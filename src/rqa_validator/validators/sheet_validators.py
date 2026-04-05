@@ -1,0 +1,47 @@
+from ..validators.base import ValidationResult, BaseValidator
+from typing import Dict, List
+
+from ..models.schema import BaseDatasetSchema
+from ..loaders.excel_loader import ExcelLoaderData
+
+class MissingSheets(BaseValidator):
+    def __init__(self, schema: BaseDatasetSchema):
+        self.schema = schema
+
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+
+        results: List[ValidationResult] = []
+
+        expected_sheets = [ sheet.standard_name for sheet in  self.schema.loaded_sheets]
+        expected_sheets.extend([sheet.standard_name for sheet in  self.schema.unloaded_sheets])
+
+        provided_sheets = [*data.loaded_sheets]
+        provided_sheets.extend(data.unloaded_sheets)
+
+        missing_sheets = [sheet for sheet in expected_sheets if sheet not in provided_sheets]
+
+        for sheet in missing_sheets:
+            results.append(ValidationResult(
+                message=f'A sheet for {sheet} was expexted but was not found.'
+                ,severity='error'
+            ))
+
+        return results
+    
+class UnexpectedSheets(BaseValidator):
+
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+
+        results: List[ValidationResult] = []
+
+        for sheet in data.unexpected_sheets:
+            results.append(ValidationResult(
+                message=f'An unexpected sheet {sheet} was found.'
+                ,severity='warning'
+            ))
+
+        return results
+
+            
+
+
