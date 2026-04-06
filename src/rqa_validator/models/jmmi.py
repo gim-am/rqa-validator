@@ -1,12 +1,11 @@
 from ..models.schema import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 from ..validators.sheet_validators import UnexpectedSheets, MissingSheets
-
+from ..validators.column_validators import MandatoryColumns
 class JMMIDatasetSchema(BaseDataset):
 
     @staticmethod
-    def get_schema() -> BaseDatasetSchema:
-        schema = DefaultDatasetSchema
-        schema.dataset_type = "JMMI"
+    def get_schema() -> DefaultDatasetSchema:
+        schema = DefaultDatasetSchema(dataset_type = "JMMI")
         return schema
     
     @staticmethod
@@ -14,4 +13,5 @@ class JMMIDatasetSchema(BaseDataset):
         return[
             MissingSheets(schema=schema)
             , UnexpectedSheets()
+            , MandatoryColumns(schema=schema)
         ]

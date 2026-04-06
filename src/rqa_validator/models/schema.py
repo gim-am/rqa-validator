@@ -1,51 +1,59 @@
 from abc import abstractmethod, ABC
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class ColumnMapping:
+    standard_name: str    
+    names: List[str] 
 
 @dataclass
 class SheetMapping:
     standard_name: str
     names: List[str]  
-    required: bool = True    
+    mandatory_columns: List[ColumnMapping] = field(default_factory=list)
+    required: bool = True  
+     
     
     def matches(self, sheet_name: str) -> bool:
-        return sheet_name in self.names
-    
-@dataclass
-class ColumnMapping:
-    # standard_name: str
-    
-    names: List[str] 
-    sheet: str = None 
-    
+        return sheet_name in self.names    
 
 
 @dataclass
 class BaseDatasetSchema:
-    dataset_type: str = None
+    dataset_type: str 
     # sheets that have to be loaded and used for further validation
-    loaded_sheets: List[SheetMapping]= None
+    loaded_sheets: List[SheetMapping]= field(default_factory=list)
     # sheets that should exist but dont need to be loaded
-    unloaded_sheets: List[SheetMapping]   = None 
-
-    mandatory_columns: List[ColumnMapping]= None
-
-    # removeable_columns: Dict[str, List[ColumnMapping]] 
+    unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
 
 
-@dataclass
+
+@dataclass()
 class DefaultDatasetSchema(BaseDatasetSchema):
-    loaded_sheets=[
+
+    loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name= "raw_data", 
                         names =["raw_data"]),
         SheetMapping(standard_name= "variable_tracker", 
                         names =["variable_tracker"]),
         SheetMapping(standard_name= "clean_data", 
-                        names =["clean_data"]),
+                        names =["clean_data"],
+                        mandatory_columns = [ColumnMapping(standard_name="uuid",
+                                                           names=["uuid", "X_uuid"]),
+                                             ColumnMapping(standard_name="stratum",
+                                                           names=["stratum"]),
+                                             ColumnMapping(standard_name="pop_group",
+                                                           names=["pop_group"]),
+                                             ColumnMapping(standard_name="weight",
+                                                           names=["weight"]),
+                                             ColumnMapping(standard_name="person_id",
+                                                           names=["person_id"])
+                                            ]),
         SheetMapping(standard_name= "deletion_log", 
                         names =["deletion_log"]),                                
-    ],
-    unloaded_sheets=[
+    ])
+    unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 
                         names= ["read_me"]),
         SheetMapping(standard_name="kobo_survey", 
@@ -60,12 +68,8 @@ class DefaultDatasetSchema(BaseDatasetSchema):
         SheetMapping(standard_name="enumerator_performance_log", 
                         names=["enumerator_performance_log"], 
                         required=False),
-    ],
+    ])
 
-    mandatory_columns = [
-        ColumnMapping(sheet="clean_data",
-                        names=["uuid","stratum","pop_group","weight","person_id"])
-    ]
 
 class BaseDataset(ABC):
     @abstractmethod
