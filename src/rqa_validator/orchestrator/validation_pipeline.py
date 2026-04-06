@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from ..utils.helpers import lowercase_schema_mappings
+
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDatasetSchema
 from ..validators.base import ValidationResult
@@ -17,6 +19,9 @@ class ValidationPipeline:
             self.validators = JMMIDatasetSchema.get_validators(schema=self.schema)
         else:
             raise ValueError(f"Unknown dataset type: {self.dataset_type}")
+        
+        lowercase_schema_mappings(self.schema)
+
         
 
     def run(self, filepath: Path):

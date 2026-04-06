@@ -12,7 +12,6 @@ class MandatoryColumns(BaseValidator):
         self.schema = schema
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
-
         results: List[ValidationResult] = []
         for sheet in self.schema.loaded_sheets:
             if not sheet.mandatory_columns:
@@ -24,6 +23,7 @@ class MandatoryColumns(BaseValidator):
                     results.append(ValidationResult(
                         message=f'A column for {column.standard_name} was expexted in the {data.loaded_sheets[sheet.standard_name]['original_sheet_name']} sheet but was not found.'
                         ,severity='error'
+                        ,sheet_name=data.loaded_sheets[sheet.standard_name]['original_sheet_name']
                         ))
 
 

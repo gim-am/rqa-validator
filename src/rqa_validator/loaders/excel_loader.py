@@ -16,11 +16,15 @@ class ExcelLoader:
     def load(self, filepath: Path)  -> ExcelLoaderData:
         """Load matching sheets from Excel file."""
         all_sheets = fastexcel.read_excel(filepath).sheet_names
+        all_sheets = list(map(str.lower, all_sheets))
+        
         data = ExcelLoaderData()
         
         for sheet_name in all_sheets:
             if self._should_load_sheet(sheet_name):
                 df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=sheet_name)
+                df = df.rename(str.lower)
+                
                 mapped_name = self._get_mapped_name(sheet_name, self.schema.loaded_sheets)
                 # TODO: Do i need to store original sheet name for anything?
                 data.loaded_sheets[mapped_name] = {"data": df, "original_sheet_name": sheet_name}
