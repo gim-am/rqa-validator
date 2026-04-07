@@ -1,11 +1,17 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 
 @dataclass
 class ColumnMapping:
     standard_name: str    
     names: List[str] 
+
+    def combine(self):
+        if self.standard_name not in self.names:
+            return self.names.append(self.standard_name)
+        else:
+            return self.names
 
 @dataclass
 class SheetMapping:
@@ -13,6 +19,8 @@ class SheetMapping:
     names: List[str]  
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
+    unique_uuid: bool = False
+    unique_uuid_column: Optional[ColumnMapping] = field(default_factory=lambda: ColumnMapping(None, []))
      
     
     def matches(self, sheet_name: str) -> bool:
@@ -34,7 +42,10 @@ class DefaultDatasetSchema(BaseDatasetSchema):
 
     loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name= "raw_data", 
-                        names =["raw_data"]),
+                        names =["raw_data"],
+                        unique_uuid=True,
+                        unique_uuid_column= ColumnMapping(standard_name="uuid",
+                                                           names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "variable_tracker", 
                         names =["variable_tracker"]),
         SheetMapping(standard_name= "clean_data", 
@@ -49,9 +60,12 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                                            names=["weight"]),
                                              ColumnMapping(standard_name="person_id",
                                                            names=["person_id"])
-                                            ]),
+                                            ],
+                        unique_uuid=True,
+                        unique_uuid_column= ColumnMapping(standard_name="uuid",
+                                                           names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "deletion_log", 
-                        names =["deletion_log"]),                                
+                        names =["deletion_log"])                                
     ])
     unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 
@@ -67,7 +81,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         required=False),
         SheetMapping(standard_name="enumerator_performance_log", 
                         names=["enumerator_performance_log"], 
-                        required=False),
+                        required=False)
     ])
 
 

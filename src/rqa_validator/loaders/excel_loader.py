@@ -23,6 +23,7 @@ class ExcelLoader:
         for sheet_name in all_sheets:
             if self._should_load_sheet(sheet_name):
                 df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=sheet_name)
+                # TODO: check for duplicate column names
                 df = df.rename(str.lower)
                 
                 mapped_name = self._get_mapped_name(sheet_name, self.schema.loaded_sheets)

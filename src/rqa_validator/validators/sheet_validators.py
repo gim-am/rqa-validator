@@ -5,6 +5,8 @@ from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
 
 class MissingSheets(BaseValidator):
+    name = "MissingSheets"
+
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
 
@@ -46,7 +48,7 @@ class MissingSheets(BaseValidator):
         return results
     
 class UnexpectedSheets(BaseValidator):
-
+    name = "UnexpectedSheets"
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
 
         results: List[ValidationResult] = []

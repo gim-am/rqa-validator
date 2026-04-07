@@ -1,6 +1,6 @@
 from ..models.schema import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 from ..validators.sheet_validators import UnexpectedSheets, MissingSheets
-from ..validators.column_validators import MandatoryColumns
+from ..validators.column_validators import  MandatoryColumns, UniqueColumn
 
 class JMMIDatasetSchema(BaseDataset):
 
@@ -15,4 +15,5 @@ class JMMIDatasetSchema(BaseDataset):
             MissingSheets(schema=schema)
             , UnexpectedSheets()
             , MandatoryColumns(schema=schema)
+            , UniqueColumn(schema=schema)
         ]

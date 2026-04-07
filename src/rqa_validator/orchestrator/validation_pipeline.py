@@ -36,7 +36,8 @@ class ValidationPipeline:
         for validator in self.validators:
             try:
                 results = validator.validate(data)
-                all_results.extend(results)
+                if results:
+                    all_results.extend(results)
             except Exception as e:
                 all_results.append(ValidationResult(
                     # passed=False,
