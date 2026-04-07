@@ -21,7 +21,7 @@ class MissingSheets(BaseValidator):
         optional_sheets.extend([sheet.standard_name for sheet in  self.schema.unloaded_sheets if not sheet.required])
 
         # get keys
-        provided_sheets = [*data.loaded_sheets]
+        provided_sheets = data.get_loaded_sheet_mapped_names()
         provided_sheets.extend(data.unloaded_sheets)
 
         missing_sheets = [sheet for sheet in expected_sheets if sheet not in provided_sheets]
