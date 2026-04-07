@@ -4,7 +4,12 @@ from ..models.schema import BaseDatasetSchema, SheetMapping, ColumnMapping
 
 
 def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
-    """ lowercase all sheet and column names in a schema to make comparisons, searches a bit easier."""
+    """lowercase all sheet and column names in a schema to make 
+    comparisons, searches a bit easier.
+
+    Args:
+        schema (BaseDatasetSchema): schema to process
+    """
     
     def lowercase_list_strs(str_list: List[str]) -> None:
         str_list[:] = list(map(str.lower, str_list))

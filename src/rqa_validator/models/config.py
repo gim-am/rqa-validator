@@ -1,3 +1,5 @@
+# pii columns that are searched for when checking if sheets contain pii data
+# keep these lowercase. 
 PII_COLUMN_NAMES = [
     # Names
     'first_name', 'last_name', 'middle_name', 'full_name', 'name',

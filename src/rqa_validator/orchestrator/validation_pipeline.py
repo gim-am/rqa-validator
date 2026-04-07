@@ -13,19 +13,31 @@ class ValidationPipeline:
         self._setup_schema()
     
     def _setup_schema(self):
-        """Initialize schema and validators based on dataset type."""
+        """Initialise schema and validators based on dataset type.
+
+        Raises:
+            ValueError: if dataset type not found.
+        """
         if self.dataset_type == "jmmi":
             self.schema = JMMIDatasetSchema.get_schema()
             self.validators = JMMIDatasetSchema.get_validators(schema=self.schema)
         else:
             raise ValueError(f"Unknown dataset type: {self.dataset_type}")
         
-        lowercase_schema_mappings(self.schema)
-
-        
+        # make sure all the sheet and column names in the shema are lower
+        # to make comparison easier later
+        lowercase_schema_mappings(self.schema)        
 
     def run(self, filepath: Path):
+        """Orchestrator for the dataset validation pipeline.
 
+        Args:
+            filepath (Path): Currently the excel filepath. Probably change to api
+            call later.
+
+        Returns:
+            _type_: 
+        """
         loader = ExcelLoader(self.schema)
         data = loader.load(filepath)
 
@@ -46,3 +58,4 @@ class ValidationPipeline:
                 ))
 
         return all_results
+    

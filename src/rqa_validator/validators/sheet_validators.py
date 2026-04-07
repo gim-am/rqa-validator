@@ -11,7 +11,15 @@ class MissingSheets(BaseValidator):
         self.schema = schema
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if any expected sheets are missing
+        across a dataset. 
 
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: List of validation errors.
+        """
         results: List[ValidationResult] = []
 
         expected_sheets = [ sheet.standard_name for sheet in  self.schema.loaded_sheets if sheet.required]
@@ -50,6 +58,15 @@ class MissingSheets(BaseValidator):
 class UnexpectedSheets(BaseValidator):
     name = "UnexpectedSheets"
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if there are any unexpected sheets 
+        across a dataset. 
+
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: List of validation errors.
+        """
 
         results: List[ValidationResult] = []
 

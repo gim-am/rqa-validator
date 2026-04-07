@@ -2,6 +2,7 @@ from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+
 @dataclass
 class ColumnMapping:
     standard_name: str    
@@ -22,7 +23,6 @@ class SheetMapping:
     unique_uuid: bool = False
     unique_uuid_column: Optional[ColumnMapping] = field(default_factory=lambda: ColumnMapping(None, []))
      
-    
     def matches(self, sheet_name: str) -> bool:
         return sheet_name in self.names    
 
@@ -34,7 +34,6 @@ class BaseDatasetSchema:
     loaded_sheets: List[SheetMapping]= field(default_factory=list)
     # sheets that should exist but dont need to be loaded
     unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
-
 
 
 @dataclass()

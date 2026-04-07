@@ -13,6 +13,15 @@ class MandatoryColumns(BaseValidator):
         self.schema = schema
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if any expected mandatory columns are missing
+        across relevant sheets. 
+
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: List of validation errors.
+        """
         results: List[ValidationResult] = []
         for sheet in self.schema.loaded_sheets:
             if not sheet.mandatory_columns:
@@ -55,6 +64,15 @@ class UniqueColumn(BaseValidator):
         self.schema = schema
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if any expected unique columns contain any
+        non unique valies across relevant sheets. 
+
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: List of validation errors.
+        """
         results: List[ValidationResult] = []        
         for sheet in self.schema.loaded_sheets:
             
@@ -91,6 +109,17 @@ class UniqueColumn(BaseValidator):
 class PiiColumns(BaseValidator):
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if any pii columns are present
+        across relevant sheets. 
+
+        Possible pii columns are currently stores in models/config 
+
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: List of validation errors.
+        """
         results: List[ValidationResult] = []   
 
         for sheet in data.loaded_sheets:
