@@ -3,7 +3,7 @@ from typing import  List
 from ..validators.base import ValidationResult, BaseValidator
 from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
-
+from ..models import config as conf
 
 
 class MandatoryColumns(BaseValidator):
@@ -79,7 +79,7 @@ class UniqueColumn(BaseValidator):
                     unique_duplicated_row_count = df.filter(df.select(column).is_duplicated()).select(column).n_unique()
                     if unique_duplicated_row_count > 0:
                         results.append(ValidationResult(
-                            message=f'For column {column} {unique_duplicated_row_count} in sheet {loaded_sheet_info.mapped_name} non unique values were found. This column should contain unique values.'
+                            message=f'For column {column} in sheet {loaded_sheet_info.mapped_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
                             ,severity='error'
                             ,sheet_name=loaded_sheet_info.mapped_name
                             ))
@@ -88,3 +88,19 @@ class UniqueColumn(BaseValidator):
 
 
 
+class PiiColumns(BaseValidator):
+
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        results: List[ValidationResult] = []   
+
+        for sheet in data.loaded_sheets:
+            possible_pii_columns = [item for item in sheet.data.columns if item in conf.PII_COLUMN_NAMES]
+            
+            if possible_pii_columns:
+                results.append(ValidationResult(
+                            message=f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {possible_pii_columns}.'
+                            ,severity='warning'
+                            ,sheet_name=sheet.original_name
+                            ))
+                
+        return results
