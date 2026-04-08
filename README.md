@@ -60,7 +60,7 @@ These rules are currently based on the minimum standars checklist (1.2)
 
 #### Rules currently implemented
 **Column Rules**
-- Mandatory columns: checks if mandatory columns are not present in a sheet
+- Mandatory columns: checks if mandatory columns or uuid columns are not present in a sheet
 - Unique column values (uuids): checks if a column does not contain unique values
 - Pii columns: checks if any of the columns are possible pii columns
 

@@ -20,10 +20,9 @@ class SheetMapping:
     names: List[str]  
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
-    unique_uuid: bool = False
     unique_uuid_column: Optional[ColumnMapping] = field(default_factory=lambda: ColumnMapping(None, []))
      
-    def matches(self, sheet_name: str) -> bool:
+    def matches(self, sheet_name: str)  -> bool:
         return sheet_name in self.names    
 
 
@@ -35,14 +34,13 @@ class BaseDatasetSchema:
     # sheets that should exist but dont need to be loaded
     unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
 
-
+   
 @dataclass()
 class DefaultDatasetSchema(BaseDatasetSchema):
 
     loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name= "raw_data", 
                         names =["raw_data"],
-                        unique_uuid=True,
                         unique_uuid_column= ColumnMapping(standard_name="uuid",
                                                            names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "variable_tracker", 
@@ -60,7 +58,6 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                              ColumnMapping(standard_name="person_id",
                                                            names=["person_id"])
                                             ],
-                        unique_uuid=True,
                         unique_uuid_column= ColumnMapping(standard_name="uuid",
                                                            names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "deletion_log", 
