@@ -50,7 +50,7 @@ Each of these sheets has:
 
 TODO: Can probably merge the two uuid fields into one.
 
-Each of the columns within a sheet has:
+Each of the columns listed within a sheet above has:
 - a standard name
 - a list of possible alternate names
 
