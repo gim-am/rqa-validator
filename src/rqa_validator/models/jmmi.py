@@ -1,5 +1,5 @@
 from ..models.schema import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
-from ..validators.sheet_validators import UnexpectedSheets, MissingSheets
+from ..validators.sheet_validators import DataSumCheck,UnexpectedSheets, MissingSheets
 from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
 
 # schema and validation rules for jmmi dataset. 
@@ -18,4 +18,5 @@ class JMMIDatasetSchema(BaseDataset):
             , MandatoryColumns(schema=schema)
             , UniqueColumn(schema=schema)
             , PiiColumns()
+            , DataSumCheck()
         ]

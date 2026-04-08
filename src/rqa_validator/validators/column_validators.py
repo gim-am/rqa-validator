@@ -32,9 +32,9 @@ class MandatoryColumns(BaseValidator):
             for column in sheet.mandatory_columns:
                 if not any(map(lambda v: v in df_columns, column.combine())):
                     results.append(ValidationResult(
-                        message=f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
-                        ,severity='error'
-                        ,sheet_name=loaded_sheet_info.original_name
+                        message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
+                        ,severity = 'error'
+                        ,sheet_name = loaded_sheet_info.original_name
                         ))
 
 
@@ -52,8 +52,8 @@ class MandatoryColumns(BaseValidator):
 #             duplicates = [column for column in set(df_columns) if df_columns.count(column) > 1]
 #             if duplicates:
 #                 results.append(ValidationResult(
-#                         message=f'The sheet for {item['original_sheet_name']} has duplicate column names for the following columns: {duplicates}.'
-#                         ,severity='error'
+#                         message = f'The sheet for {item['original_sheet_name']} has duplicate column names for the following columns: {duplicates}.'
+#                         ,severity = 'error'
 #                         ,sheet_name=item['original_sheet_name']
 #                         ))
     
@@ -83,9 +83,9 @@ class UniqueColumn(BaseValidator):
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
             if not uuid_columns:
                 results.append(ValidationResult(
-                        message=f'Admin warning: The schema for {sheet.standard_name} states unique uuids are required but no column names are provided. Check that the schema is correct.'
-                        ,severity='warning'
-                        ,sheet_name=loaded_sheet_info.mapped_name
+                        message = f'Admin warning: The schema for {sheet.standard_name} states unique uuids are required but no column names are provided. Check that the schema is correct.'
+                        ,severity = 'warning'
+                        ,sheet_name = loaded_sheet_info.mapped_name
                         ))
                 continue
 
@@ -97,9 +97,9 @@ class UniqueColumn(BaseValidator):
                     unique_duplicated_row_count = df.filter(df.select(column).is_duplicated()).select(column).n_unique()
                     if unique_duplicated_row_count > 0:
                         results.append(ValidationResult(
-                            message=f'For column {column} in sheet {loaded_sheet_info.mapped_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
-                            ,severity='error'
-                            ,sheet_name=loaded_sheet_info.mapped_name
+                            message = f'For column {column} in sheet {loaded_sheet_info.mapped_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
+                            ,severity = 'error'
+                            ,sheet_name = loaded_sheet_info.mapped_name
                             ))
                         
         return results
@@ -107,12 +107,13 @@ class UniqueColumn(BaseValidator):
 
 
 class PiiColumns(BaseValidator):
+    name = "PiiColumns"
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks to see if any pii columns are present
         across relevant sheets. 
 
-        Possible pii columns are currently stores in models/config 
+        Possible pii columns are currently stored in models/config 
 
         Args:
             data (ExcelLoaderData): data to be validated
@@ -127,9 +128,10 @@ class PiiColumns(BaseValidator):
             
             if possible_pii_columns:
                 results.append(ValidationResult(
-                            message=f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {possible_pii_columns}.'
-                            ,severity='warning'
-                            ,sheet_name=sheet.original_name
+                            message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {possible_pii_columns}.'
+                            ,severity = 'warning'
+                            ,sheet_name = sheet.original_name
+                            ,column_name = possible_pii_columns
                             ))
                 
         return results

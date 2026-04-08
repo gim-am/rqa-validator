@@ -20,3 +20,8 @@ class BaseValidator(ABC):
     @abstractmethod
     def validate(self, data: Any) -> List[ValidationResult]:
         pass
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
