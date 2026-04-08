@@ -45,10 +45,7 @@ Each of these sheets has:
 - a list of possible alternate names
 - a list of mandatory columns
 - a flag stating if the sheet is required
-- a flag stating if there should be a uuid column
 - a list of possible uuid column names
-
-TODO: Can probably merge the two uuid fields into one.
 
 Each of the columns listed within a sheet above has:
 - a standard name
