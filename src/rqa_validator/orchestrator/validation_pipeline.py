@@ -54,7 +54,7 @@ class ValidationPipeline:
                 all_results.append(ValidationResult(
                     # passed=False,
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
-                    severity="error"
+                    severity="admin_error"
                 ))
 
         return self._compile_results(all_results)
@@ -70,17 +70,21 @@ class ValidationPipeline:
     def _compile_results(self, results: List[ValidationResult]) -> Dict[str, Any]:
         """Compile validation results into structured output."""
         errors = [r for r in results if r.severity == "error" ]
+        admin_errors = [r for r in results if r.severity == "admin_error" ]
         warnings = [r for r in results if r.severity == "warning" ]
 
+
         return {
-            "success": len(errors) == 0,
+            "success": len(errors) == 0 and len(admin_errors) == 0,
             "summary": {
                 # "total_checks": len(results),
                 # "passed": len(passed),
-                "errors": len(errors),
+                "admin_errors": len(admin_errors),
+                "errors": len(errors),                
                 "warnings": len(warnings)
             },
-            "errors": [self._result_to_dict(r) for r in errors],
+            "admin_errors": [self._result_to_dict(r) for r in admin_errors],
+            "errors": [self._result_to_dict(r) for r in errors],            
             "warnings": [self._result_to_dict(r) for r in warnings],
             "metadata": {
                 "dataset_type": self.dataset_type,

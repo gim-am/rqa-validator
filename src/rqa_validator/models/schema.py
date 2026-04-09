@@ -6,7 +6,7 @@ from typing import List, Optional
 @dataclass
 class ColumnMapping:
     standard_name: str    
-    names: List[str] 
+    names: List[str] = field(default_factory=list) 
 
     def combine(self):
         if self.standard_name not in self.names:
@@ -20,7 +20,7 @@ class SheetMapping:
     names: List[str]  
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
-    unique_uuid_column: Optional[ColumnMapping] = field(default_factory=lambda: ColumnMapping(None, []))
+    unique_uuid_column: Optional[ColumnMapping] = None #field(default_factory=lambda: ColumnMapping(None, []))
      
     def matches(self, sheet_name: str)  -> bool:
         return sheet_name in self.names    
