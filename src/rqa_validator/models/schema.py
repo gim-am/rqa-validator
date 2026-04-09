@@ -20,8 +20,9 @@ class SheetMapping:
     names: List[str]  
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
-    unique_uuid_column: Optional[ColumnMapping] = None #field(default_factory=lambda: ColumnMapping(None, []))
-     
+    # unique columns are included in the mandatory_column check rule
+    unique_columns: Optional[ColumnMapping] = None 
+    
     def matches(self, sheet_name: str)  -> bool:
         return sheet_name in self.names    
 
@@ -41,7 +42,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
     loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name= "raw_data", 
                         names =["raw_data"],
-                        unique_uuid_column= ColumnMapping(standard_name="uuid",
+                        unique_columns= ColumnMapping(standard_name="uuid",
                                                            names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "variable_tracker", 
                         names =["variable_tracker"]),
@@ -58,7 +59,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                              ColumnMapping(standard_name="person_id",
                                                            names=["person_id"])
                                             ],
-                        unique_uuid_column= ColumnMapping(standard_name="uuid",
+                        unique_columns= ColumnMapping(standard_name="uuid",
                                                            names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "deletion_log", 
                         names =["deletion_log"])                                

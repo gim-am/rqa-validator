@@ -23,7 +23,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         for col in sheet.mandatory_columns:
             process_column_mapping(col)
         
-        process_column_mapping(sheet.unique_uuid_column)
+        process_column_mapping(sheet.unique_columns)
 
     def process_column_mapping(col: ColumnMapping) -> None:
         if col is None:

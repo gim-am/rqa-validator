@@ -16,6 +16,8 @@ class MandatoryColumns(BaseValidator):
         """Checks to see if any expected mandatory columns are missing
         across relevant sheets. 
 
+        Also checks if unique columns are missing.
+
         Args:
             data (ExcelLoaderData): data to be validated
 
@@ -25,7 +27,7 @@ class MandatoryColumns(BaseValidator):
         results: List[ValidationResult] = []
         for sheet in self.schema.loaded_sheets:
 
-            if not sheet.mandatory_columns and not sheet.unique_uuid_column:
+            if not sheet.mandatory_columns and not sheet.unique_columns:
                 continue
             
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
@@ -40,11 +42,11 @@ class MandatoryColumns(BaseValidator):
                             ,sheet_name = loaded_sheet_info.original_name
                             ))                        
             
-            if sheet.unique_uuid_column:   
-                uuid_columns = sheet.unique_uuid_column.combine()             
+            if sheet.unique_columns:   
+                uuid_columns = sheet.unique_columns.combine()             
                 if not any(map(lambda v: v in df_columns, uuid_columns)):
                     results.append(ValidationResult(
-                        message = f'A unique column for {sheet.unique_uuid_column.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
+                        message = f'A unique column for {sheet.unique_columns.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
                         ,severity = 'error'
                         ,sheet_name = loaded_sheet_info.original_name
                         ))
@@ -88,11 +90,11 @@ class UniqueColumn(BaseValidator):
         results: List[ValidationResult] = []        
         for sheet in self.schema.loaded_sheets:
             
-            if not sheet.unique_uuid_column:
+            if not sheet.unique_columns:
                 continue
 
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
-            uuid_columns = sheet.unique_uuid_column.combine() 
+            uuid_columns = sheet.unique_columns.combine() 
             df = loaded_sheet_info.data
             df_columns = df.columns
             for column in uuid_columns:

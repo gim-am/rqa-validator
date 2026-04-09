@@ -85,3 +85,4 @@ Data is currely loaded from a file on disk one sheet at a time. This process:
 - jira api integration
 - impact repository integration
 - logging and error reporting.
+- adjust for infrastructure requirements
