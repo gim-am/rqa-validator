@@ -60,3 +60,22 @@ PII_COLUMN_NAMES = [
     # 'account_number', 'bank_account', 'credit_card', 'iban',
     'ip_address', 'device_id', 'mac_address', 'serial_number'
 ]
+
+def get_pii_columns() -> list[str]:
+    """Expands the pii column list by readding items without _ characters.
+    
+
+    Returns:
+        list[str]: _description_
+    """
+    existing_items = set(PII_COLUMN_NAMES)
+    result = list(PII_COLUMN_NAMES)  # Start with a copy of the original list
+    
+    for item in PII_COLUMN_NAMES:
+        if '_' in item:
+            base_name = item.replace('_', '')
+            
+            if base_name not in existing_items:
+                result.append(base_name)
+                
+    return result

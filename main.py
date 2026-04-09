@@ -16,8 +16,10 @@ def main():
     pipeline = ValidationPipeline(dataset_type=args.dataset_type)
     results = pipeline.run(args.input_file)
 
+    print(f"Admin Errors: {results['summary']['admin_errors']}")
     print(f"Errors: {results['summary']['errors']}")
     print(f"Warnings: {results['summary']['warnings']}")
+    print(results['admin_errors'])
     print(results['errors'])
     print(results['warnings'])
 

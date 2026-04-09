@@ -3,7 +3,7 @@ from typing import  List
 from ..validators.base import ValidationResult, BaseValidator
 from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
-from ..models import config as conf
+from . config import get_pii_columns
 
 
 class MandatoryColumns(BaseValidator):
@@ -31,12 +31,13 @@ class MandatoryColumns(BaseValidator):
                 continue
             
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
-            df_columns = loaded_sheet_info.data.columns
+            df_columns = loaded_sheet_info.columns
             
             if sheet.mandatory_columns:
                 for column in sheet.mandatory_columns:
                     if not any(map(lambda v: v in df_columns, column.combine())):
                         results.append(ValidationResult(
+                            rule = self.name,
                             message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
                             ,severity = 'error'
                             ,sheet_name = loaded_sheet_info.original_name
@@ -46,6 +47,7 @@ class MandatoryColumns(BaseValidator):
                 uuid_columns = sheet.unique_columns.combine()             
                 if not any(map(lambda v: v in df_columns, uuid_columns)):
                     results.append(ValidationResult(
+                        rule = self.name,
                         message = f'A unique column for {sheet.unique_columns.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
                         ,severity = 'error'
                         ,sheet_name = loaded_sheet_info.original_name
@@ -95,14 +97,13 @@ class UniqueColumn(BaseValidator):
 
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
             uuid_columns = sheet.unique_columns.combine() 
-            df = loaded_sheet_info.data
-            df_columns = df.columns
             for column in uuid_columns:
-                if column in df_columns:
+                if column in loaded_sheet_info.columns:
                     # TODO: specifiy which ids are duplicated and how many times?
-                    unique_duplicated_row_count = df.filter(df.select(column).is_duplicated()).select(column).n_unique()
+                    unique_duplicated_row_count = loaded_sheet_info.data.filter(loaded_sheet_info.data.select(column).is_duplicated()).select(column).n_unique()
                     if unique_duplicated_row_count > 0:
                         results.append(ValidationResult(
+                            rule = self.name,
                             message = f'For column {column} in sheet {loaded_sheet_info.mapped_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
                             ,severity = 'error'
                             ,sheet_name = loaded_sheet_info.mapped_name
@@ -130,10 +131,11 @@ class PiiColumns(BaseValidator):
         results: List[ValidationResult] = []   
 
         for sheet in data.loaded_sheets:
-            possible_pii_columns = [item for item in sheet.data.columns if item in conf.PII_COLUMN_NAMES]
+            possible_pii_columns = [item for item in sheet.columns if item in get_pii_columns()]
             
             if possible_pii_columns:
                 results.append(ValidationResult(
+                            rule = self.name,
                             message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {possible_pii_columns}.'
                             ,severity = 'warning'
                             ,sheet_name = sheet.original_name

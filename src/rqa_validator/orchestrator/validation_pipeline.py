@@ -52,7 +52,7 @@ class ValidationPipeline:
                     all_results.extend(results)
             except Exception as e:
                 all_results.append(ValidationResult(
-                    # passed=False,
+                    rule='n/a',
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
                     severity="admin_error"
                 ))

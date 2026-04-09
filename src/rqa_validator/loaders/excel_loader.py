@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import fastexcel
 import polars as pl
@@ -11,9 +11,12 @@ class LoadedSheet:
     mapped_name:str
     original_name: str
     data: pl.DataFrame
+    # this operation is ran numerous times so might as well store it once here
+    columns: List[str]
 
+@dataclass
 class ExcelLoaderData:
-    loaded_sheets: List[LoadedSheet] = []
+    loaded_sheets: List[LoadedSheet] = field(default_factory=list)
     unloaded_sheets = []
     unexpected_sheets = []
 
@@ -70,7 +73,8 @@ class ExcelLoader:
                                 
                 data.loaded_sheets.append(LoadedSheet(mapped_name=mapped_name,
                                                       original_name=sheet_name,
-                                                      data=df))                
+                                                      data=df,
+                                                      columns=df.columns))                
 
             elif (mapped_name := self._should_ignore_sheet(sheet_name)):
                 # sheets that are expected but dont need to be loaded

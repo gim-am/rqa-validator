@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 @dataclass
 class ValidationResult:
-    # passed: bool
+    rule: str
     message: str
     severity: str  # 'error', 'warning', 'info'
     sheet_name: Optional[str] = None

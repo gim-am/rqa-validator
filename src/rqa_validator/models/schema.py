@@ -9,7 +9,9 @@ class ColumnMapping:
     names: List[str] = field(default_factory=list) 
 
     def combine(self):
-        if self.standard_name not in self.names:
+        if not self.names:
+            return [self.standard_name]
+        elif self.standard_name not in self.names:
             return self.names.append(self.standard_name)
         else:
             return self.names
@@ -34,6 +36,20 @@ class BaseDatasetSchema:
     loaded_sheets: List[SheetMapping]= field(default_factory=list)
     # sheets that should exist but dont need to be loaded
     unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
+
+    def get_loaded_sheet(self, sheet_name: str)  -> SheetMapping | None:
+        """Gets the details and data for a loaded sheet if it exists.
+
+        Args:
+            sheet_name (str): Schema sheets to be searched for
+
+        Returns:
+            LoadedSheet | None: Loaded sheet details if found
+        """
+        for sheet in self.loaded_sheets:
+            if sheet.standard_name == sheet_name:
+                return sheet
+        return None
 
    
 @dataclass()
@@ -62,7 +78,10 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         unique_columns= ColumnMapping(standard_name="uuid",
                                                            names=["uuid", "X_uuid"])),
         SheetMapping(standard_name= "deletion_log", 
-                        names =["deletion_log"])                                
+                        names =["deletion_log"],                        
+                        unique_columns= ColumnMapping(standard_name="uuid") ),
+        SheetMapping(standard_name="cleaning_log", 
+                        names=["cleaning_log"]),                               
     ])
     unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 
@@ -70,9 +89,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
         SheetMapping(standard_name="kobo_survey", 
                         names= ["kobo_survey"]),
         SheetMapping(standard_name= "kobo_choices", 
-                        names =["kobo_choices"]),
-        SheetMapping(standard_name="cleaning_log", 
-                        names=["cleaning_log"]),
+                        names =["kobo_choices"]),        
         SheetMapping(standard_name="sampling_info", 
                         names=["sampling_info"], 
                         required=False),
