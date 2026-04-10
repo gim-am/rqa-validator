@@ -237,7 +237,7 @@ class CrossSheetIdCheck(BaseValidator):
     
     def _get_matching_columns(self, loaded_data: LoadedSheet, sheet_name: str) -> list[Any] | list[str]:
         
-        sheet = self.schema.get_loaded_sheet(sheet_name)
+        sheet = self.schema.get_schema_sheet(sheet_name)
         if sheet is not None:
             id_columns = sheet.unique_columns
             

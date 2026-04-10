@@ -4,7 +4,6 @@ from typing import List, Optional
 
 from ..validators.base import BaseValidator
 
-
 @dataclass
 class ColumnMapping:
     standard_name: str    
@@ -43,7 +42,7 @@ class BaseDatasetSchema:
     # sheets that should exist but dont need to be loaded
     unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
 
-    def get_loaded_sheet(self, sheet_name: str)  -> SheetMapping | None:
+    def get_schema_sheet(self, sheet_name: str)  -> SheetMapping | None:
         """Gets the details and data for a loaded sheet if it exists.
 
         Args:
