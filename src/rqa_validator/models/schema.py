@@ -2,19 +2,25 @@ from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from ..validators.base import BaseValidator
+
 
 @dataclass
 class ColumnMapping:
     standard_name: str    
     names: List[str] = field(default_factory=list) 
 
-    def combine(self):
-        if not self.names:
-            return [self.standard_name]
+    def combine(self) -> List[str]:
+        ret_list: List[str] = []
+        if not self.names :
+            ret_list = [self.standard_name]
         elif self.standard_name not in self.names:
-            return self.names.append(self.standard_name)
+            ret_list = self.names
+            ret_list.append(self.standard_name)
         else:
-            return self.names
+            ret_list = self.names
+
+        return ret_list
 
 @dataclass
 class SheetMapping:
@@ -105,7 +111,7 @@ class BaseDataset(ABC):
         pass
 
     @abstractmethod
-    def get_validators() -> List:
+    def get_validators() -> List[BaseValidator]:
         pass
 
 

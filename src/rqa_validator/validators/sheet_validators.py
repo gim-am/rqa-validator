@@ -1,11 +1,14 @@
 from ..validators.base import ValidationResult, BaseValidator
-from typing import  List
+from typing import  Any, List
 
 from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData, LoadedSheet
 
 class MissingSheets(BaseValidator):
-    name = "MissingSheets"
+
+    @property
+    def name(self) -> str:
+        return 'MissingSheets'
 
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
@@ -59,7 +62,10 @@ class MissingSheets(BaseValidator):
         return results
     
 class UnexpectedSheets(BaseValidator):
-    name = "UnexpectedSheets"
+    @property
+    def name(self) -> str:
+        return 'UnexpectedSheets'
+
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks to see if there are any unexpected sheets 
         across a dataset. 
@@ -83,7 +89,10 @@ class UnexpectedSheets(BaseValidator):
         return results
 
 class DataSumCheck(BaseValidator):
-    name = "DataSumCheck"
+    @property
+    def name(self) -> str:
+        return 'DataSumCheck'
+    
     def validate(self, data: ExcelLoaderData, raw_data_sheet: str = 'raw_data'
     , clean_data_sheet: str = 'clean_data', deletion_log_sheet: str = 'deletion_log') -> List[ValidationResult]:
         """Checks to see if raw_data rows equals clean_data rows plus deletion_log rows.
@@ -95,6 +104,9 @@ class DataSumCheck(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []
+        clean_data_count:int = 0
+        deleted_data_count:int = 0
+        raw_data_count:int = 0
 
         raw_data = data.get_loaded_sheet(raw_data_sheet)
         if raw_data:
@@ -127,7 +139,7 @@ class DataSumCheck(BaseValidator):
             ))
 
         if not results:
-            missing_rows = abs(clean_data_count + deleted_data_count - raw_data_count)
+            missing_rows: int = abs(clean_data_count + deleted_data_count - raw_data_count)
             if missing_rows > 0:
                 results.append(ValidationResult(
                     rule = self.name,
@@ -141,8 +153,10 @@ class DataSumCheck(BaseValidator):
 class CrossSheetIdCheck(BaseValidator):
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
-
-    name = 'CrossSheetIdCheck'
+        
+    @property
+    def name(self) -> str:
+        return 'CrossSheetIdCheck'
 
     def validate(self, data: ExcelLoaderData, 
                     master_sheet: str = 'raw_data',
@@ -176,7 +190,7 @@ class CrossSheetIdCheck(BaseValidator):
                 message = f'A single unique id column for {master_loaded_sheet.original_name} is expected but {len(master_matching_columns)} were found. {*master_matching_columns,}'
                 ,severity = 'error'
                 , sheet_name =  master_loaded_sheet.original_name
-                , column_name = master_matching_columns
+                , column_name = ', '.join(master_matching_columns)
             ))
             return results
 
@@ -198,8 +212,8 @@ class CrossSheetIdCheck(BaseValidator):
                     rule = self.name,
                     message = f'A single unique id column for {child_loaded_sheet.original_name} is expected but {len(child_matching_columns)} were found. {*child_matching_columns,}'
                     ,severity = 'error'
-                    , sheet_name=child_loaded_sheet.original_name
-                    , column_name=child_matching_columns
+                    , sheet_name = child_loaded_sheet.original_name
+                    , column_name = ', '.join(master_matching_columns)
                 ))
                 continue
 
@@ -214,19 +228,23 @@ class CrossSheetIdCheck(BaseValidator):
                     message = f'Id values for sheet {child_loaded_sheet.original_name} and column {child_matching_columns[0]} were not found in sheet {master_loaded_sheet.original_name} column {master_matching_columns[0]}. ids: {*missing_ids,}'
                     ,severity = 'error'
                     , sheet_name = child_loaded_sheet.original_name
-                    , column_name = child_matching_columns[0]
+                    , column_name = ', '.join(master_matching_columns)
                 ))
         return results
 
 
 
     
-    def _get_matching_columns(self, loaded_data: LoadedSheet, sheet_name: str):
-        id_columns = self.schema.get_loaded_sheet(sheet_name).unique_columns.combine()
-        if not id_columns:
-            return []
-        else:
-            return  [column for column in id_columns if column in loaded_data.columns]
+    def _get_matching_columns(self, loaded_data: LoadedSheet, sheet_name: str) -> list[Any] | list[str]:
+        
+        sheet = self.schema.get_loaded_sheet(sheet_name)
+        if sheet is not None:
+            id_columns = sheet.unique_columns
+            
+            if id_columns is not None:
+                return  [column for column in id_columns.combine() if column in loaded_data.columns]
+                
+        return []
 
 
         # check column exists in both raw, clean and deleted
