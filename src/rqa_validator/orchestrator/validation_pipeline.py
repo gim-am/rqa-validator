@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import List, Dict, Any
-from ..utils.helpers import lowercase_schema_mappings
+from ..models.preprocess import lowercase_schema_mappings, validate_schema
 
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDatasetSchema
@@ -26,7 +26,8 @@ class ValidationPipeline:
         
         # make sure all the sheet and column names in the shema are lower
         # to make comparison easier later
-        lowercase_schema_mappings(self.schema)        
+        lowercase_schema_mappings(self.schema)         
+
 
     def run(self, filepath: Path):
         """Orchestrator for the dataset validation pipeline.
@@ -38,6 +39,12 @@ class ValidationPipeline:
         Returns:
             _type_: 
         """
+
+        validation_errors =  validate_schema(self.schema)  
+            
+        if validation_errors:
+            return self._compile_results(validation_errors)
+
         loader = ExcelLoader(self.schema)
         data = loader.load(filepath)
 

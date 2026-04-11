@@ -8,6 +8,7 @@ from ..validators.base import BaseValidator
 class ColumnMapping:
     standard_name: str    
     alternate_names: List[str] = field(default_factory=list) 
+    # matched_name: str = str()
 
     def combine(self) -> List[str]:
         ret_list: List[str] = []
@@ -24,14 +25,55 @@ class ColumnMapping:
 @dataclass
 class SheetMapping:
     standard_name: str
-    alternate_names: List[str]  
+    alternate_names: List[str] 
+    # matched_name: str = str() 
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
     # unique columns are included in the mandatory_column check rule
     unique_columns: Optional[ColumnMapping] = None 
     
     def matches(self, sheet_name: str)  -> bool:
-        return sheet_name in self.alternate_names    
+        return sheet_name in self.combine_sheet_names()  
+    
+    def combine_column_names(self) -> List[str]:
+        """Creates a unique list of mandatory and unique column name options
+
+        Returns:
+            List[str]: _description_
+        """
+        ret_list: List[str] = []
+        column_list: List[str] = []
+
+        if self.unique_columns is not None:
+            column_list.extend(self.unique_columns.combine())
+
+        for column in self.mandatory_columns:
+            column_list.extend(column.combine())
+
+        [ret_list.append(column) for column in column_list if column not in ret_list]
+
+        if ret_list == [None]:
+            ret_list = []
+
+        return ret_list
+
+    def combine_sheet_names(self) -> List[str]:
+        """combines standard_name and alternate_names into one list checking 
+        standard_name is not in alternate_names list
+
+        Returns:
+            List[str]: combined list
+        """
+        ret_list: List[str] = []
+        if not self.alternate_names :
+            ret_list = [self.standard_name]
+        elif self.standard_name not in self.alternate_names:
+            ret_list = self.alternate_names
+            ret_list.append(self.standard_name)
+        else:
+            ret_list = self.alternate_names
+
+        return ret_list  
 
 
 @dataclass
@@ -112,6 +154,7 @@ class BaseDataset(ABC):
     @abstractmethod
     def get_validators() -> List[BaseValidator]:
         pass
+
 
 
 
