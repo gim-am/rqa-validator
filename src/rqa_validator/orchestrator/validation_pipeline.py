@@ -39,19 +39,19 @@ class ValidationPipeline:
         Returns:
             _type_: 
         """
-
+        all_results:List[ValidationResult] = []
         validation_errors =  validate_schema(self.schema)  
             
         if validation_errors:
             return self._compile_results(validation_errors)
 
         loader = ExcelLoader(self.schema)
-        data = loader.load(filepath)
+        data, all_results = loader.load(filepath)
 
         if not data:
             return self._create_error_result("No matching sheets found in Excel file")
         
-        all_results = []
+        
         for validator in self.validators:
             try:
                 results = validator.validate(data)
@@ -71,6 +71,7 @@ class ValidationPipeline:
                 "success": False,
                 "errors": [{"message": message, "severity": "error"}],
                 "warnings": [],
+                "info": [],
                 "metadata": {"dataset_type": self.dataset_type}
             }
 
@@ -79,6 +80,7 @@ class ValidationPipeline:
         errors = [r for r in results if r.severity == "error" ]
         admin_errors = [r for r in results if r.severity == "admin_error" ]
         warnings = [r for r in results if r.severity == "warning" ]
+        info = [r for r in results if r.severity == "info" ]
 
 
         return {
@@ -88,11 +90,13 @@ class ValidationPipeline:
                 # "passed": len(passed),
                 "admin_errors": len(admin_errors),
                 "errors": len(errors),                
-                "warnings": len(warnings)
+                "warnings": len(warnings),
+                "info": len(info)
             },
             "admin_errors": [self._result_to_dict(r) for r in admin_errors],
             "errors": [self._result_to_dict(r) for r in errors],            
             "warnings": [self._result_to_dict(r) for r in warnings],
+            "info": [self._result_to_dict(r) for r in info],
             "metadata": {
                 "dataset_type": self.dataset_type,
                 # "sheets_processed": list(self.schema.required_columns.keys())

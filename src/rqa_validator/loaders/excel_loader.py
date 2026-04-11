@@ -5,8 +5,9 @@ import polars as pl
 from pathlib import Path
 from typing import List
 
-# from ..validators.base import ValidationResult
+from ..validators.base import ValidationResult
 from ..models.schema import  BaseDatasetSchema, SheetMapping
+from ..models.matching import match_excel_sheet_to_schema
 
 @dataclass
 class LoadedSheet:
@@ -51,7 +52,7 @@ class ExcelLoader:
         self.schema = schema_config
         # self.results: List[ValidationResult] = []
 
-    def load(self, filepath: Path)  -> ExcelLoaderData:
+    def load(self, filepath: Path)   -> tuple[ExcelLoaderData, List[ValidationResult]]:
         """Loads an excel file, does some checking and sorting of the sheets.
 
         Args:
@@ -60,7 +61,7 @@ class ExcelLoader:
         Returns:
             ExcelLoaderData: class that contains the loaded data, sheets etc.
         """        
-        
+        results: List[ValidationResult] = []
         # get a list of excel sheet names
         all_sheets = fastexcel.read_excel(filepath).sheet_names
         # lower sheet names for easier comparison later
@@ -69,43 +70,59 @@ class ExcelLoader:
         data = ExcelLoaderData()
         
         for sheet_name in all_sheets:
-            if (mapped_name := self._match_sheet(sheet_name, self.schema.schema_loaded_sheets)):
+
+            l_mapped_name, l_results = match_excel_sheet_to_schema(sheet_name, self.schema.schema_loaded_sheets)
+            u_mapped_name, u_results = match_excel_sheet_to_schema(sheet_name, self.schema.schema_unloaded_sheets)
+            
+            # pre schema validation will throw error if and sheets have matching names or alternate names
+            # so there should not be both l_mapped_name and u_mapped_name for literal matches
+            # options
+            # 1: l_mapped_name, not l_results > literal match on loaded sheets
+            # 2: u_mapped_name, not u_results > literal match on unloaded sheets
+            # 3: l_mapped_name, l_results, not u_mapped_name > fuzzy match on loaded sheets
+            # 4: u_mapped_name, u_results > fuzzy match on unloaded sheets
+            # 5: l_mapped_name and u_mapped_name > error fuzzy matching
+            # 6: not l_mapped_name, not u_mapped_name, (u_results or l_results) > error fuzzy matching
+            # 7: unexpected sheet > no matching
+
+            # 5
+            if (l_mapped_name and l_results and u_mapped_name and u_results):
+                results.append(ValidationResult(
+                                rule = 'Match excel sheeet to schema',
+                                message = f'Exceh sheet {sheet_name} was fuzzy matched with multiple schema sheets. This will lead to validation errors about excel sheets not being found.'
+                                ,severity = 'info'
+                                ,sheet_name = sheet_name
+                                )) 
+            # 6
+            elif (not l_mapped_name and not u_mapped_name and (l_results or u_results)):
+                results.extend(l_results)
+                results.extend(u_results)
+
+            # 1 and 3
+            elif (l_mapped_name and (not l_results or 
+                                   (l_results and ( not( u_mapped_name and not u_results)
+                                                   or not u_mapped_name)))):
                 # sheets that are expected and loaded for further data validation
                 df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=sheet_name)
                 # TODO: check for duplicate column names. difficult as they are renames on load
                 df = df.rename(str.lower)
                                 
-                data.loaded_sheets.append(LoadedSheet(mapped_name=mapped_name,
+                data.loaded_sheets.append(LoadedSheet(mapped_name=l_mapped_name,
                                                       original_name=sheet_name,
                                                       data=df,
-                                                      columns=df.columns))                
-
-            elif (mapped_name := self._match_sheet(sheet_name, self.schema.schema_unloaded_sheets)):
+                                                      columns=df.columns))    
+                results.extend(l_results)            
+            # 2, 4
+            elif (u_mapped_name ):
                 # sheets that are expected but dont need to be loaded
-                data.unloaded_sheets.append(mapped_name)
+                data.unloaded_sheets.append(u_mapped_name)
+                results.extend(u_results)
             else:
-                # unexpected sheets
+                # 7
                 data.unexpected_sheets.append(sheet_name)
 
-        return data
+        return data, results
     
-
-    def _match_sheet(self, sheet_name: str, schema_sheets: List[SheetMapping]):
-        # ret_value: str = str()
-        matched_values: List[str] = []
-        for sheet_config in schema_sheets:
-            if sheet_config.matches(sheet_name):
-                matched_values.append(sheet_config.standard_name)
-
-        # if not matched_values:
-            # do fuzzy matching
-
-        if len(matched_values) == 1:
-            return matched_values[0]
-        # else:
-
-
-
 
     
     

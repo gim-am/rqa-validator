@@ -19,9 +19,11 @@ def main():
     print(f"Admin Errors: {results['summary']['admin_errors']}")
     print(f"Errors: {results['summary']['errors']}")
     print(f"Warnings: {results['summary']['warnings']}")
+    print(f"info: {results['summary']['info']}")
     print(results['admin_errors'])
     print(results['errors'])
     print(results['warnings'])
+    print(results['info'])
 
 if __name__ == "__main__":
     exit(main())
