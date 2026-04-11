@@ -4,7 +4,9 @@ import fastexcel
 import polars as pl
 from pathlib import Path
 from typing import List
-from ..models.schema import  BaseDatasetSchema
+
+# from ..validators.base import ValidationResult
+from ..models.schema import  BaseDatasetSchema, SheetMapping
 
 @dataclass
 class LoadedSheet:
@@ -47,6 +49,7 @@ class ExcelLoader:
 
     def __init__(self, schema_config: BaseDatasetSchema):
         self.schema = schema_config
+        # self.results: List[ValidationResult] = []
 
     def load(self, filepath: Path)  -> ExcelLoaderData:
         """Loads an excel file, does some checking and sorting of the sheets.
@@ -56,7 +59,8 @@ class ExcelLoader:
 
         Returns:
             ExcelLoaderData: class that contains the loaded data, sheets etc.
-        """
+        """        
+        
         # get a list of excel sheet names
         all_sheets = fastexcel.read_excel(filepath).sheet_names
         # lower sheet names for easier comparison later
@@ -65,7 +69,7 @@ class ExcelLoader:
         data = ExcelLoaderData()
         
         for sheet_name in all_sheets:
-            if (mapped_name := self._should_load_sheet(sheet_name)):
+            if (mapped_name := self._match_sheet(sheet_name, self.schema.schema_loaded_sheets)):
                 # sheets that are expected and loaded for further data validation
                 df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=sheet_name)
                 # TODO: check for duplicate column names. difficult as they are renames on load
@@ -76,7 +80,7 @@ class ExcelLoader:
                                                       data=df,
                                                       columns=df.columns))                
 
-            elif (mapped_name := self._should_ignore_sheet(sheet_name)):
+            elif (mapped_name := self._match_sheet(sheet_name, self.schema.schema_unloaded_sheets)):
                 # sheets that are expected but dont need to be loaded
                 data.unloaded_sheets.append(mapped_name)
             else:
@@ -85,31 +89,24 @@ class ExcelLoader:
 
         return data
     
-    def _should_load_sheet(self, sheet_name: str)  -> str | None:
-        """Check if sheet name matches any configured/expected names
-            that are to be loaded.
 
-        Args:
-            sheet_name (str): Sheet name to be checked
-
-        Returns:
-            str | None: standard name if a match is made
-        """
-        for sheet_config in self.schema.schema_loaded_sheets:
+    def _match_sheet(self, sheet_name: str, schema_sheets: List[SheetMapping]):
+        # ret_value: str = str()
+        matched_values: List[str] = []
+        for sheet_config in schema_sheets:
             if sheet_config.matches(sheet_name):
-                return sheet_config.standard_name
+                matched_values.append(sheet_config.standard_name)
+
+        # if not matched_values:
+            # do fuzzy matching
+
+        if len(matched_values) == 1:
+            return matched_values[0]
+        # else:
+
+
+
+
     
-    def _should_ignore_sheet(self, sheet_name: str)  -> str | None:
-        """Check if sheet name matches any configured names
-            that should be ignored/not loaded.
-
-        Args:
-            sheet_name (str): Sheet name to be checked
-
-        Returns:
-            str | None: standard name if a match is made
-        """
-        for sheet_config in self.schema.schema_unloaded_sheets:
-            if sheet_config.matches(sheet_name):
-                return sheet_config.standard_name
+    
     

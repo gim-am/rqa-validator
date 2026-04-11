@@ -39,6 +39,7 @@ class MandatoryColumns(BaseValidator):
                 
                 if sheet.mandatory_columns:
                     for column in sheet.mandatory_columns:
+                        # TODO: add fuzzy matching check?
                         if not any(map(lambda v: v in df_columns, column.combine())):
                             results.append(ValidationResult(
                                 rule = self.name,
