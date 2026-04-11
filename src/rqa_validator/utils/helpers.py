@@ -18,7 +18,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         if sheet.standard_name:
             sheet.standard_name = sheet.standard_name.lower()
         
-        lowercase_list_strs(sheet.names)
+        lowercase_list_strs(sheet.alternate_names)
         
         for col in sheet.mandatory_columns:
             process_column_mapping(col)
@@ -32,13 +32,13 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         if col.standard_name:
             col.standard_name = col.standard_name.lower()
         
-        lowercase_list_strs(col.names)
+        lowercase_list_strs(col.alternate_names)
 
     if schema.dataset_type:
         schema.dataset_type = schema.dataset_type.lower()
 
-    for sheet in schema.loaded_sheets:
+    for sheet in schema.schema_loaded_sheets:
         process_sheet_mapping(sheet)
 
-    for sheet in schema.unloaded_sheets:
+    for sheet in schema.schema_unloaded_sheets:
         process_sheet_mapping(sheet)

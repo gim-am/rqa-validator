@@ -95,7 +95,7 @@ class ExcelLoader:
         Returns:
             str | None: standard name if a match is made
         """
-        for sheet_config in self.schema.loaded_sheets:
+        for sheet_config in self.schema.schema_loaded_sheets:
             if sheet_config.matches(sheet_name):
                 return sheet_config.standard_name
     
@@ -109,7 +109,7 @@ class ExcelLoader:
         Returns:
             str | None: standard name if a match is made
         """
-        for sheet_config in self.schema.unloaded_sheets:
+        for sheet_config in self.schema.schema_unloaded_sheets:
             if sheet_config.matches(sheet_name):
                 return sheet_config.standard_name
     

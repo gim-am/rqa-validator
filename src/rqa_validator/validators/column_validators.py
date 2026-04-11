@@ -28,7 +28,7 @@ class MandatoryColumns(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []
-        for sheet in self.schema.loaded_sheets:
+        for sheet in self.schema.schema_loaded_sheets:
 
             if not sheet.mandatory_columns and not sheet.unique_columns:
                 continue
@@ -103,18 +103,18 @@ class UniqueColumn(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []        
-        for sheet in self.schema.loaded_sheets:
+        for sheet in self.schema.schema_loaded_sheets:
 
 
-            uuid_columns = sheet.unique_columns 
-            if not uuid_columns:
+            unique_column = sheet.unique_columns 
+            if not unique_column:
                 continue
 
-            uuid_columns = uuid_columns.combine()
+            unique_columns = unique_column.combine()
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
             
             if loaded_sheet_info:
-                for column in uuid_columns:
+                for column in unique_columns:
                     if loaded_sheet_info.columns is not None:
                         if column in loaded_sheet_info.columns:
                             # TODO: specifiy which ids are duplicated and how many times?

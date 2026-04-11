@@ -25,11 +25,11 @@ class MissingSheets(BaseValidator):
         """
         results: List[ValidationResult] = []
 
-        expected_sheets = [ sheet.standard_name for sheet in  self.schema.loaded_sheets if sheet.required]
-        expected_sheets.extend([sheet.standard_name for sheet in  self.schema.unloaded_sheets if sheet.required])
+        expected_sheets = [ sheet.standard_name for sheet in  self.schema.schema_loaded_sheets if sheet.required]
+        expected_sheets.extend([sheet.standard_name for sheet in  self.schema.schema_unloaded_sheets if sheet.required])
 
-        optional_sheets = [ sheet.standard_name for sheet in  self.schema.loaded_sheets if not sheet.required]
-        optional_sheets.extend([sheet.standard_name for sheet in  self.schema.unloaded_sheets if not sheet.required])
+        optional_sheets = [ sheet.standard_name for sheet in  self.schema.schema_loaded_sheets if not sheet.required]
+        optional_sheets.extend([sheet.standard_name for sheet in  self.schema.schema_unloaded_sheets if not sheet.required])
 
         # get keys
         provided_sheets = data.get_loaded_sheet_mapped_names()
