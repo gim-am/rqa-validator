@@ -50,7 +50,6 @@ class ExcelLoader:
 
     def __init__(self, schema_config: BaseDatasetSchema):
         self.schema = schema_config
-        # self.results: List[ValidationResult] = []
 
     def load(self, filepath: Path)   -> tuple[ExcelLoaderData, List[ValidationResult]]:
         """Loads an excel file, does some checking and sorting of the sheets.
@@ -59,7 +58,10 @@ class ExcelLoader:
             filepath (Path): Filepath of excel file. Might change for api call.
 
         Returns:
-            ExcelLoaderData: class that contains the loaded data, sheets etc.
+            tuple[ExcelLoaderData,  List[ValidationResult]]: 
+            class that contains the loaded data, sheets etc,
+            list of validation warnings
+
         """        
         results: List[ValidationResult] = []
         # get a list of excel sheet names

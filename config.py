@@ -9,6 +9,6 @@ class Settings(BaseSettings):
 
     FUZZY_MATCH_SHEETS: bool = False
     FUZZY_MATCH_COLUMNS: bool = False
-
+    MIN_FUZZY_MATCH_SCORE: int = 90
 
 settings = Settings()
