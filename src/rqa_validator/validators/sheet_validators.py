@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from ..validators.base import ValidationResult, BaseValidator
 from typing import  Any, List
 
@@ -88,13 +90,13 @@ class UnexpectedSheets(BaseValidator):
 
         return results
 
-class DataSumCheck(BaseValidator):
+class CrossSheetRowSumCheck(BaseValidator):
     @property
     def name(self) -> str:
-        return 'DataSumCheck'
+        return 'CrossSheetRowSumCheck'
     
-    def validate(self, data: ExcelLoaderData, raw_data_sheet: str = 'raw_data'
-    , clean_data_sheet: str = 'clean_data', deletion_log_sheet: str = 'deletion_log') -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData, master_sheet: str = 'raw_data'
+    , child_sheets: List[str] = ['clean_data', 'deletion_log']) -> List[ValidationResult]:
         """Checks to see if raw_data rows equals clean_data rows plus deletion_log rows.
 
         Args:
@@ -104,46 +106,45 @@ class DataSumCheck(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []
-        clean_data_count:int = 0
-        deleted_data_count:int = 0
-        raw_data_count:int = 0
+        master_data_count:int = 0
 
-        raw_data = data.get_loaded_sheet(raw_data_sheet)
-        if raw_data:
-            raw_data_count = raw_data.data.height
+        @dataclass
+        class ChildCounts():
+            sheet_name: str
+            row_count:int
+
+        child_counts: List[ChildCounts] = []
+
+        master_data = data.get_loaded_sheet(master_sheet)
+        if master_data:
+            master_data_count = master_data.data.height
         else:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A sheet for {raw_data_sheet} was not found. This sheet is required for checking data counts.'
+                message = f'A sheet for {master_sheet} was not found. This sheet is required for checking data counts.'
                 ,severity = 'error'
             ))
 
-        clean_data = data.get_loaded_sheet(clean_data_sheet)
-        if clean_data:
-            clean_data_count = clean_data.data.height
-        else:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {clean_data_sheet} was not found. This sheet is required for checking data counts.'
-                ,severity = 'error'
-            ))
-
-        deleted_data = data.get_loaded_sheet(deletion_log_sheet)
-        if deleted_data:
-            deleted_data_count = deleted_data.data.height
-        else:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {deletion_log_sheet} was not found. This sheet is required for checking data counts.'
-                ,severity = 'error'
-            ))
-
-        if not results:
-            missing_rows: int = abs(clean_data_count + deleted_data_count - raw_data_count)
-            if missing_rows > 0:
+        for sheet in child_sheets:
+            child_data = data.get_loaded_sheet(sheet)
+            if child_data:
+                child_counts.append(ChildCounts(sheet_name=sheet,
+                                                row_count=child_data.data.height))
+            else:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'clean_data rows ({clean_data_count}) + deletion_log rows ({deleted_data_count}) does not equal raw_data rows ({raw_data_count}). The difference is {missing_rows}.'
+                    message = f'A sheet for {sheet} was not found. This sheet is required for checking data counts.'
+                    ,severity = 'error'
+                ))
+
+        if not results:
+            child_sum = sum([item.row_count for item in child_counts])
+            missing_rows: int = abs(child_sum - master_data_count)
+            if missing_rows > 0:
+                child_message = ' and '.join([f'{item.sheet_name} ({item.row_count})'for item in child_counts])
+                results.append(ValidationResult(
+                    rule = self.name,
+                    message = f'Summing row counts for sheets {child_message} does not equal {master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
                     ,severity = 'error'
             ))
                 
@@ -236,7 +237,15 @@ class CrossSheetIdCheck(BaseValidator):
 
     
     def _get_matching_columns(self, loaded_data: LoadedSheet, sheet_name: str) -> list[Any] | list[str]:
-        
+        """matches schema unique columns to loaded data column
+
+        Args:
+            loaded_data (LoadedSheet): the excel loaded data sheet to match with
+            sheet_name (str): the schema sheet to match with
+
+        Returns:
+            list[Any] | list[str]: a list of matched columns
+        """
         sheet = self.schema.get_schema_sheet(sheet_name)
         if sheet is not None:
             id_columns = sheet.unique_columns

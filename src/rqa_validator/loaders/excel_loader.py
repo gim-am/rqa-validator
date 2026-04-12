@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from ..validators.base import ValidationResult
-from ..models.schema import  BaseDatasetSchema, SheetMapping
+from ..models.schema import  BaseDatasetSchema
 from ..models.matching import match_excel_sheet_to_schema
 
 @dataclass
