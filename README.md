@@ -2,32 +2,53 @@
 **Aim**: To develop a hopefully flexible framework that can handle different datasets with non-standard sheet and column names that have different validation rules.
 
 ```bash
+├── config.py
+├── .env
 ├── .gitignore
 ├── main.py
 ├── pyproject.toml
 ├── .python-version
+├── README.md
 ├── src
-│   └── rqa_validator
-│       ├── loaders
-│       │   ├── excel_loader.py
-│       │   └── __init__.py
-│       ├── models
-│       │   ├── config.py
-│       │   ├── __init__.py
-│       │   ├── jmmi.py
-│       │   └── schema.py
-│       ├── orchestrator
-│       │   ├── __init__.py
-│       │   └── validation_pipeline.py
-│       ├── utils
-│       │   ├── helpers.py
-│       │   └── __init__.py
+│   ├── rqa_validator
+│   │   ├── loaders
+│   │   │   ├── excel_loader.py
+│   │   │   └── __init__.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── jmmi.py
+│   │   │   ├── matching.py
+│   │   │   ├── preprocess.py
+│   │   │   └── schema.py
+│   │   ├── orchestrator
+│   │   │   ├── __init__.py
+│   │   │   └── validation_pipeline.py
+│   │   ├── utils
+│   │   │   └── __init__.py
+│   │   └── validators
+│   │       ├── base.py
+│   │       ├── column_validators.py
+│   │       ├── config.py
+│   │       ├── __init__.py
+│   │       ├── preprocess.py
+│   │       └── sheet_validators.py
+│   └── tests
+│       ├── __init__.py
 │       └── validators
-│           ├── base.py
-│           ├── column_validators.py
+│           ├── column_validators
+│           │   ├── __init__.py
+│           │   ├── test_mandatory_columns.py
+│           │   ├── test_pii_columns.py
+│           │   └── test_unique_columns.py
 │           ├── __init__.py
-│           └── sheet_validators.py
+│           └── sheet_validators
+│               ├── __init__.py
+│               ├── test_cross_sheet_id_check.py
+│               ├── test_cross_sheet_row_sum_check.py
+│               ├── test_missing_sheets.py
+│               └── test_unexpected_sheets.py
 └── uv.lock
+
 ```
 
 
