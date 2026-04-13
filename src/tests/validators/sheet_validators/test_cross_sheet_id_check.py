@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.schema import SheetMapping, ColumnMapping, BaseDatasetSchema
+from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
 from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.sheet_validators import CrossSheetIdCheck
 from rqa_validator.validators.base import BaseValidator
@@ -68,23 +68,23 @@ def valid_excel_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_log",
-                        original_name="cleaning_log",
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         columns=["uuid"])]
 
@@ -112,23 +112,23 @@ def master_extra_id_column_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid", "uuidx"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_log",
-                        original_name="cleaning_log",
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         columns=["uuid"])]
 
@@ -157,23 +157,23 @@ def child_extra_id_column_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid","uuidx"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_log",
-                        original_name="cleaning_log",
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         columns=["uuid"])]
 
@@ -201,23 +201,23 @@ def child_missing_id_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_log",
-                        original_name="cleaning_log",
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         columns=["uuid"])]
 
@@ -245,23 +245,23 @@ def child_missing_sheets_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_datax",
-                        original_name="clean_datax",
+                        schema_sheet_name="clean_datax",
+                        data_sheet_name="clean_datax",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_logx",
-                        original_name="deletion_logx",
+                        schema_sheet_name="deletion_logx",
+                        data_sheet_name="deletion_logx",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_logx",
-                        original_name="cleaning_logx",
+                        schema_sheet_name="cleaning_logx",
+                        data_sheet_name="cleaning_logx",
                         data=df_clean_log,
                         columns=["uuid"])]
 
@@ -288,23 +288,23 @@ def master_missing_sheets_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_datax",
-                        original_name="raw_datax",
+                        schema_sheet_name="raw_datax",
+                        data_sheet_name="raw_datax",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="cleaning_log",
-                        original_name="cleaning_log",
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         columns=["uuid"])]
 

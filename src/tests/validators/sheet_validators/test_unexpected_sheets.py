@@ -18,8 +18,8 @@ def unexpected_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_datax",
-        original_name="raw_datax",
+        schema_sheet_name="raw_datax",
+        data_sheet_name="raw_datax",
         data=df,
         columns=["uuid"]
     )
@@ -39,8 +39,8 @@ def expected_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_datax",
-        original_name="raw_datax",
+        schema_sheet_name="raw_datax",
+        data_sheet_name="raw_datax",
         data=df,
         columns=["uuid"]
     )

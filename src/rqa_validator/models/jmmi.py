@@ -1,4 +1,4 @@
-from ..models.schema import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
+from .base import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 from ..validators.sheet_validators import CrossSheetRowSumCheck,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
 from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
 from ..validators.base import BaseValidator

@@ -19,8 +19,8 @@ def valid_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_data",
-        original_name="raw_data",
+        schema_sheet_name="raw_data",
+        data_sheet_name="raw_data",
         data=df,
         columns=["uuid"]
     )
@@ -35,8 +35,8 @@ def invalid_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_data",
-        original_name="raw_data",
+        schema_sheet_name="raw_data",
+        data_sheet_name="raw_data",
         data=df,
         columns=["phone_number"]
     )
@@ -47,14 +47,14 @@ def invalid_excel_data():
 def invalid_fuzzy_excel_data():
     """Create ExcelLoaderData with matching columns"""
     df = pl.DataFrame({
-        "phone_numbea": [1, 2, 3, 4, 5],
+        "phone_number1": [1, 2, 3, 4, 5],
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_data",
-        original_name="raw_data",
+        schema_sheet_name="raw_data",
+        data_sheet_name="raw_data",
         data=df,
-        columns=["phone_numbea"]
+        columns=["phone_number1"]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])

@@ -1,7 +1,7 @@
 from typing import  List
 
 from ..validators.base import ValidationResult, BaseValidator
-from ..models.schema import BaseDatasetSchema
+from ..models.base import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
 from . config import get_pii_columns
 from ..common.matching import match_list_to_list
@@ -45,18 +45,18 @@ class MandatoryColumns(BaseValidator):
                         if not any(map(lambda v: v in df_columns, column.combine())):
                             results.append(ValidationResult(
                                 rule = self.name,
-                                message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
+                                message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
                                 ,severity = 'error'
-                                ,sheet_name = loaded_sheet_info.original_name
+                                ,sheet_name = loaded_sheet_info.data_sheet_name
                                 ))                        
                 
                 if sheet.unique_columns:   
                     if not any(map(lambda v: v in df_columns, sheet.unique_columns.combine() )):
                         results.append(ValidationResult(
                             rule = self.name,
-                            message = f'A unique column for {sheet.unique_columns.standard_name} was expexted in the {loaded_sheet_info.original_name} sheet but was not found.'
+                            message = f'A unique column for {sheet.unique_columns.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
                             ,severity = 'error'
-                            ,sheet_name = loaded_sheet_info.original_name
+                            ,sheet_name = loaded_sheet_info.data_sheet_name
                             ))
             else:
                 results.append(ValidationResult(
@@ -124,9 +124,9 @@ class UniqueColumn(BaseValidator):
                             if unique_duplicated_row_count > 0:
                                 results.append(ValidationResult(
                                     rule = self.name,
-                                    message = f'For column {column} in sheet {loaded_sheet_info.mapped_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
+                                    message = f'For column {column} in sheet {loaded_sheet_info.schema_sheet_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
                                     ,severity = 'error'
-                                    ,sheet_name = loaded_sheet_info.mapped_name
+                                    ,sheet_name = loaded_sheet_info.schema_sheet_name
                                     ))
                         
         return results
@@ -161,18 +161,18 @@ class PiiColumns(BaseValidator):
                 for item in literal_matches:
                     results.append(ValidationResult(
                                 rule = self.name + ' literal comparison',
-                                message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {item}.'
+                                message = f'The sheet {sheet.data_sheet_name} has possible pii columns. Check to see if these should be removed: {item}.'
                                 ,severity = 'warning'
-                                ,sheet_name = sheet.original_name
+                                ,sheet_name = sheet.data_sheet_name
                                 ,column_name = item
                                 ))
             if fuzzy_matched_values:
                 for item in fuzzy_matched_values:
                     results.append(ValidationResult(
                                 rule = self.name + ' fuzzy match comparison',
-                                message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed. standard_name: {item.standard_name}, matches (matched_column, score): {item.matches} '
+                                message = f'The sheet {sheet.data_sheet_name} has possible pii columns. Check to see if these should be removed. standard_name: {item.standard_name}, matches (matched_column, score): {item.matches} '
                                 ,severity = 'warning'
-                                ,sheet_name = sheet.original_name
+                                ,sheet_name = sheet.data_sheet_name
                                 ,column_name = item.standard_name
                                 ))
                 

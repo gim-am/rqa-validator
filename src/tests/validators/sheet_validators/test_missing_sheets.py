@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.schema import SheetMapping, ColumnMapping, BaseDatasetSchema
+from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
 from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.sheet_validators import MissingSheets
 from rqa_validator.validators.base import BaseValidator
@@ -94,8 +94,8 @@ def valid_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_data",
-        original_name="raw_data",
+        schema_sheet_name="raw_data",
+        data_sheet_name="raw_data",
         data=df,
         columns=["uuid"]
     )
@@ -110,8 +110,8 @@ def invalid_excel_data():
     })
     
     loaded_sheet = LoadedSheet(
-        mapped_name="raw_datax",
-        original_name="raw_datax",
+        schema_sheet_name="raw_datax",
+        data_sheet_name="raw_datax",
         data=df,
         columns=["uuid"]
     )

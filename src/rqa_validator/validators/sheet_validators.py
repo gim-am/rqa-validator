@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from ..validators.base import ValidationResult, BaseValidator
 from typing import  Any, List
 
-from ..models.schema import BaseDatasetSchema
+from ..models.base import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData, LoadedSheet
 from ..common.matching import filter_list, match_list_to_list
 
@@ -189,9 +189,9 @@ class CrossSheetIdCheck(BaseValidator):
         if len(master_matching_columns) != 1:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A single unique id column for {master_loaded_sheet.original_name} is expected but {len(master_matching_columns)} were found. {*master_matching_columns,}'
+                message = f'A single unique id column for {master_loaded_sheet.data_sheet_name} is expected but {len(master_matching_columns)} were found. {*master_matching_columns,}'
                 ,severity = 'error'
-                , sheet_name =  master_loaded_sheet.original_name
+                , sheet_name =  master_loaded_sheet.data_sheet_name
                 , column_name = ', '.join(master_matching_columns)
             ))
             return results
@@ -212,9 +212,9 @@ class CrossSheetIdCheck(BaseValidator):
             if len(child_matching_columns) != 1:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'A single unique id column for {child_loaded_sheet.original_name} is expected but {len(child_matching_columns)} were found. {*child_matching_columns,}'
+                    message = f'A single unique id column for {child_loaded_sheet.data_sheet_name} is expected but {len(child_matching_columns)} were found. {*child_matching_columns,}'
                     ,severity = 'error'
-                    , sheet_name = child_loaded_sheet.original_name
+                    , sheet_name = child_loaded_sheet.data_sheet_name
                     , column_name = ', '.join(master_matching_columns)
                 ))
                 continue
@@ -227,9 +227,9 @@ class CrossSheetIdCheck(BaseValidator):
             if missing_ids:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'Id values for sheet {child_loaded_sheet.original_name} and column {child_matching_columns[0]} were not found in sheet {master_loaded_sheet.original_name} column {master_matching_columns[0]}. ids: {*missing_ids,}'
+                    message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_matching_columns[0]} were not found in sheet {master_loaded_sheet.data_sheet_name} column {master_matching_columns[0]}. ids: {*missing_ids,}'
                     ,severity = 'error'
-                    , sheet_name = child_loaded_sheet.original_name
+                    , sheet_name = child_loaded_sheet.data_sheet_name
                     , column_name = ', '.join(master_matching_columns)
                 ))
         return results

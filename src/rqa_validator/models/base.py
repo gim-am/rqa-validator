@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from ..validators.base import BaseValidator
-from ..common.matching import add_to_list, combine_lists
+from ..common.matching import is_in_list, add_to_list, combine_lists, unique_list
 
 @dataclass
 class ColumnMapping:
@@ -12,6 +12,7 @@ class ColumnMapping:
     # matched_name: str = str()
 
     def combine(self) -> List[str]:
+        """returns a unique list of column names and alternate names"""
         return add_to_list(self.standard_name, self.alternate_names)
 
 
@@ -26,26 +27,38 @@ class SheetMapping:
     unique_columns: Optional[ColumnMapping] = None 
     
     def matches(self, sheet_name: str)  -> bool:
-        return sheet_name in self.combine_sheet_names()  
+        """checks if a sheet name is part of the schema (including alternate names)"""
+        return is_in_list(sheet_name, self.combine_sheet_names())  
     
-    def combine_column_names(self) -> List[str]:
+    def combine_column_names(self, include_unique_columns: bool = True, return_unique_list: bool = True) -> List[str]:
         """Creates a unique list of mandatory and unique column name options
 
+        Args:
+            include_unique_columns (bool, optional): Include unique columns in the results. Defaults to True.
+            return_unique_list (bool, optional): return a list of unique values. Defaults to True.
+
         Returns:
-            List[str]: _description_
+            List[str]: returns a list of column names and alternate names for a sheet
         """
         column_list: List[str] = []
         for column in self.mandatory_columns:
             column_list.extend(column.combine())
 
-        return combine_lists(self.unique_columns.combine(), column_list)
-        
+        if include_unique_columns:
+            return combine_lists(self.unique_columns.combine(), column_list, return_unique_list)
+        else:
+            # this list may have dupliaces if columns share names or laternate names
+            if return_unique_list:
+                return unique_list(column_list)
+            else:
+                return column_list
+            
     def combine_sheet_names(self) -> List[str]:
         """combines standard_name and alternate_names into one list checking 
         standard_name is not in alternate_names list
 
         Returns:
-            List[str]: combined list
+            List[str]: combined list of unique items
         """
         return add_to_list(self.standard_name, self.alternate_names)
 

@@ -2,10 +2,15 @@
 from typing import List
 
 from ..validators.base import ValidationResult
-from .schema import BaseDatasetSchema, SheetMapping, ColumnMapping
+from .base import BaseDatasetSchema, SheetMapping, ColumnMapping
+from ..common.matching import duplicate_list_items
 
 def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
-    """checks that a sheet is listed only once in the schema
+    """Checks that a sheet is listed only once in the schema.
+
+    Checks that a column is listed only once per sheet. This check
+    does not include unique columns as they are likely included
+    in mandatory columns and only one unique column can be set
 
     Args:
         schema (BaseDatasetSchema): schema to validate
@@ -14,13 +19,21 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
         List[ValidationResult]: validation errors
     """
     sheet_names: List[str] = []
-    # column_names: List[str] = []
     results: List[ValidationResult] = []
 
     for sheet in schema.schema_loaded_sheets:
         sheet_names.extend(sheet.combine_sheet_names())
-        # column_names.extend(sheet.combine_column_names())
-
+        column_names: List[str] = sheet.combine_column_names(include_unique_columns=False, return_unique_list=False)
+        
+        # check duplicate columns per sheet
+        duplicate_column_names = duplicate_list_items(column_names)
+        if duplicate_column_names:
+            results.append(ValidationResult(
+                    rule = 'Duplicate column names in schema',
+                    message = f' For sheet {sheet} the following mandatory column standard/altername names were listed on more than one column: {duplicate_column_names}. Column names should be unique per sheet.'
+                    , severity = 'admin_error'
+                    , column_name = ', '.join(duplicate_column_names)
+                ))
     for sheet in schema.schema_unloaded_sheets:
         sheet_names.extend(sheet.combine_sheet_names())
 
@@ -33,14 +46,7 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
                 , sheet_name= ', '.join(duplicate_sheet_names)
             ))
         
-    # duplicate_column_names = [item for item in set(column_names) if column_names.count(item) > 1]
-    # if duplicate_column_names:
-    #     results.append(ValidationResult(
-    #             rule = 'Duplicate column names in schema',
-    #             message = f'The following possible column names were listed on more than one sheet: {duplicate_column_names}.'
-    #             , severity = 'admin_error'
-    #             , column_name = ', '.join(duplicate_column_names)
-    #         ))
+    
 
     return results
 

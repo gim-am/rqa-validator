@@ -27,18 +27,18 @@ def valid_excel_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"])]
 
@@ -61,18 +61,18 @@ def missing_deleted_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"])]
 
@@ -95,18 +95,18 @@ def missing_clean_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="raw_data",
-                        original_name="raw_data",
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="clean_data",
-                        original_name="clean_data",
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="deletion_log",
-                        original_name="deletion_log",
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
                         data=df_deleted,
                         columns=["uuid"])]
 
@@ -129,18 +129,18 @@ def missing_sheet_data():
     })
     
     loaded_sheets = [LoadedSheet(
-                        mapped_name="bla",
-                        original_name="bla",
+                        schema_sheet_name="bla",
+                        data_sheet_name="bla",
                         data=df_raw,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="blo",
-                        original_name="blo",
+                        schema_sheet_name="blo",
+                        data_sheet_name="blo",
                         data=df_clean,
                         columns=["uuid"]),
                         LoadedSheet(
-                        mapped_name="ble",
-                        original_name="ble",
+                        schema_sheet_name="ble",
+                        data_sheet_name="ble",
                         data=df_deleted,
                         columns=["uuid"])]
 
