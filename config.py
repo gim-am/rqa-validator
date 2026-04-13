@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from thefuzz import fuzz
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -7,8 +8,10 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    FUZZY_MATCH_SHEETS: bool = False
-    FUZZY_MATCH_COLUMNS: bool = False
-    MIN_FUZZY_MATCH_SCORE: int = 90
+    FUZZY_MATCH_SHEETS: bool = True
+    FUZZY_MATCH_COLUMNS: bool = True
+    MIN_FUZZY_MATCH_SCORE: int = 95
+    # FUZZY_MATCH_SCORER = fuzz.WRatio()
 
 settings = Settings()
+

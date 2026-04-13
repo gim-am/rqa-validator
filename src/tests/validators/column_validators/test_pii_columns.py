@@ -43,6 +43,22 @@ def invalid_excel_data():
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
 
+@pytest.fixture
+def invalid_fuzzy_excel_data():
+    """Create ExcelLoaderData with matching columns"""
+    df = pl.DataFrame({
+        "phone_numbea": [1, 2, 3, 4, 5],
+    })
+    
+    loaded_sheet = LoadedSheet(
+        mapped_name="raw_data",
+        original_name="raw_data",
+        data=df,
+        columns=["phone_numbea"]
+    )
+    
+    return ExcelLoaderData(loaded_sheets=[loaded_sheet])
+
 class TestPiiColumns():
     def test_valid_data(self, validator: BaseValidator,
                         valid_excel_data: ExcelLoaderData):
@@ -54,6 +70,13 @@ class TestPiiColumns():
     def test_invalid_data(self, validator: BaseValidator,
                         invalid_excel_data: ExcelLoaderData):
         result = validator.validate(invalid_excel_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+    def test_invalid_fuzzy_data(self, validator: BaseValidator,
+                        invalid_fuzzy_excel_data: ExcelLoaderData):
+        result = validator.validate(invalid_fuzzy_excel_data)
         
         assert isinstance(result, list)
         assert len(result) == 1

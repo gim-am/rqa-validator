@@ -4,6 +4,8 @@ from ..validators.base import ValidationResult, BaseValidator
 from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
 from . config import get_pii_columns
+from ..common.matching import match_list_to_list
+from config import settings
 
 
 class MandatoryColumns(BaseValidator):
@@ -106,7 +108,6 @@ class UniqueColumn(BaseValidator):
         results: List[ValidationResult] = []        
         for sheet in self.schema.schema_loaded_sheets:
 
-
             unique_column = sheet.unique_columns 
             if not unique_column:
                 continue
@@ -152,16 +153,27 @@ class PiiColumns(BaseValidator):
         """
         results: List[ValidationResult] = []   
 
+        pii_columns = get_pii_columns()
         for sheet in data.loaded_sheets:
-            possible_pii_columns = [item for item in sheet.columns if item in get_pii_columns()]
+            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
             
-            if possible_pii_columns:
-                results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {possible_pii_columns}.'
-                            ,severity = 'warning'
-                            ,sheet_name = sheet.original_name
-                            ,column_name = ', '.join(possible_pii_columns)
-                            ))
+            if literal_matches:
+                for item in literal_matches:
+                    results.append(ValidationResult(
+                                rule = self.name + ' literal comparison',
+                                message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed: {item}.'
+                                ,severity = 'warning'
+                                ,sheet_name = sheet.original_name
+                                ,column_name = item
+                                ))
+            if fuzzy_matched_values:
+                for item in fuzzy_matched_values:
+                    results.append(ValidationResult(
+                                rule = self.name + ' fuzzy match comparison',
+                                message = f'The sheet {sheet.original_name} has possible pii columns. Check to see if these should be removed. standard_name: {item.standard_name}, matches (matched_column, score): {item.matches} '
+                                ,severity = 'warning'
+                                ,sheet_name = sheet.original_name
+                                ,column_name = item.standard_name
+                                ))
                 
         return results

@@ -19,9 +19,10 @@ PII_COLUMN_NAMES = [
     
     # Physical Addresses
     'address', 'street_address', 'street', 'house_number', 'building_number',
-    'apartment', 'unit', 'floor', 'postal_address', 'mailing_address',
+    'apartment', 'floor', 'postal_address', 'mailing_address',
     'residential_address', 'current_address', 'permanent_address',
     'previous_address', 'home_address', 'work_address',
+    # 'unit'
     
     # City/Region/Country
     # 'city', 'town', 'village', 'municipality', 'district', 'county',

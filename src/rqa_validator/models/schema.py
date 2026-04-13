@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from ..validators.base import BaseValidator
+from ..common.matching import add_to_list, combine_lists
 
 @dataclass
 class ColumnMapping:
@@ -11,16 +12,8 @@ class ColumnMapping:
     # matched_name: str = str()
 
     def combine(self) -> List[str]:
-        ret_list: List[str] = []
-        if not self.alternate_names :
-            ret_list = [self.standard_name]
-        elif self.standard_name not in self.alternate_names:
-            ret_list = self.alternate_names
-            ret_list.append(self.standard_name)
-        else:
-            ret_list = self.alternate_names
+        return add_to_list(self.standard_name, self.alternate_names)
 
-        return ret_list
 
 @dataclass
 class SheetMapping:
@@ -41,22 +34,12 @@ class SheetMapping:
         Returns:
             List[str]: _description_
         """
-        ret_list: List[str] = []
         column_list: List[str] = []
-
-        if self.unique_columns is not None:
-            column_list.extend(self.unique_columns.combine())
-
         for column in self.mandatory_columns:
             column_list.extend(column.combine())
 
-        [ret_list.append(column) for column in column_list if column not in ret_list]
-
-        if ret_list == [None]:
-            ret_list = []
-
-        return ret_list
-
+        return combine_lists(self.unique_columns.combine(), column_list)
+        
     def combine_sheet_names(self) -> List[str]:
         """combines standard_name and alternate_names into one list checking 
         standard_name is not in alternate_names list
@@ -64,16 +47,7 @@ class SheetMapping:
         Returns:
             List[str]: combined list
         """
-        ret_list: List[str] = []
-        if not self.alternate_names :
-            ret_list = [self.standard_name]
-        elif self.standard_name not in self.alternate_names:
-            ret_list = self.alternate_names
-            ret_list.append(self.standard_name)
-        else:
-            ret_list = self.alternate_names
-
-        return ret_list  
+        return add_to_list(self.standard_name, self.alternate_names)
 
 
 @dataclass

@@ -5,6 +5,7 @@ from typing import  Any, List
 
 from ..models.schema import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData, LoadedSheet
+from ..common.matching import filter_list, match_list_to_list
 
 class MissingSheets(BaseValidator):
 
@@ -37,8 +38,8 @@ class MissingSheets(BaseValidator):
         provided_sheets = data.get_loaded_sheet_mapped_names()
         provided_sheets.extend(data.unloaded_sheets)
 
-        missing_sheets = [sheet for sheet in expected_sheets if sheet not in provided_sheets]
-        optional_missing_sheets = [sheet for sheet in optional_sheets if sheet not in provided_sheets]
+        missing_sheets = filter_list(expected_sheets, provided_sheets) 
+        optional_missing_sheets = filter_list(optional_sheets, provided_sheets)
 
         for sheet in missing_sheets:
             results.append(ValidationResult(
@@ -246,11 +247,15 @@ class CrossSheetIdCheck(BaseValidator):
         Returns:
             list[Any] | list[str]: a list of matched columns
         """
+
+       
         sheet = self.schema.get_schema_sheet(sheet_name)
         if sheet is not None:
             id_columns = sheet.unique_columns
             
             if id_columns is not None:
+                
+                 # TODO add fuzzy matching
                 return  [column for column in id_columns.combine() if column in loaded_data.columns]
                 
         return []

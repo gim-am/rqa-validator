@@ -4,10 +4,13 @@ import fastexcel
 import polars as pl
 from pathlib import Path
 from typing import List
+from thefuzz import fuzz
+from thefuzz import process
 
 from ..validators.base import ValidationResult
-from ..models.schema import  BaseDatasetSchema
-from ..models.matching import match_excel_sheet_to_schema
+from ..models.schema import  BaseDatasetSchema, SheetMapping
+from ..common.matching import FuzzMatch
+from config import settings
 
 @dataclass
 class LoadedSheet:
@@ -73,8 +76,8 @@ class ExcelLoader:
         
         for sheet_name in all_sheets:
 
-            l_mapped_name, l_results = match_excel_sheet_to_schema(sheet_name, self.schema.schema_loaded_sheets)
-            u_mapped_name, u_results = match_excel_sheet_to_schema(sheet_name, self.schema.schema_unloaded_sheets)
+            l_mapped_name, l_results = self.match_excel_sheet_to_schema(sheet_name, self.schema.schema_loaded_sheets)
+            u_mapped_name, u_results = self.match_excel_sheet_to_schema(sheet_name, self.schema.schema_unloaded_sheets)
             
             # pre schema validation will throw error if and sheets have matching names or alternate names
             # so there should not be both l_mapped_name and u_mapped_name for literal matches
@@ -128,4 +131,60 @@ class ExcelLoader:
 
     
     
-    
+    def match_excel_sheet_to_schema(self, sheet_name: str, schema_sheets: List[SheetMapping]) -> tuple[str, List[ValidationResult]]:
+        """Trys to match an excel sheet name to a schema sheet name. 
+            
+            First, a literal match is attempted. If one is found this 
+            is returned
+
+            If there is no literal match and fuzzy matching is enabled
+            then a fuzzy match is attempted. If a match is made to only
+            one sheet then this is returned. If a match is made to more than 
+            one sheet then no match is returned.
+        Args:
+            sheet_name (str): excel sheet to be matched
+            schema_sheets (List[SheetMapping]): schema sheets to match to. 
+
+        Returns:
+            tuple[str, List[ValidationResult]]: the schema sheet standard name
+            if matched, a list of any validation warnings if relevant.
+        """
+        results: List[ValidationResult] = []
+
+        fuzzy_matched_values: List[FuzzMatch] = []
+        for sheet_config in schema_sheets:
+            if sheet_config.matches(sheet_name):
+                # clear warning as they are not relevant if a literal match is found
+                results = []
+                return sheet_config.standard_name, results
+            elif settings.FUZZY_MATCH_SHEETS:
+                fuz_match =  process.extractBests(query=sheet_name, 
+                                                choices=sheet_config.combine_sheet_names(), 
+                                                scorer= fuzz.WRatio,
+                                                score_cutoff = settings.MIN_FUZZY_MATCH_SCORE,
+                                                limit = 2)
+                # fuz_filter= [match for match in fuz_match if match[1] > settings.MIN_FUZZY_MATCH_SCORE]
+                if fuz_match:
+                    fuzzy_matched_values.append(FuzzMatch(sheet_config.standard_name,
+                                                        dict(fuz_match)))
+
+        if fuzzy_matched_values:
+            if len(fuzzy_matched_values) == 1:
+                # fuzzy match to only 1 schema sheet
+                results.append(ValidationResult(
+                                    rule = 'Match excel sheeet to schema',
+                                    message = f'Excel sheet {sheet_name} was fuzzy matched with schema sheet {fuzzy_matched_values[0].standard_name} via schema sheet name/s and score/s {fuzzy_matched_values[0].matches}.'
+                                    ,severity = 'info'
+                                    ,sheet_name = sheet_name
+                                    ))     
+                return  fuzzy_matched_values[0].standard_name, results
+            else:
+                # fuzzy match to multiple schema sheets
+                results.append(ValidationResult(
+                                    rule = 'Match excel sheeet to schema',
+                                    message = f'Excel sheet {sheet_name} was fuzzy matched with multiple schema sheets via schema sheet name/s and score/s  {fuzzy_matched_values} so was not matched. This will lead to validation errors about excel sheets not being found.'
+                                    ,severity = 'info'
+                                    ,sheet_name = sheet_name
+                                    ))    
+                
+        return str(), results
