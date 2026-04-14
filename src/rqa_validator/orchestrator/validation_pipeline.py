@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 from ..models.preprocess import lowercase_schema_mappings, validate_schema
 
 from ..loaders.excel_loader import ExcelLoader
-from ..models.jmmi import JMMIDatasetSchema
+from ..models.jmmi import JMMIDataset
 from ..validators.base import ValidationResult
 
 
@@ -19,8 +19,8 @@ class ValidationPipeline:
             ValueError: if dataset type not found.
         """
         if self.dataset_type == "jmmi":
-            self.schema = JMMIDatasetSchema.get_schema()
-            self.validators = JMMIDatasetSchema.get_validators(schema=self.schema)
+            self.schema = JMMIDataset.get_schema()
+            self.validators = JMMIDataset.get_validators(schema=self.schema)
         else:
             raise ValueError(f"Unknown dataset type: {self.dataset_type}")
         

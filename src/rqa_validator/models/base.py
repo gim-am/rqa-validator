@@ -18,7 +18,7 @@ class ColumnMapping:
 
 @dataclass
 class SheetMapping:
-    standard_name: str
+    standard_name: str 
     alternate_names: List[str] 
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
@@ -63,7 +63,7 @@ class SheetMapping:
 
 @dataclass
 class BaseDatasetSchema:
-    dataset_type: str 
+    dataset_type: str = str()
     # sheets that have to be loaded and used for further validation
     schema_loaded_sheets: List[SheetMapping]= field(default_factory=list)
     # sheets that should exist but dont need to be loaded
@@ -84,54 +84,7 @@ class BaseDatasetSchema:
         return None
 
    
-@dataclass()
-class DefaultDatasetSchema(BaseDatasetSchema):
 
-    schema_loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
-        SheetMapping(standard_name= "raw_data", 
-                        alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"],
-                                                           is_unique=True)]
-                                                        ),
-        SheetMapping(standard_name= "variable_tracker", 
-                        alternate_names =["variable_tracker"]),
-        SheetMapping(standard_name= "clean_data", 
-                        alternate_names =["clean_data"],
-                        mandatory_columns = [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"],
-                                                           is_unique=True),
-                                             ColumnMapping(standard_name="stratum",
-                                                           alternate_names=["stratum"]),
-                                             ColumnMapping(standard_name="pop_group",
-                                                           alternate_names=["pop_group"]),
-                                             ColumnMapping(standard_name="weight",
-                                                           alternate_names=["weight"]),
-                                             ColumnMapping(standard_name="person_id",
-                                                           alternate_names=["person_id"])
-                                            ]),
-        SheetMapping(standard_name= "deletion_log", 
-                        alternate_names =["deletion_log"],                        
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                          is_unique=True),
-                                             ]),
-        SheetMapping(standard_name="cleaning_log", 
-                        alternate_names=["cleaning_log"]),                               
-    ])
-    schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
-        SheetMapping(standard_name="read_me", 
-                        alternate_names= ["read_me"]),
-        SheetMapping(standard_name="kobo_survey", 
-                        alternate_names= ["kobo_survey"]),
-        SheetMapping(standard_name= "kobo_choices", 
-                        alternate_names =["kobo_choices"]),        
-        SheetMapping(standard_name="sampling_info", 
-                        alternate_names=["sampling_info"], 
-                        required=False),
-        SheetMapping(standard_name="enumerator_performance_log", 
-                        alternate_names=["enumerator_performance_log"], 
-                        required=False)
-    ])
 
 
 class BaseDataset(ABC):
