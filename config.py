@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from thefuzz import fuzz
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(

@@ -92,6 +92,8 @@ class UnexpectedSheets(BaseValidator):
         return results
 
 class CrossSheetRowSumCheck(BaseValidator):
+    # TODO: could move master and child sheet to init so that datasets could
+    # actually set the column names in dataset get_validators
     @property
     def name(self) -> str:
         return 'CrossSheetRowSumCheck'
@@ -153,6 +155,8 @@ class CrossSheetRowSumCheck(BaseValidator):
             
         
 class CrossSheetIdCheck(BaseValidator):
+    # TODO: could move master and child sheet to init so that datasets could
+    # actually set the column names in dataset get_validators
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
         
