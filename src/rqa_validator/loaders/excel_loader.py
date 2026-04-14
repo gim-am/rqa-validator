@@ -4,8 +4,6 @@ import fastexcel
 import polars as pl
 from pathlib import Path
 from typing import List
-from thefuzz import fuzz
-from thefuzz import process
 
 from ..validators.base import ValidationResult
 from ..models.base import  BaseDatasetSchema, SheetMapping
@@ -13,12 +11,34 @@ from ..common.matching import FuzzMatch, match_list_to_list
 from config import settings
 
 @dataclass
+class ColumnMap():
+    schema_column_name:str
+    data_column_name:str
+
+
+@dataclass
 class LoadedSheet:
     schema_sheet_name:str
     data_sheet_name: str
     data: pl.DataFrame
     # this operation is ran numerous times so might as well store it once here
-    columns: List[str]
+    data_columns: List[str]
+    column_map: List[ColumnMap] = field(default_factory=list)
+
+    def get_column_map(self, search_column: str) -> ColumnMap | None:
+        """Searches if a schema column name was mapped during data load.
+        Returns a column mapping if found
+
+        Args:
+            search_column (str): schema column to search for
+
+        Returns:
+            ColumnMap | None: a column map between scheema column and 
+            excel sheet column
+        """
+        for column in self.column_map:
+            if  column.schema_column_name == search_column:
+                return column
 
 @dataclass
 class ExcelLoaderData:
@@ -111,12 +131,19 @@ class ExcelLoader:
                 # sheets that are expected and loaded for further data validation
                 df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=excel_sheet_name)
                 df = df.rename(str.lower)
+                df_columns = df.columns
+
+                column_results, column_matches = self.match_excel_columns_to_schema(df_columns, 
+                                                                                    self.schema.get_schema_sheet(l_mapped_name))
                                 
+                
                 data.loaded_sheets.append(LoadedSheet(schema_sheet_name=l_mapped_name,
                                                       data_sheet_name=excel_sheet_name,
                                                       data=df,
-                                                      columns=df.columns))    
-                results.extend(l_results)            
+                                                      data_columns=df_columns,
+                                                      column_map=column_matches))    
+                results.extend(l_results) 
+                results.extend(column_results)            
             # 2, 4
             elif (u_mapped_name ):
                 # sheets that are expected but dont need to be loaded
@@ -130,7 +157,55 @@ class ExcelLoader:
     
 
     
-    
+    def match_excel_columns_to_schema(self, excel_columns: List, schema_sheet: SheetMapping):
+        results: List[ValidationResult] = []
+        matches: List[ColumnMap] = []
+
+        for column in schema_sheet.mandatory_columns:
+            literal_matches, fuzzy_matched_values = match_list_to_list(column.combine(), 
+                                                                       excel_columns,
+                                                                       fuzzy_match=settings.FUZZY_MATCH_SHEETS)
+
+            if literal_matches:
+                if len(literal_matches) == 1:
+                    # because the schema is prevalidated there should only
+                    # be one literal match unless there are multiple alternate 
+                    # name matches
+                    matches.append(ColumnMap(data_column_name=literal_matches[0]
+                                             ,schema_column_name = column.standard_name))
+                    
+                else:
+                    # ideally this should not happen
+                    results.append(ValidationResult(
+                                    rule = 'Match excel column to schema',
+                                    message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} had {len(literal_matches)} matches to  columns. There should be only 1. Check the schema. Literal matches: {literal_matches}.'
+                                    ,severity = 'error'
+                                    ,sheet_name = schema_sheet.standard_name
+                                    , column_name=column.standard_name
+                                    ))   
+                continue
+            elif fuzzy_matched_values:
+                if len(fuzzy_matched_values[0].matches) == 1:
+                    matches.append(ColumnMap(data_column_name=fuzzy_matched_values[0].standard_name
+                                             ,schema_column_name = column.standard_name))
+
+                    results.append(ValidationResult(
+                                    rule = 'Match excel column to schema',
+                                    message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} was fuzzy matched with an excel column via column name/s and score/s {fuzzy_matched_values[0].matches}.'
+                                    ,severity = 'info'
+                                    ,sheet_name = schema_sheet.standard_name
+                                    , column_name=column.standard_name
+                                    ))  
+                else:
+                    results.append(ValidationResult(
+                                    rule = 'Match excel column to schema',
+                                    message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} was fuzzy matched with multiple excel columns so was not matched as this would cause validation errors. Matching results: schema column name/s and score/s {fuzzy_matched_values}.'
+                                    ,severity = 'error'
+                                    ,sheet_name = schema_sheet.standard_name
+                                    , column_name=column.standard_name
+                                    ))  
+        return results, matches
+
     def match_excel_sheet_to_schema(self, excel_sheet_name: str, schema_sheets: List[SheetMapping]) -> tuple[str, List[ValidationResult]]:
         """Trys to match an excel sheet name to a schema sheet name. 
             

@@ -1,15 +1,15 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 from ..validators.base import BaseValidator
-from ..common.matching import is_in_list, add_to_list, combine_lists, unique_list
+from ..common.matching import is_in_list, add_to_list, unique_list
 
 @dataclass
 class ColumnMapping:
     standard_name: str    
     alternate_names: List[str] = field(default_factory=list) 
-    # matched_name: str = str()
+    is_unique: bool = False
 
     def combine(self) -> List[str]:
         """returns a unique list of column names and alternate names"""
@@ -20,17 +20,18 @@ class ColumnMapping:
 class SheetMapping:
     standard_name: str
     alternate_names: List[str] 
-    # matched_name: str = str() 
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
-    # unique columns are included in the mandatory_column check rule
-    unique_columns: Optional[ColumnMapping] = None 
+    
+    
+    def get_unique_columns(self):
+        return [column for column in self.mandatory_columns if column.is_unique]
     
     def matches(self, sheet_name: str)  -> bool:
         """checks if a sheet name is part of the schema (including alternate names)"""
         return is_in_list(sheet_name, self.combine_sheet_names())  
     
-    def combine_column_names(self, include_unique_columns: bool = True, return_unique_list: bool = True) -> List[str]:
+    def combine_column_names(self, return_unique_list: bool = True) -> List[str]:
         """Creates a unique list of mandatory and unique column name options
 
         Args:
@@ -43,16 +44,13 @@ class SheetMapping:
         column_list: List[str] = []
         for column in self.mandatory_columns:
             column_list.extend(column.combine())
-
-        if include_unique_columns:
-            return combine_lists(self.unique_columns.combine(), column_list, return_unique_list)
+        
+        # this list may have dupliaces if columns share names or laternate names
+        if return_unique_list:
+            return unique_list(column_list)
         else:
-            # this list may have dupliaces if columns share names or laternate names
-            if return_unique_list:
-                return unique_list(column_list)
-            else:
-                return column_list
-            
+            return column_list
+        
     def combine_sheet_names(self) -> List[str]:
         """combines standard_name and alternate_names into one list checking 
         standard_name is not in alternate_names list
@@ -92,14 +90,17 @@ class DefaultDatasetSchema(BaseDatasetSchema):
     schema_loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        unique_columns= ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])),
+                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                                           alternate_names=["uuid", "X_uuid"],
+                                                           is_unique=True)]
+                                                        ),
         SheetMapping(standard_name= "variable_tracker", 
                         alternate_names =["variable_tracker"]),
         SheetMapping(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
                         mandatory_columns = [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]),
+                                                           alternate_names=["uuid", "X_uuid"],
+                                                           is_unique=True),
                                              ColumnMapping(standard_name="stratum",
                                                            alternate_names=["stratum"]),
                                              ColumnMapping(standard_name="pop_group",
@@ -108,12 +109,12 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                                            alternate_names=["weight"]),
                                              ColumnMapping(standard_name="person_id",
                                                            alternate_names=["person_id"])
-                                            ],
-                        unique_columns= ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])),
+                                            ]),
         SheetMapping(standard_name= "deletion_log", 
                         alternate_names =["deletion_log"],                        
-                        unique_columns= ColumnMapping(standard_name="uuid") ),
+                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                                          is_unique=True),
+                                             ]),
         SheetMapping(standard_name="cleaning_log", 
                         alternate_names=["cleaning_log"]),                               
     ])

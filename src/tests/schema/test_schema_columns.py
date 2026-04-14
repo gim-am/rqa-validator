@@ -12,8 +12,7 @@ def valid_schema():
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -28,8 +27,7 @@ def invalid_schema():
                                                            alternate_names=["uuid", "X_uuid"]),
                                             ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -44,8 +42,7 @@ def invalid_schema_2():
                                                            alternate_names=["uuid", "X_uuid"]),
                                             ColumnMapping(standard_name="other",
                                                            alternate_names=["uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 

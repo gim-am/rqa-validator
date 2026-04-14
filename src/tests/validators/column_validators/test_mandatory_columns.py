@@ -1,8 +1,9 @@
+
 import pytest
 import polars as pl
 
 from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.column_validators import MandatoryColumns
 from rqa_validator.validators.base import BaseValidator
 
@@ -22,11 +23,6 @@ def invalid_schema_missing_sheet_validator(invalid_schema_missing_sheet):
     return MandatoryColumns(schema=invalid_schema_missing_sheet)
 
 @pytest.fixture
-def invalid_schema_missing_unique_column_validator(invalid_schema_missing_unique_column):
-    """Create a UniqueColumn validator instance"""
-    return MandatoryColumns(schema=invalid_schema_missing_unique_column)
-
-@pytest.fixture
 def invalid_schema_missing_mandatory_column_validator(invalid_schema_missing_mandatory_column):
     """Create a UniqueColumn validator instance"""
     return MandatoryColumns(schema=invalid_schema_missing_mandatory_column)
@@ -43,8 +39,7 @@ def valid_schema():
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -69,7 +64,9 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"]
+        ,column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -91,20 +88,7 @@ def invalid_schema_missing_sheet():
         schema_unloaded_sheets=[]
     )
 
-@pytest.fixture
-def invalid_schema_missing_unique_column():
-    
-    return BaseDatasetSchema(
-        dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
-                        alternate_names =["raw_data"],
-                        unique_columns = ColumnMapping(standard_name="uuidx",
-                                                           alternate_names=[ "X_uuid"]),
 
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=[ "X_uuid"])]),  ],
-        schema_unloaded_sheets=[]
-    )
 
 @pytest.fixture
 def invalid_schema_missing_mandatory_column():
@@ -143,12 +127,6 @@ class TestMandatoryColumns:
         assert isinstance(result, list)
         assert len(result) == 1
 
-    def test_missing_unique_column(self, invalid_schema_missing_unique_column_validator: BaseValidator,
-                              valid_excel_data: ExcelLoaderData):
-        result = invalid_schema_missing_unique_column_validator.validate(valid_excel_data)
-        
-        assert isinstance(result, list)
-        assert len(result) == 1
 
     def test_missing_mandatory_column(self, invalid_schema_missing_mandatory_column_validator: BaseValidator,
                               valid_excel_data: ExcelLoaderData):

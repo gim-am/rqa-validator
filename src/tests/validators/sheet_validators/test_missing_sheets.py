@@ -36,8 +36,7 @@ def valid_schema():
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -51,8 +50,7 @@ def valid_optional_schema():
                         required = False,
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -66,8 +64,7 @@ def valid_optional_missing_schema():
                         required = False,
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -81,8 +78,7 @@ def valid_optional_sampling_schema():
                         required = False,
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                        )],
         schema_unloaded_sheets=[]
     )
 
@@ -97,7 +93,7 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -113,7 +109,7 @@ def invalid_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])

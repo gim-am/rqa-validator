@@ -30,17 +30,17 @@ def valid_excel_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"])]
+                        data_columns=["uuid"])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -64,17 +64,17 @@ def missing_deleted_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"])]
+                        data_columns=["uuid"])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -98,17 +98,17 @@ def missing_clean_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"])]
+                        data_columns=["uuid"])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -132,17 +132,17 @@ def missing_sheet_data():
                         schema_sheet_name="bla",
                         data_sheet_name="bla",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="blo",
                         data_sheet_name="blo",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"]),
                         LoadedSheet(
                         schema_sheet_name="ble",
                         data_sheet_name="ble",
                         data=df_deleted,
-                        columns=["uuid"])]
+                        data_columns=["uuid"])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)

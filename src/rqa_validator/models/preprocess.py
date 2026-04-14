@@ -23,7 +23,7 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
 
     for sheet in schema.schema_loaded_sheets:
         sheet_names.extend(sheet.combine_sheet_names())
-        column_names: List[str] = sheet.combine_column_names(include_unique_columns=False, return_unique_list=False)
+        column_names: List[str] = sheet.combine_column_names( return_unique_list=False)
         
         # check duplicate columns per sheet
         duplicate_column_names = duplicate_list_items(column_names)
@@ -74,8 +74,6 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         for col in sheet.mandatory_columns:
             process_column_mapping(col)
         
-        process_column_mapping(sheet.unique_columns)
-
     def process_column_mapping(col: ColumnMapping | None) -> None:
         if col is None:
             return

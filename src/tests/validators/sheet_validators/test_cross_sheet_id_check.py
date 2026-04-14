@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.sheet_validators import CrossSheetIdCheck
 from rqa_validator.validators.base import BaseValidator
 
@@ -20,28 +20,28 @@ def valid_schema():
         schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuidx", "X_uuid"]),
+                                                           alternate_names=["uuid", "X_uuid"],
+                                                           is_unique=True)],  
+                        
                                             )
                         ,SheetMapping(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuidx", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuidx", "X_uuid"]))
+                                                           alternate_names=["uuidx", "X_uuid"],
+                                                           is_unique=True)],  
+                        )
                         ,SheetMapping(standard_name= "deletion_log", 
                         alternate_names =["deletion_log"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))
+                                                           alternate_names=["uuid", "X_uuid"]
+                                                           , is_unique=True)],  
+                        )
                         ,SheetMapping(standard_name= "cleaning_log", 
                         alternate_names =["cleaning_log"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))                                   
+                                                           alternate_names=["uuid", "X_uuid"]
+                                                           , is_unique=True)],  
+                        )                                   
                                                            ],
         schema_unloaded_sheets=[]
     )
@@ -71,22 +71,31 @@ def valid_excel_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -115,22 +124,32 @@ def master_extra_id_column_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid", "uuidx"]),
+                        data_columns=["uuid", "uuidx"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid'),
+                                   ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuidx')]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -160,22 +179,32 @@ def child_extra_id_column_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid","uuidx"]),
+                        data_columns=["uuid","uuidx"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid'),
+                                   ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuidx')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -204,26 +233,82 @@ def child_missing_id_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
+@pytest.fixture
+def child_missing_id_column():
+    """Create ExcelLoaderData with matching columns"""
+    df_raw = pl.DataFrame({
+        "uuid": [1, 2, 3, 4, 5]        
+    })
 
+    df_deleted = pl.DataFrame({
+        "uuid": [1],
+    })
+
+    df_clean = pl.DataFrame({
+        "uuid": [2, 3, 4, 5, 7],
+    })
+
+    df_clean_log = pl.DataFrame({
+        "uuid": [ 5],
+    })
+    
+    loaded_sheets = [LoadedSheet(
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
+                        data=df_raw,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
+                        data=df_clean,
+                        data_columns=["uuid"]
+                        ),
+                        LoadedSheet(
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
+                        data=df_deleted,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
+                        data=df_clean_log,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
+
+    
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
 @pytest.fixture
 def child_missing_sheets_data():
@@ -248,22 +333,128 @@ def child_missing_sheets_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="clean_datax",
                         data_sheet_name="clean_datax",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_logx",
                         data_sheet_name="deletion_logx",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_logx",
                         data_sheet_name="cleaning_logx",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
+
+    
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
+
+@pytest.fixture
+def master_no_id_data():
+    """Create ExcelLoaderData with matching columns"""
+    df_raw = pl.DataFrame({
+        "uuidnomatch": [1, 2, 3, 4, 5]        
+    })
+
+    df_deleted = pl.DataFrame({
+        "uuid": [1],
+    })
+
+    df_clean = pl.DataFrame({
+        "uuid": [2, 3, 4, 5, 7],
+    })
+
+    df_clean_log = pl.DataFrame({
+        "uuid": [ 5],
+    })
+    
+    loaded_sheets = [LoadedSheet(
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
+                        data=df_raw,
+                        data_columns=["uuid"]),
+                        LoadedSheet(
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
+                        data=df_clean,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
+                        data=df_deleted,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
+                        data=df_clean_log,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
+
+    
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
+
+@pytest.fixture
+def child_no_id_data():
+    """Create ExcelLoaderData with matching columns"""
+    df_raw = pl.DataFrame({
+        "uuid": [1, 2, 3, 4, 5]        
+    })
+
+    df_deleted = pl.DataFrame({
+        "uuidnomatch": [1],
+    })
+
+    df_clean = pl.DataFrame({
+        "uuid": [2, 3, 4, 5, 7],
+    })
+
+    df_clean_log = pl.DataFrame({
+        "uuid": [ 5],
+    })
+    
+    loaded_sheets = [LoadedSheet(
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
+                        data=df_raw,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
+                        data=df_clean,
+                        data_columns=["uuid"]),
+                        LoadedSheet(
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
+                        data=df_deleted,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
+                        data=df_clean_log,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -291,22 +482,82 @@ def master_missing_sheets_data():
                         schema_sheet_name="raw_datax",
                         data_sheet_name="raw_datax",
                         data=df_raw,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
-                        columns=["uuid"]),
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         LoadedSheet(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
-                        columns=["uuid"])]
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
+
+    
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
+
+
+@pytest.fixture
+def no_match_id_data():
+    """Create ExcelLoaderData with matching columns"""
+    df_raw = pl.DataFrame({
+        "uuid": [1, 2, 3, 4, 5]        
+    })
+
+    df_deleted = pl.DataFrame({
+        "uuid": [1],
+    })
+
+    df_clean = pl.DataFrame({
+        "uuidmis": [2, 3, 4, 5, 7],
+    })
+
+    df_clean_log = pl.DataFrame({
+        "uuid": [ 5],
+    })
+    
+    loaded_sheets = [LoadedSheet(
+                        schema_sheet_name="raw_data",
+                        data_sheet_name="raw_data",
+                        data=df_raw,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="clean_data",
+                        data_sheet_name="clean_data",
+                        data=df_clean,
+                        data_columns=["uuidmis"],
+                        column_map=[ColumnMap(schema_column_name = 'uuidmis',
+                                   data_column_name='uuidmis')]),
+                        LoadedSheet(
+                        schema_sheet_name="deletion_log",
+                        data_sheet_name="deletion_log",
+                        data=df_deleted,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
+                        LoadedSheet(
+                        schema_sheet_name="cleaning_log",
+                        data_sheet_name="cleaning_log",
+                        data=df_clean_log,
+                        data_columns=["uuid"],
+                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')])]
 
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -325,14 +576,14 @@ class TestCrossSheetIdCheck:
         result = valid_schema_validator.validate(master_extra_id_column_data)
         
         assert isinstance(result, list)
-        assert len(result) == 1
+        assert len(result) == 0
 
     def test_child_extra_id_column_data(self, valid_schema_validator: BaseValidator,
                            child_extra_id_column_data: ExcelLoaderData):
         result = valid_schema_validator.validate(child_extra_id_column_data)
         
         assert isinstance(result, list)
-        assert len(result) == 1
+        assert len(result) == 0
 
     def test_child_extra_id_data(self, valid_schema_validator: BaseValidator,
                            child_missing_id_data: ExcelLoaderData):
@@ -354,4 +605,35 @@ class TestCrossSheetIdCheck:
         
         assert isinstance(result, list)
         assert len(result) == 1
+
+    def test_master_no_id_data(self, valid_schema_validator: BaseValidator,
+                           master_no_id_data: ExcelLoaderData):
+        result = valid_schema_validator.validate(master_no_id_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+    def test_child_no_id_data(self, valid_schema_validator: BaseValidator,
+                           master_no_id_data: ExcelLoaderData):
+        result = valid_schema_validator.validate(master_no_id_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+    def test_child_missing_id_column(self, valid_schema_validator: BaseValidator,
+                           child_missing_id_column: ExcelLoaderData):
+        result = valid_schema_validator.validate(child_missing_id_column)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+
+
+    def test_no_match_id_column(self, valid_schema_validator: BaseValidator,
+                           no_match_id_data: ExcelLoaderData):
+        result = valid_schema_validator.validate(no_match_id_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+
 

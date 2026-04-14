@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.column_validators import UniqueColumn
 from rqa_validator.validators.base import BaseValidator
 
@@ -28,9 +28,9 @@ def valid_schema():
         schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"])],  
-                        unique_columns = ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]))],
+                                                           alternate_names=["uuid", "X_uuid"]
+                                                           , is_unique=True)],  
+                        )],
         schema_unloaded_sheets=[]
     )
 @pytest.fixture
@@ -58,7 +58,9 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"],
+        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -74,7 +76,9 @@ def invalid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"],
+        column_map=[ColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])

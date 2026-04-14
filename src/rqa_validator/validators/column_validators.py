@@ -32,36 +32,26 @@ class MandatoryColumns(BaseValidator):
         results: List[ValidationResult] = []
         for sheet in self.schema.schema_loaded_sheets:
 
-            if not sheet.mandatory_columns and not sheet.unique_columns:
+            if not sheet.mandatory_columns:
                 continue
             
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
-            if loaded_sheet_info is not None:
-                df_columns = loaded_sheet_info.columns
+            if loaded_sheet_info is not None:                
                 
-                if sheet.mandatory_columns:
-                    for column in sheet.mandatory_columns:
-                        # TODO: add fuzzy matching check?
-                        if not any(map(lambda v: v in df_columns, column.combine())):
-                            results.append(ValidationResult(
-                                rule = self.name,
-                                message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
-                                ,severity = 'error'
-                                ,sheet_name = loaded_sheet_info.data_sheet_name
-                                ))                        
-                
-                if sheet.unique_columns:   
-                    if not any(map(lambda v: v in df_columns, sheet.unique_columns.combine() )):
+                for column in sheet.mandatory_columns:
+                    if not loaded_sheet_info.get_column_map(column.standard_name):
                         results.append(ValidationResult(
                             rule = self.name,
-                            message = f'A unique column for {sheet.unique_columns.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
+                            message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
                             ,severity = 'error'
                             ,sheet_name = loaded_sheet_info.data_sheet_name
-                            ))
+                            ))  
+                
+                
             else:
                 results.append(ValidationResult(
                                 rule = self.name,
-                                message = f'A no sheet was loaded for {sheet.standard_name}.'
+                                message = f'No sheet was loaded for {sheet.standard_name}.'
                                 ,severity = 'error'
                                 ,sheet_name = sheet.standard_name
                                 )) 
@@ -105,29 +95,29 @@ class UniqueColumn(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
+        # TODO: rewrite for new structure
         results: List[ValidationResult] = []        
         for sheet in self.schema.schema_loaded_sheets:
 
-            unique_column = sheet.unique_columns 
-            if not unique_column:
+            unique_columns = sheet.get_unique_columns() 
+            if not unique_columns:
                 continue
 
-            unique_columns = unique_column.combine()
             loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
             
             if loaded_sheet_info:
                 for column in unique_columns:
-                    if loaded_sheet_info.columns is not None:
-                        if column in loaded_sheet_info.columns:
+                    mapped_column = loaded_sheet_info.get_column_map(column.standard_name)
+                    if mapped_column is not None:
                             # TODO: specifiy which ids are duplicated and how many times?
-                            unique_duplicated_row_count = loaded_sheet_info.data.filter(loaded_sheet_info.data.select(column).is_duplicated()).select(column).n_unique()
-                            if unique_duplicated_row_count > 0:
-                                results.append(ValidationResult(
-                                    rule = self.name,
-                                    message = f'For column {column} in sheet {loaded_sheet_info.schema_sheet_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
-                                    ,severity = 'error'
-                                    ,sheet_name = loaded_sheet_info.schema_sheet_name
-                                    ))
+                        unique_duplicated_row_count = loaded_sheet_info.data.filter(loaded_sheet_info.data.select(mapped_column.data_column_name).is_duplicated()).select(mapped_column.data_column_name).n_unique()
+                        if unique_duplicated_row_count > 0:
+                            results.append(ValidationResult(
+                                rule = self.name,
+                                message = f'For column {mapped_column.data_column_name} in sheet {loaded_sheet_info.data_sheet_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values.'
+                                ,severity = 'error'
+                                ,sheet_name = loaded_sheet_info.schema_sheet_name
+                                ))
                         
         return results
 
@@ -155,7 +145,7 @@ class PiiColumns(BaseValidator):
 
         pii_columns = get_pii_columns()
         for sheet in data.loaded_sheets:
-            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
+            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.data_columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
             
             if literal_matches:
                 for item in literal_matches:

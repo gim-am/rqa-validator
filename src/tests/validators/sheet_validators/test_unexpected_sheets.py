@@ -21,7 +21,7 @@ def unexpected_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"]
     )
     unexpected_sheets = ['somesheet', 'anothersheet']
 
@@ -42,7 +42,7 @@ def expected_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        columns=["uuid"]
+        data_columns=["uuid"]
     )
     unexpected_sheets = []
 
