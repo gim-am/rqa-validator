@@ -92,15 +92,24 @@ class UnexpectedSheets(BaseValidator):
         return results
 
 class CrossSheetRowSumCheck(BaseValidator):
-    # TODO: could move master and child sheet to init so that datasets could
-    # actually set the column names in dataset get_validators
+
+    def __init__(self, master_sheet: str = 'raw_data'
+                 , child_sheets: List[str] = ['clean_data', 'deletion_log']):
+        """
+        Checks to see if master_sheet rows equals the sum of child sheet rows 
+
+        Args:
+            master_sheet (str, optional): Sheet to make sure that child ids are in. Defaults to 'raw_data'.
+            child_sheets (List, optional): Sheet/s to make sure that ids are in master_sheet. Defaults to ['clean_data', 'deletion_log', 'cleaning_log'].
+        """
+        self.master_sheet = master_sheet
+        self.child_sheets = child_sheets
     @property
     def name(self) -> str:
         return 'CrossSheetRowSumCheck'
     
-    def validate(self, data: ExcelLoaderData, master_sheet: str = 'raw_data'
-    , child_sheets: List[str] = ['clean_data', 'deletion_log']) -> List[ValidationResult]:
-        """Checks to see if raw_data rows equals clean_data rows plus deletion_log rows.
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if master_sheet rows equals the sum of child sheet rows rows.
 
         Args:
             data (ExcelLoaderData): data to be validated
@@ -118,17 +127,17 @@ class CrossSheetRowSumCheck(BaseValidator):
 
         child_counts: List[ChildCounts] = []
 
-        master_data = data.get_loaded_sheet(master_sheet)
+        master_data = data.get_loaded_sheet(self.master_sheet)
         if master_data:
             master_data_count = master_data.data.height
         else:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A sheet for {master_sheet} was not found. This sheet is required for checking data counts.'
+                message = f'A sheet for {self.master_sheet} was not found. This sheet is required for checking data counts.'
                 ,severity = 'error'
             ))
 
-        for sheet in child_sheets:
+        for sheet in self.child_sheets:
             child_data = data.get_loaded_sheet(sheet)
             if child_data:
                 child_counts.append(ChildCounts(sheet_name=sheet,
@@ -147,7 +156,7 @@ class CrossSheetRowSumCheck(BaseValidator):
                 child_message = ' and '.join([f'{item.sheet_name} ({item.row_count})'for item in child_counts])
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'Sum of row counts for sheets {child_message} does not equal {master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
+                    message = f'Sum of row counts for sheets {child_message} does not equal {self.master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
                     ,severity = 'error'
             ))
                 
@@ -155,41 +164,46 @@ class CrossSheetRowSumCheck(BaseValidator):
             
         
 class CrossSheetIdCheck(BaseValidator):
-    # TODO: could move master and child sheet to init so that datasets could
-    # actually set the column names in dataset get_validators
-    def __init__(self, schema: BaseDatasetSchema):
+    def __init__(self, schema: BaseDatasetSchema, 
+                 master_sheet: str = 'raw_data'
+                 ,child_sheets: List[str] = ['clean_data', 'deletion_log']):
+        """Checks to see if ids from child sheet/s are present in a master/parent sheet
+
+        Args:
+            schema (BaseDatasetSchema): dataset schema
+           master_sheet (str, optional): Sheet to make sure that child ids are in. Defaults to 'raw_data'.
+            child_sheets (List, optional): Sheet/s to make sure that ids are in master_sheet. Defaults to ['clean_data', 'deletion_log', 'cleaning_log'].
+        """
+        self.master_sheet = master_sheet
+        self.child_sheets = child_sheets
         self.schema = schema
         
     @property
     def name(self) -> str:
         return 'CrossSheetIdCheck'
 
-    def validate(self, data: ExcelLoaderData, 
-                    master_sheet: str = 'raw_data',
-                    child_sheets: List = ['clean_data', 'deletion_log', 'cleaning_log']) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
 
         Args:
             data (ExcelLoaderData): data to be validated
-            master_sheet (str, optional): Sheet to make sure that child ids are in. Defaults to 'raw_data'.
-            child_sheets (List, optional): Sheet/s to make sure that ids are in master_sheet. Defaults to ['clean_data', 'deletion_log', 'cleaning_log'].
-
+           
         Returns:
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []
 
-        master_loaded_sheet = data.get_loaded_sheet(master_sheet)
+        master_loaded_sheet = data.get_loaded_sheet(self.master_sheet)
         
         if not master_loaded_sheet:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A sheet for {master_sheet} is expected.'
+                message = f'A sheet for {self.master_sheet} is expected.'
                 ,severity = 'error'
             ))  
             return results         
         # likely only 1 column
-        master_matching_columns = self._get_matching_columns(master_loaded_sheet, master_sheet)
+        master_matching_columns = self._get_matching_columns(master_loaded_sheet, self.master_sheet)
         if not master_matching_columns:
             results.append(ValidationResult(
                 rule = self.name,
@@ -200,7 +214,7 @@ class CrossSheetIdCheck(BaseValidator):
             ))
             return results
 
-        for sheet in child_sheets:
+        for sheet in self.child_sheets:
             child_loaded_sheet  = data.get_loaded_sheet(sheet)
             if not child_loaded_sheet:
                 results.append(ValidationResult(

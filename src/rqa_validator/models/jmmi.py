@@ -39,8 +39,7 @@ class JMMIDatasetSchema(BaseDatasetSchema):
                                              ]),
         SheetMapping(standard_name="cleaning_log", 
                         alternate_names=["clog_logbook"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                          is_unique=True)]),                               
+                        mandatory_columns= [ColumnMapping(standard_name="uuid")]),                               
     ])
     schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 
