@@ -5,6 +5,7 @@ from ..models.base_dataset import BaseDatasetSchema, BaseDataset
 
 from ..validators.sheet_validators import CrossSheetRowSumCheck,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
 from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
+from ..validators.data_validators import CleaningLog
 from ..validators.base import BaseValidator
 
 from typing import List
@@ -82,4 +83,5 @@ class JMMIDataset(BaseDataset):
             , PiiColumns()
             , CrossSheetRowSumCheck()
             , CrossSheetIdCheck(schema=schema)
+            , CleaningLog(schema=schema)
         ]
