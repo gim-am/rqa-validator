@@ -168,7 +168,7 @@ class CrossSheetRowSumCheck(BaseValidator):
 class CrossSheetIdCheck(BaseValidator):
     def __init__(self, schema: BaseDatasetSchema, 
                  master_sheet: str = 'raw_data'
-                 ,child_sheets: List[str] = ['clean_data', 'deletion_log']):
+                 ,child_sheets: List[str] = ['clean_data', 'deletion_log', 'cleaning_log']):
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
 
         Args:

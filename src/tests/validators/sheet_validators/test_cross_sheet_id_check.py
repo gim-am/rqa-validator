@@ -1,8 +1,9 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
+from rqa_validator.models.base import SheetMapping, ColumnMapping
 from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
+from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.sheet_validators import CrossSheetIdCheck
 from rqa_validator.validators.base import BaseValidator
 
@@ -337,22 +338,22 @@ def child_missing_sheets_data():
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         LoadedSheet(
-                        schema_sheet_name="clean_datax",
-                        data_sheet_name="clean_datax",
+                        schema_sheet_name="clean_dataxxx",
+                        data_sheet_name="clean_dataxxx",
                         data=df_clean,
                         data_columns=["uuid"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         LoadedSheet(
-                        schema_sheet_name="deletion_logx",
-                        data_sheet_name="deletion_logx",
+                        schema_sheet_name="deletion_logxxx",
+                        data_sheet_name="deletion_logxxx",
                         data=df_deleted,
                         data_columns=["uuid"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         LoadedSheet(
-                        schema_sheet_name="cleaning_logx",
-                        data_sheet_name="cleaning_logx",
+                        schema_sheet_name="cleaning_logxxx",
+                        data_sheet_name="cleaning_logxxx",
                         data=df_clean_log,
                         data_columns=["uuid"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',

@@ -2,7 +2,7 @@ from typing import  List
 import polars as pl
 
 from ..common.file_export import df_to_csv
-from ..common.list_matching import  match_sheet_columns
+from ..common.list_matching import  filter_list, match_sheet_columns
 from ..common.schema_matching import get_matching_columns
 from ..models.base_dataset import BaseDatasetSchema
 
@@ -75,6 +75,28 @@ class CleaningLog(BaseValidator):
             ))  
             return results  
         
+        # make sure that the cleaning log has the columns needed
+        new_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_new_value_column)
+        if new_value_column is None:
+            results.append(ValidationResult(
+                rule = self.name,
+                message = f'A column for {self.cleaning_log_new_value_column} is expected.'
+                ,severity = 'error'
+                , sheet_name= self.cleaning_log_sheet
+            ))  
+            return results 
+
+        question_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_question_column)
+        if question_column is None:    
+            results.append(ValidationResult(
+                rule = self.name,
+                message = f'A column for {self.cleaning_log_question_column} is expected.'
+                ,severity = 'error'
+                , sheet_name= self.cleaning_log_sheet
+            ))  
+            return results 
+        
+
         matching_id_columns = match_sheet_columns(clean_data_sheet_ids, cleaning_log_loaded_sheet.column_map)
         # should only be one matching id column between the sheets.
         if len(matching_id_columns) != 1:
@@ -89,7 +111,7 @@ class CleaningLog(BaseValidator):
         cleaning_log_id_column = cleaning_log_loaded_sheet.get_column_map(clean_data_id_columns.schema_column_name)
 
         if cleaning_log_id_column is None:
-            # should not happen as it was just matched
+            # should not happen as it was just matched/checked
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'Expected to find a column for {clean_data_id_columns.schema_column_name} in sheet {self.cleaning_log_sheet} but none was found.'
@@ -100,31 +122,44 @@ class CleaningLog(BaseValidator):
 
         # dataframe of actual changes made
         modified_rows_df = cleaning_log_loaded_sheet.data.select([cleaning_log_id_column.data_column_name,
-                                                                  self.cleaning_log_new_value_column,
-                                                                  self.cleaning_log_question_column]) \
-                                                                    .filter(pl.col(self.cleaning_log_new_value_column).is_not_null() )
+                                                                  new_value_column.data_column_name,
+                                                                  question_column.data_column_name]) \
+                                                                    .filter(pl.col(new_value_column.data_column_name).is_not_null() )
         # racods where the same question was updated more than once for the same id
-        multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name, self.cleaning_log_question_column).is_duplicated()
+        multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name, question_column.data_column_name).is_duplicated()
         
         multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
 
         if multiple_change_df.height > 0:
+            # TODO: need better file name
             df_to_csv(data=multiple_change_df, filename='cleaning_log_validation_multiple_changes_found.csv')
             results.append(ValidationResult(
                 rule = self.name,
                 message = 'Some Ids had multiple changes for the same question. These were not validated. Check the output file cleaning_log_validation_multiple_changes_found for details.'
-                ,severity = 'error'
+                ,severity = 'warning'
             ))  
         # remove records with multiple chages as there is no way to determine which should
         # be the most recent
         unique_modified_rows_df = modified_rows_df.filter(~multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
+        
+        if unique_modified_rows_df.height < 1:
+            return results
         # get a list of questions that had values changed
-        questions = unique_modified_rows_df.select(self.cleaning_log_question_column).unique().to_series().str.to_lowercase().to_list()
+        questions = unique_modified_rows_df.select(question_column.data_column_name).unique().to_series().str.to_lowercase().to_list()
+
+        missing_quesitons = filter_list(questions, clean_data_loaded_sheet.data_columns)
+        if missing_quesitons:
+            results.append(ValidationResult(
+                rule = self.name,
+                message = f'The following questions are listed in {cleaning_log_loaded_sheet.data_sheet_name} but were not found in {clean_data_loaded_sheet.data_sheet_name}: {missing_quesitons}.'
+                ,severity = 'Error'
+            ))  
+            return results
 
         # pivot the table for use later. lower the questions/column names.
-        unique_modified_rows_df = unique_modified_rows_df.pivot(on=self.cleaning_log_question_column,
+        unique_modified_rows_df = unique_modified_rows_df.pivot(on=question_column.data_column_name,
                                                       index=cleaning_log_id_column.data_column_name, 
-                                                      values=self.cleaning_log_new_value_column) \
+                                                      values=new_value_column.data_column_name) \
                                                       .rename(str.lower)
         
         # filter the clean_data sheet to only have records that are in the cleaning log

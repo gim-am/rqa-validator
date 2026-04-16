@@ -1,7 +1,8 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import SheetMapping, ColumnMapping, BaseDatasetSchema
+from rqa_validator.models.base import SheetMapping, ColumnMapping
+from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
 from rqa_validator.validators.column_validators import UniqueColumn
 from rqa_validator.validators.base import BaseValidator
