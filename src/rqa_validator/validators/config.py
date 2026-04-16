@@ -38,7 +38,7 @@ PII_COLUMN_NAMES = [
     'start_gps', 'end_gps', 'waypoint', 'marker', 'position',
     
     # KoboToolbox Specific Fields
-    '_geopoint'#, '_start', '_end', '_submission_time', '_uuid',
+    '_geopoint',# '_start', '_end', '_submission_time', '_uuid',
     # '_xform_id_string', '_status', '_notes', '_index', '_total_media',
     # '_media_all_received', '_media_count', '_geolocation_accuracy',
     # '_geolocation_altitude', '_geolocation_precision',
@@ -51,7 +51,7 @@ PII_COLUMN_NAMES = [
     # 'case_id', 'reference_number', 'tracking_number',
     
     # Demographics (can be identifying in combination)
-    'date_of_birth', 'dob', 'birth_date' #, 'age', 'gender', 'sex',
+    'date_of_birth', 'dob', 'birth_date',# 'age', 'gender', 'sex',
     # 'ethnicity', 'race', 'religion', 'marital_status', 'occupation',
     # 'employer', 'job_title', 'income', 'salary', 'household_size',
     
@@ -59,7 +59,11 @@ PII_COLUMN_NAMES = [
     # 'biometric_data', 'fingerprint', 'face_recognition', 'dna_sample',
     # 'medical_record_number', 'insurance_number', 'policy_number',
     # 'account_number', 'bank_account', 'credit_card', 'iban',
-    'ip_address', 'device_id', 'mac_address', 'serial_number'
+    'ip_address', 'device_id', 'mac_address', 'serial_number',
+    'signature',
+
+    # Others
+    'audit'
 ]
 
 def get_pii_columns() -> list[str]:

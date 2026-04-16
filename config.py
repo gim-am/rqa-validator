@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -11,6 +13,8 @@ class Settings(BaseSettings):
     FUZZY_MATCH_COLUMNS: bool = True
     MIN_FUZZY_MATCH_SCORE: int = 95
     # FUZZY_MATCH_SCORER = fuzz.WRatio()
+
+    VALIDATION_LOG_DIRECTORY: Path = Path('../validation_logs')
 
 settings = Settings()
 

@@ -5,46 +5,19 @@ import polars as pl
 from pathlib import Path
 from typing import List
 
+from .base import LoadedSheet, ColumnMap
 from ..validators.base import ValidationResult
-from ..models.base import  BaseDatasetSchema, SheetMapping
-from ..common.matching import FuzzMatch, match_list_to_list
+from ..models.base import   SheetMapping
+from ..models.base_dataset import BaseDatasetSchema
+from ..common.list_matching import FuzzMatch, match_list_to_list
 from config import settings
 
-@dataclass
-class ColumnMap():
-    schema_column_name:str
-    data_column_name:str
-
-
-@dataclass
-class LoadedSheet:
-    schema_sheet_name:str
-    data_sheet_name: str
-    data: pl.DataFrame
-    # this operation is ran numerous times so might as well store it once here
-    data_columns: List[str]
-    column_map: List[ColumnMap] = field(default_factory=list)
-
-    def get_column_map(self, search_column: str) -> ColumnMap | None:
-        """Searches if a schema column name was mapped during data load.
-        Returns a column mapping if found
-
-        Args:
-            search_column (str): schema column to search for
-
-        Returns:
-            ColumnMap | None: a column map between scheema column and 
-            excel sheet column
-        """
-        for column in self.column_map:
-            if  column.schema_column_name == search_column:
-                return column
 
 @dataclass
 class ExcelLoaderData:
     loaded_sheets: List[LoadedSheet] = field(default_factory=list)
-    unloaded_sheets = []
-    unexpected_sheets = []
+    unloaded_sheets: List = field(default_factory=list)
+    unexpected_sheets: List = field(default_factory=list)
 
     def get_loaded_sheet_mapped_names(self) -> List[str]:
         """Gets all the standard names for the loaded excel sheets
@@ -133,17 +106,27 @@ class ExcelLoader:
                 df = df.rename(str.lower)
                 df_columns = df.columns
 
-                column_results, column_matches = self.match_excel_columns_to_schema(df_columns, 
-                                                                                    self.schema.get_schema_sheet(l_mapped_name))
-                                
-                
-                data.loaded_sheets.append(LoadedSheet(schema_sheet_name=l_mapped_name,
+                schema_sheet = self.schema.get_schema_sheet(l_mapped_name)
+                if schema_sheet is not None:
+                    # it should not be none as it was just matched.
+                    column_results, column_matches = self.match_excel_columns_to_schema(df_columns, schema_sheet)
+                    data.loaded_sheets.append(LoadedSheet(schema_sheet_name=l_mapped_name,
                                                       data_sheet_name=excel_sheet_name,
                                                       data=df,
                                                       data_columns=df_columns,
                                                       column_map=column_matches))    
-                results.extend(l_results) 
-                results.extend(column_results)            
+                    results.extend(l_results) 
+                    results.extend(column_results)  
+                else:
+                    results.append(ValidationResult(
+                                    rule = 'Getting Schema Sheet',
+                                    message = f'The schema sheet {l_mapped_name} was not found.'
+                                    ,severity = 'error'
+                                    ,sheet_name = l_mapped_name
+                                    )) 
+                    continue                
+                
+                          
             # 2, 4
             elif (u_mapped_name ):
                 # sheets that are expected but dont need to be loaded

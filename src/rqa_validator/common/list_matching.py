@@ -4,11 +4,14 @@ from thefuzz import fuzz
 from thefuzz import process
 
 from config import settings
+from ..loaders.base import ColumnMap
 
 @dataclass
 class FuzzMatch():
     standard_name: str
     matches: Dict= field(default_factory=dict) 
+
+
 
 
 def match_list_to_list(source: List[str],
@@ -97,3 +100,22 @@ def add_to_list(item: str | None, target: List | None) -> list:
 def is_in_list(item:str, target: List) -> bool:
     """Checks if an item is in a list"""
     return item in target  
+
+
+
+
+def match_sheet_columns(source:List[ColumnMap], target:List[ColumnMap] ):
+    """matches columns between two column maps where they have the same schema name.
+
+    Args:
+        source (ColumnMap): loaded column that needs to be matched to the target columns
+        target (List[ColumnMap]): columns loaded in the target sheet
+
+        Note: these should both be specified in the dataset schema otherwise columns
+        wont be matchable
+
+    Returns:
+        List: matched columns. 
+    """
+    # return [column for column in target if column.schema_column_name == source.schema_column_name]
+    return [item for item in source if item.schema_column_name in [column.schema_column_name for column in target]]

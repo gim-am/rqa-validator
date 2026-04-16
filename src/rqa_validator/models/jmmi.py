@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 
-from .base import BaseDatasetSchema, BaseDataset, SheetMapping, ColumnMapping
+from .base import SheetMapping, ColumnMapping
+from ..models.base_dataset import BaseDatasetSchema, BaseDataset
+
 from ..validators.sheet_validators import CrossSheetRowSumCheck,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
 from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
 from ..validators.base import BaseValidator
@@ -39,7 +41,10 @@ class JMMIDatasetSchema(BaseDatasetSchema):
                                              ]),
         SheetMapping(standard_name="cleaning_log", 
                         alternate_names=["clog_logbook"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid")]),                               
+                        mandatory_columns= [ColumnMapping(standard_name="uuid"),
+                                            ColumnMapping(standard_name="old_value"),
+                                            ColumnMapping(standard_name="new_value"),
+                                            ColumnMapping(standard_name="question")]),                               
     ])
     schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 

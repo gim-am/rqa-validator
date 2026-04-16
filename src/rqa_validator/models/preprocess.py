@@ -2,8 +2,10 @@
 from typing import List
 
 from ..validators.base import ValidationResult
-from .base import BaseDatasetSchema, SheetMapping, ColumnMapping
-from ..common.matching import duplicate_list_items
+from .base import SheetMapping, ColumnMapping
+from ..models.base_dataset import BaseDatasetSchema
+
+from ..common.list_matching import duplicate_list_items
 
 def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
     """Checks that a sheet is listed only once in the schema.

@@ -1,10 +1,10 @@
 from typing import  List
 
 from ..validators.base import ValidationResult, BaseValidator
-from ..models.base import BaseDatasetSchema
+from ..models.base_dataset import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
 from . config import get_pii_columns
-from ..common.matching import match_list_to_list
+from ..common.list_matching import match_list_to_list
 from config import settings
 
 
@@ -95,7 +95,6 @@ class UniqueColumn(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        # TODO: rewrite for new structure
         results: List[ValidationResult] = []        
         for sheet in self.schema.schema_loaded_sheets:
 
@@ -110,6 +109,7 @@ class UniqueColumn(BaseValidator):
                     mapped_column = loaded_sheet_info.get_column_map(column.standard_name)
                     if mapped_column is not None:
                             # TODO: specifiy which ids are duplicated and how many times?
+                            # output these to csv for upload. update message
                         unique_duplicated_row_count = loaded_sheet_info.data.filter(loaded_sheet_info.data.select(mapped_column.data_column_name).is_duplicated()).select(mapped_column.data_column_name).n_unique()
                         if unique_duplicated_row_count > 0:
                             results.append(ValidationResult(
