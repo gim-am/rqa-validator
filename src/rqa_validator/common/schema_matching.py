@@ -14,7 +14,7 @@ def get_matching_columns(schema: BaseDatasetSchema, loaded_data: LoadedSheet, sh
             list[Any] | list[str]: a list of matched columns
         """
 
-        sheet = schema.get_schema_sheet(sheet_name)
+        sheet = schema.get_schema_loaded_sheet(sheet_name)
         matching_columns: List[ColumnMap] = []
 
         if sheet is not None:

@@ -64,7 +64,7 @@ class CleaningLog(BaseValidator):
             ))  
             return results 
         
-        cleaning_log_schema_sheet = self.schema.get_schema_sheet(self.cleaning_log_sheet)
+        cleaning_log_schema_sheet = self.schema.get_schema_loaded_sheet(self.cleaning_log_sheet)
         if not cleaning_log_schema_sheet:
             results.append(ValidationResult(
                 rule = self.name,

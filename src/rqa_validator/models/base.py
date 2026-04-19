@@ -37,14 +37,14 @@ class SheetMapping:
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
 
-    def get_column(self, column_name: str):
+    def get_column(self, column_name: str) -> ColumnMapping | None:
         """ Returns a column from mandatory_columns if a name is matched."""
         for column in self.mandatory_columns:
             if column.standard_name == column_name:
                 return column
     
     
-    def get_unique_columns(self):
+    def get_unique_columns(self) -> List[ColumnMapping]:
         return [column for column in self.mandatory_columns if column.is_unique]
     
     def matches(self, sheet_name: str)  -> bool:
@@ -81,7 +81,22 @@ class SheetMapping:
         return add_to_list(self.standard_name, self.alternate_names)
 
 
+    def add_mandatory_column(self, column: ColumnMapping) -> ColumnMapping | None:
+        """Adds a column to mandatory_columns if the standard_name provided
+        does not exist.
+        
+        If the name exists within alternate_names then the schema prevalidation
+        process will detect it and report an error.
 
+        Returns None if a column with the same standard_name already exists
+
+        Returns:
+            ColumnMapping | None: the new column or None  
+        """
+
+        if self.get_column(column.standard_name) is None:
+            self.mandatory_columns.append(column)
+            return column
 
 
 

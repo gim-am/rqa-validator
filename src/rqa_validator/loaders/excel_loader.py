@@ -106,7 +106,7 @@ class ExcelLoader:
                 df = df.rename(str.lower)
                 df_columns = df.columns
 
-                schema_sheet = self.schema.get_schema_sheet(l_mapped_name)
+                schema_sheet = self.schema.get_schema_loaded_sheet(l_mapped_name)
                 if schema_sheet is not None:
                     # it should not be none as it was just matched.
                     column_results, column_matches = self.match_excel_columns_to_schema(df_columns, schema_sheet)

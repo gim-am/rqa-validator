@@ -6,17 +6,22 @@ from config import settings
 
 def df_to_csv(data: pl.DataFrame, 
               filename:str, 
-              directory:Path = settings.VALIDATION_LOG_DIRECTORY):
-    """Saves dataframe to a csv. Adds a timestamp to the file
+              directory:Path = settings.VALIDATION_LOG_DIRECTORY,
+              add_timestamp: bool = False):
+    """Saves dataframe to a csv.
 
     Args:
         data (pl.DataFrame): data to be saved
         filename (str): name of the file. Does not need to include .csv extension.
         directory (Path, optional): directory to save the file. Defaults to settings.VALIDATION_LOG_DIRECTORY.
+        add_timestamp (bool, optional): add a timestamp to the filename
     """
+    timestamp = ''
+    if add_timestamp:
+        timestamp = (datetime.now(timezone.utc)).strftime("%Y%m%d-%H%M%S")
+    
     output = str((directory / filename).with_suffix('')) \
-          + (datetime.now(timezone.utc)).strftime("%Y%m%d-%H%M%S") \
-              + '.csv'
+          + timestamp + '.csv'
 
     directory.mkdir(parents=True, exist_ok=True)
     data.write_csv(output)
