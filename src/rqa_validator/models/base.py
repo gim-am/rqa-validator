@@ -5,14 +5,29 @@ from typing import List
 from ..common.list_matching import is_in_list, add_to_list, unique_list
 
 @dataclass
+class ProcessValueMap:
+    """ Values expexted in a column required for a validation process"""
+    process_name: str
+    values: List = field(default_factory=list) 
+
+
+@dataclass
 class ColumnMapping:
     standard_name: str    
     alternate_names: List[str] = field(default_factory=list) 
     is_unique: bool = False
+    process_values: List[ProcessValueMap] = field(default_factory=list) 
 
     def combine(self) -> List[str]:
         """returns a unique list of column names and alternate names"""
         return add_to_list(self.standard_name, self.alternate_names)
+
+    def get_process_values(self, process_name: str):
+        for item in self.process_values:
+            if item.process_name == process_name:
+                return item
+        
+
 
 
 @dataclass
@@ -21,6 +36,12 @@ class SheetMapping:
     alternate_names: List[str] 
     mandatory_columns: List[ColumnMapping] = field(default_factory=list)
     required: bool = True  
+
+    def get_column(self, column_name: str):
+        """ Returns a column from mandatory_columns if a name is matched."""
+        for column in self.mandatory_columns:
+            if column.standard_name == column_name:
+                return column
     
     
     def get_unique_columns(self):

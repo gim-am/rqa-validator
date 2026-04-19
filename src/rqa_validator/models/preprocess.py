@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import Any, List
 
 from ..validators.base import ValidationResult
 from .base import SheetMapping, ColumnMapping
@@ -53,9 +53,6 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
     return results
 
 
-
-
-
 def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
     """lowercase all sheet and column names in a schema to make 
     comparisons, searches a bit easier.
@@ -64,8 +61,8 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         schema (BaseDatasetSchema): schema to process
     """
     
-    def lowercase_list_strs(str_list: List[str]) -> None:
-        str_list[:] = list(map(str.lower, str_list))
+    def lowercase_list_strs(str_list: List[Any]) -> None:
+        str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
 
     def process_sheet_mapping(sheet: SheetMapping) -> None:
         if sheet.standard_name:
@@ -84,6 +81,11 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
             col.standard_name = col.standard_name.lower()
         
         lowercase_list_strs(col.alternate_names)
+
+        if col.process_values:
+            for process in col.process_values:
+                process.process_name = process.process_name.lower()
+                lowercase_list_strs(process.values)
 
     if schema.dataset_type:
         schema.dataset_type = schema.dataset_type.lower()
