@@ -88,7 +88,8 @@ class ExcelLoader:
         """        
         results: List[ValidationResult] = []
         # get a list of excel sheet names
-        all_sheets = fastexcel.read_excel(filepath).sheet_names
+        excel_file = fastexcel.read_excel(filepath)
+        all_sheets = excel_file.sheet_names
         # lower sheet names for easier comparison later
         # all_sheets = list(map(str.lower, all_sheets))
         
@@ -129,7 +130,7 @@ class ExcelLoader:
                                    (l_results and ( not( u_mapped_name and not u_results)
                                                    or not u_mapped_name)))):
                 # sheets that are expected and loaded for further data validation
-                df: pl.DataFrame = pl.read_excel(source=filepath, sheet_name=excel_sheet_name)
+                df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars() 
                 df = df.rename(str.lower)
                 df_columns = df.columns
 

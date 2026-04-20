@@ -16,7 +16,7 @@ class CleaningLog(BaseValidator):
     - makes sure the required sheets and columns have been loaded and matched
     - filters the cleaning log to have only rows that have a changed value
     - does some transformations and comparisons between clean_data and the cleaning_log 
-    - outputs items where there is a difference bbetween cleaning_log and clean_data
+    - outputs items where there is a difference between cleaning_log and clean_data
 
     """
     def __init__(self, schema: BaseDatasetSchema, 
