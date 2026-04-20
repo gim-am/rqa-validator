@@ -5,7 +5,7 @@ from typing import  List
 
 from ..models.base_dataset import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
-from ..common.list_matching import duplicate_list_items, filter_list, unique_list
+from ..common.list_matching import duplicate_list_items, filter_list
 from ..common.schema_matching import get_matching_columns
 
 

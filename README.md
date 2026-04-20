@@ -12,11 +12,15 @@
 ├── src
 │   ├── rqa_validator
 │   │   ├── common
-│   │   │   └── matching.py
+│   │   │   ├── file_export.py
+│   │   │   ├── list_matching.py
+│   │   │   └── schema_matching.py
 │   │   ├── loaders
-│   │   │   ├── excel_loader.py 
+│   │   │   ├── base.py
+│   │   │   ├── excel_loader.py
 │   │   │   └── __init__.py
 │   │   ├── models
+│   │   │   ├── base_dataset.py
 │   │   │   ├── base.py
 │   │   │   ├── __init__.py
 │   │   │   ├── jmmi.py
@@ -28,10 +32,10 @@
 │   │       ├── base.py
 │   │       ├── column_validators.py
 │   │       ├── config.py
+│   │       ├── data_validators.py
 │   │       ├── __init__.py
 │   │       └── sheet_validators.py
 │   └── tests
-
 └── uv.lock
 
 ```
@@ -64,7 +68,7 @@ Currently, from this point onwards all errors are accumulated and the process wi
 2. Load the Excel file  
     - Excel sheets and columns are mapped to the schema for sheets that have to be loaded
     - Sheet names for sheets that do not have to be loaded
-    - This optionally includes fuzzy matching of sheets/columns
+    - This optionally includes fuzzy matching of sheets/columns by setting the config values in `.env`.
 3. Perform all the validation steps.
 4. Errors are output to the user.
 
@@ -93,13 +97,15 @@ Each of the columns listed within a sheet above has:
 - a standard name
 - a list of possible alternate names
 - a flag stating if the column should containe unique values, default False
+- a process value map where certain column values that are required for a validation process can be listed. 
 
 ### Validation Rules
-Validation rules are split between sheet based validation rules and column based validation rules. Each of these are designed to be able to be run on any dataset by looking at either the dataset, the dataset schema or other config values.
+Validation rules are split between different categories. Each of these are designed to be able to be run on any dataset by looking at either the dataset, the dataset schema or other config values.
 
 A structured list of validation errors is produced (errors, warnings) for each rule.
 
 These rules are currently based on the minimum standars checklist (1.2)
+
 
 #### Rules currently implemented
 **Column Rules**
@@ -110,11 +116,14 @@ These rules are currently based on the minimum standars checklist (1.2)
 **Sheet Rules**
 - Missing sheets: checks if mandatory sheets are not present
 - Unexpected sheets: checks if there are any unexpcedted sheets
+- Multiple sheet matches: checks if multiple excel sheets are matched to the same schema sheet
 - Dataset sum check: checks if clean data + deleted data = raw data
 - Cross sheet id check: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
 
+**Data Rules**
+- Cleaning log: checks that all updates listed in the cleaning log sheet are reflected in the clean_data sheet
 
-Fuzzy matching can also be attempted on the sheet and column names by setting the config values in `.env`.
+
 
 
     
