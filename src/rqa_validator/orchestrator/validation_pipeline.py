@@ -40,17 +40,42 @@ class ValidationPipeline:
             _type_: 
         """
         all_results:List[ValidationResult] = []
-        validation_errors =  validate_schema(self.schema)  
+
+        try:            
+            validation_errors =  validate_schema(self.schema)  
+                
+            if validation_errors:
+                all_results.extend(validation_errors)
+                return self._compile_results(all_results)
+        except Exception as e:
+            all_results.append(ValidationResult(
+                    rule='SchemaValidation',
+                    message=f"Schema validation encountered an error: {str(e)}",
+                    severity="admin_error"
+                ))
+            return self._compile_results(all_results)
+
+        try:
+            loader = ExcelLoader(self.schema)
+            data, excel_results = loader.load(filepath)
             
-        if validation_errors:
-            return self._compile_results(validation_errors)
+            if excel_results:   
+                all_results.extend(excel_results)
 
-        loader = ExcelLoader(self.schema)
-        data, all_results = loader.load(filepath)
-
-        if not data:
-            return self._create_error_result("No matching sheets found in Excel file")
-        
+            if not data:
+                all_results.append(ValidationResult(
+                    rule='ExcelFileLoading',
+                    message=f"No matching sheets founf in excel file {filepath}.",
+                    severity="admin_error"
+                ))
+                return self._compile_results(all_results)
+        except Exception as e:
+            all_results.append(ValidationResult(
+                    rule='ExcelFileLoading',
+                    message=f"Loading of the excel file {filepath} encountered an error: {str(e)}",
+                    severity="admin_error"
+                ))
+            return self._compile_results(all_results)
         
         for validator in self.validators:
             try:
@@ -59,7 +84,7 @@ class ValidationPipeline:
                     all_results.extend(results)
             except Exception as e:
                 all_results.append(ValidationResult(
-                    rule='n/a',
+                    rule=validator.name,
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
                     severity="admin_error"
                 ))
