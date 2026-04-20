@@ -5,8 +5,43 @@ from typing import  List
 
 from ..models.base_dataset import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
-from ..common.list_matching import filter_list
+from ..common.list_matching import duplicate_list_items, filter_list, unique_list
 from ..common.schema_matching import get_matching_columns
+
+
+class DuplicateSheetMatches(BaseValidator):
+    @property
+    def name(self) -> str:
+        return 'DuplicateSheetMatches'
+
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Checks to see if a schema sheet was matched to multiple excel sheets. 
+
+        Args:
+            data (ExcelLoaderData): excel data
+
+        Returns:
+            List[ValidationResult]: list of validation errors.
+        """
+        results: List[ValidationResult] = []
+        
+        provided_sheets = data.get_loaded_sheet_mapped_names()
+        provided_sheets.extend(data.get_unloaded_sheet_mapped_names())
+        # duplicates should be a unique list
+        duplicates = duplicate_list_items(provided_sheets)
+
+        if duplicates:
+            for item in duplicates:
+                matched_sheets = data.get_sheet_matches(item)
+                sheet_names = [name.data_sheet_name for name in matched_sheets]
+                results.append(ValidationResult(
+                    rule = self.name,
+                    message = f'Multiple excel sheets, {sheet_names}, were mapped to the same schema sheet {item}. There should be at most a 1-1 mapping for each sheet.'
+                    ,severity = 'error'
+                    ,sheet_name=item
+                ))
+
+        return results
 
 
 class MissingSheets(BaseValidator):
@@ -38,7 +73,7 @@ class MissingSheets(BaseValidator):
 
         # get keys
         provided_sheets = data.get_loaded_sheet_mapped_names()
-        provided_sheets.extend(data.unloaded_sheets)
+        provided_sheets.extend(data.get_unloaded_sheet_mapped_names())
 
         missing_sheets = filter_list(expected_sheets, provided_sheets) 
         optional_missing_sheets = filter_list(optional_sheets, provided_sheets)

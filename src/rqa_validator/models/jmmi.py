@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .base import SheetMapping, ColumnMapping
 from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 
-from ..validators.sheet_validators import CrossSheetRowSumCheck,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
+from ..validators.sheet_validators import CrossSheetRowSumCheck, DuplicateSheetMatches,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
 from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
 from ..validators.data_validators import CleaningLog
 from ..validators.base import BaseValidator
@@ -38,6 +38,7 @@ class JMMIDataset(BaseDataset):
         return[
             MissingSheets(schema=schema)
             , UnexpectedSheets()
+            , DuplicateSheetMatches()
             , MandatoryColumns(schema=schema)
             , UniqueColumn(schema=schema)
             , PiiColumns()

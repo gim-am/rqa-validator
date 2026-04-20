@@ -52,6 +52,9 @@ class CleaningLog(BaseValidator):
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         results: List[ValidationResult] = []
 
+        multiple_changes_filename = 'cleaning_log_validation_multiple_changes'
+        validation_results_filename = 'cleaning_log_validation_results'
+        
         # PRE-VALIDATION - check sheets, columns etc all exist
 
         clean_data_loaded_sheet = data.get_loaded_sheet(self.clean_data_sheet)
@@ -182,11 +185,10 @@ class CleaningLog(BaseValidator):
         multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
 
         if multiple_change_df.height > 0:
-            # TODO: need better file name
-            df_to_csv(data=multiple_change_df, filename='cleaning_log_validation_multiple_changes_found.csv')
+            df_to_csv(data=multiple_change_df, filename = multiple_changes_filename)
             results.append(ValidationResult(
                 rule = self.name,
-                message = 'Some Ids had multiple changes for the same question. These were not validated. Check the output file cleaning_log_validation_multiple_changes_found for details.'
+                message = f'Some Ids had multiple changes for the same question. These were not validated. Check the output file {multiple_changes_filename} for details.'
                 ,severity = 'warning'
             ))  
         # remove records with multiple chages as there is no way to determine which should
@@ -207,10 +209,13 @@ class CleaningLog(BaseValidator):
             ))  
             return results
 
-        # add column to specifiy an update. this helps to specift which
+        # add column to specifiy an update. this helps to specify which
         # questions were updated later after the pivot as the pivot will
         # add a column for each question even if that question was not updated
-        # for a particular uuid.
+        # for a particular uuid. 
+        # The result of this will be that question columns
+        # that actually had an update in cleaning log will have 'true' for that question
+        # while all other other questions will be null
         # fill null with '' to make comparison easier later
         unique_modified_rows_df = unique_modified_rows_df.with_columns(pl.lit(True).alias('is_update')) \
                                                         .with_columns(pl.col(new_value_column.data_column_name).fill_null(''))
@@ -276,7 +281,7 @@ class CleaningLog(BaseValidator):
                         old_val = row[question]
                         new_val = row[new_col]
                         output_rows.append({
-                            "uuid": uuid,
+                            cleaning_log_id_column.data_column_name: uuid,
                             "question": question,
                             f"{self.cleaning_log_sheet}_value": new_val,
                             F"{self.clean_data_sheet}_value": old_val 
@@ -286,10 +291,10 @@ class CleaningLog(BaseValidator):
 
         # if there are differences found log them
         if difference_df.height > 0:
-            df_to_csv(data=difference_df, filename='cleaning_log_validation_results.csv')
+            df_to_csv(data=difference_df, filename=validation_results_filename)
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the cleaning_log_validation_results file.'
+                message = f'There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the {validation_results_filename} file.'
                 ,severity = 'error'
                 ,sheet_name=self.cleaning_log_sheet
             ))  

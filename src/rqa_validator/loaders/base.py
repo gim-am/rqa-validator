@@ -9,10 +9,10 @@ class ColumnMap():
 
 
 @dataclass
-class LoadedSheet:
+class SheetMap:
     schema_sheet_name:str
     data_sheet_name: str
-    data: pl.DataFrame
+    data: pl.DataFrame = field(default_factory=pl.DataFrame)
     # this operation is ran numerous times so might as well store it once here
     data_columns: List[str] = field(default_factory=list)
     column_map: List[ColumnMap] = field(default_factory=list)

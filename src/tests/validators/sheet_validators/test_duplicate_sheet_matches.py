@@ -2,23 +2,15 @@ import pytest
 import polars as pl
 
 from rqa_validator.models.base import SheetMapping, ColumnMapping
+from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
-from rqa_validator.validators.column_validators import UniqueColumn
+from rqa_validator.validators.sheet_validators import DuplicateSheetMatches
 from rqa_validator.validators.base import BaseValidator
 
-
 @pytest.fixture
-def valid_schema_validator(valid_schema):
+def valid_schema_validator():
     """Create a UniqueColumn validator instance"""
-    return UniqueColumn(schema=valid_schema)
-
-@pytest.fixture
-def no_unique_columns_validator(no_unique_columns_schema):
-    """Create a UniqueColumn validator instance"""
-    return UniqueColumn(schema=no_unique_columns_schema)
-
-
+    return DuplicateSheetMatches()
 
 
 @pytest.fixture
@@ -29,24 +21,10 @@ def valid_schema():
         schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]
-                                                           , is_unique=True)],  
-                        )],
-        schema_unloaded_sheets=[]
-    )
-@pytest.fixture
-def no_unique_columns_schema():
-    
-    return BaseDatasetSchema(
-        dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
-                        alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
                         )],
         schema_unloaded_sheets=[]
     )
-
 
 @pytest.fixture
 def valid_excel_data():
@@ -59,9 +37,7 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
-        column_map=[ColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]
+        data_columns=["uuid"]
     )
     
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -70,32 +46,31 @@ def valid_excel_data():
 def invalid_excel_data():
     """Create ExcelLoaderData with matching columns"""
     df = pl.DataFrame({
-        "uuid": ['1', '1', '3', '4', '5'],
+        "uuid": [1, 2, 3, 4, 5],
+    })
+    df2 = pl.DataFrame({
+        "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheets = [SheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
-        column_map=[ColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]
-    )
+        data_columns=["uuid"]),
+        SheetMap(
+        schema_sheet_name="raw_data",
+        data_sheet_name="raw_data2",
+        data=df2,
+        data_columns=["uuid"])
+    ]
     
-    return ExcelLoaderData(loaded_sheets=[loaded_sheet])
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
 
-class TestUniqueColumns():
-    def test_valid_data(self, valid_schema_validator: BaseValidator,
+class TestMissingSheets:
+    def test_valid_schema(self, valid_schema_validator: BaseValidator,
                               valid_excel_data: ExcelLoaderData):
         result = valid_schema_validator.validate(valid_excel_data)
-        
-        assert isinstance(result, list)
-        assert len(result) == 0
-
-    def test_no_unique_columns_schema(self, no_unique_columns_validator: BaseValidator,
-                              valid_excel_data: ExcelLoaderData):
-        result = no_unique_columns_validator.validate(valid_excel_data)
         
         assert isinstance(result, list)
         assert len(result) == 0

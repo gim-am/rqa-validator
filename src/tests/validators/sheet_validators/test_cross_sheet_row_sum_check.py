@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
 from rqa_validator.validators.sheet_validators import CrossSheetRowSumCheck
 from rqa_validator.validators.base import BaseValidator
 
@@ -26,17 +26,17 @@ def valid_excel_data():
         "uuid": [2, 3, 4, 5],
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
@@ -60,17 +60,17 @@ def missing_deleted_data():
         "uuid": [2, 3, 4, 5],
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
@@ -94,17 +94,17 @@ def missing_clean_data():
         "uuid": [ 3, 4, 5],
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="deletion_log",
                         data_sheet_name="deletion_log",
                         data=df_deleted,
@@ -128,17 +128,17 @@ def missing_sheet_data():
         "uuid": [ 3, 4, 5],
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="bla",
                         data_sheet_name="bla",
                         data=df_raw,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="blo",
                         data_sheet_name="blo",
                         data=df_clean,
                         data_columns=["uuid"]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="ble",
                         data_sheet_name="ble",
                         data=df_deleted,

@@ -5,7 +5,7 @@ import polars as pl
 from pathlib import Path
 from typing import List
 
-from .base import LoadedSheet, ColumnMap
+from .base import SheetMap, ColumnMap
 from ..validators.base import ValidationResult
 from ..models.base import   SheetMapping
 from ..models.base_dataset import BaseDatasetSchema
@@ -15,8 +15,8 @@ from config import settings
 
 @dataclass
 class ExcelLoaderData:
-    loaded_sheets: List[LoadedSheet] = field(default_factory=list)
-    unloaded_sheets: List = field(default_factory=list)
+    loaded_sheets: List[SheetMap] = field(default_factory=list)
+    unloaded_sheets: List[SheetMap] = field(default_factory=list)
     unexpected_sheets: List = field(default_factory=list)
 
     def get_loaded_sheet_mapped_names(self) -> List[str]:
@@ -27,20 +27,47 @@ class ExcelLoaderData:
         """
         return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
     
-    def get_loaded_sheet(self, sheet_name: str)  -> LoadedSheet | None:
+    def get_unloaded_sheet_mapped_names(self) -> List[str]:
+        """Gets all the standard names for the loaded excel sheets
+
+        Returns:
+            List[str]: List of sheet names.
+        """
+        return [sheet.schema_sheet_name for sheet in self.unloaded_sheets]
+    
+    def get_loaded_sheet(self, sheet_name: str)  -> SheetMap | None:
         """Gets the details and data for a loaded sheet if it exists.
 
         Args:
             sheet_name (str): Excel sheets to be searched for
 
         Returns:
-            LoadedSheet | None: Loaded sheet details if found
+            SheetMap | None: Loaded sheet details if found
         """
         for sheet in self.loaded_sheets:
             if sheet.schema_sheet_name == sheet_name:
                 return sheet
         return None
     
+    def get_sheet_matches(self, sheet_name: str) -> List[SheetMap]:
+        """Gets all the sheets matched with a given schema_name.
+
+        Args:
+            sheet_name (str): Excel sheets to be searched for
+
+        Returns:
+            List[SheetMap] | None: Loaded sheet details if found
+        """
+        sheets: List[SheetMap] = []
+        for sheet in self.loaded_sheets:
+            if sheet.schema_sheet_name == sheet_name:
+                sheets.append(sheet)
+
+        for sheet in self.unloaded_sheets:
+            if sheet.schema_sheet_name == sheet_name:
+                sheets.append(sheet)
+
+        return sheets
 
 class ExcelLoader:
 
@@ -63,7 +90,7 @@ class ExcelLoader:
         # get a list of excel sheet names
         all_sheets = fastexcel.read_excel(filepath).sheet_names
         # lower sheet names for easier comparison later
-        all_sheets = list(map(str.lower, all_sheets))
+        # all_sheets = list(map(str.lower, all_sheets))
         
         data = ExcelLoaderData()
         
@@ -110,8 +137,8 @@ class ExcelLoader:
                 if schema_sheet is not None:
                     # it should not be none as it was just matched.
                     column_results, column_matches = self.match_excel_columns_to_schema(df_columns, schema_sheet)
-                    data.loaded_sheets.append(LoadedSheet(schema_sheet_name=l_mapped_name,
-                                                      data_sheet_name=excel_sheet_name,
+                    data.loaded_sheets.append(SheetMap(schema_sheet_name=l_mapped_name,
+                                                      data_sheet_name = excel_sheet_name,
                                                       data=df,
                                                       data_columns=df_columns,
                                                       column_map=column_matches))    
@@ -130,7 +157,8 @@ class ExcelLoader:
             # 2, 4
             elif (u_mapped_name ):
                 # sheets that are expected but dont need to be loaded
-                data.unloaded_sheets.append(u_mapped_name)
+                data.unloaded_sheets.append(SheetMap(schema_sheet_name=u_mapped_name,
+                                                     data_sheet_name=excel_sheet_name))
                 results.extend(u_results)
             else:
                 # 7

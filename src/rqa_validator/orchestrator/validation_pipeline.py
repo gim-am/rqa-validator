@@ -106,7 +106,7 @@ class ValidationPipeline:
     def _result_to_dict(self, result: ValidationResult) -> Dict[str, Any]:
         """Convert ValidationResult to dictionary for JSON export."""
         return {
-            # "passed": result.passed,
+            "rule": result.rule,
             "message": result.message,
             "severity": result.severity,
             # "validator": result.__class__.__name__,

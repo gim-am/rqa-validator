@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from rqa_validator.models.base import ProcessValueMap, SheetMapping, ColumnMapping
-from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.data_validators import CleaningLog
 from rqa_validator.validators.base import BaseValidator
@@ -86,14 +86,14 @@ def valid_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -126,14 +126,14 @@ def invalid_clean_data_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -167,14 +167,14 @@ def invalid_cleanlog_data_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -207,14 +207,14 @@ def missing_question_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question6", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -247,14 +247,14 @@ def missing_question_log_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -288,14 +288,14 @@ def missing_sheet_1_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_datamis",
                         data_sheet_name="clean_datamis",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -328,14 +328,14 @@ def missing_sheet_2_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_logmiss",
                         data_sheet_name="cleaning_logmiss",
                         data=df_clean_log,
@@ -370,14 +370,14 @@ def missing_column_1_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuidmiss", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuidmiss',
                                    data_column_name='uuidmiss')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -411,14 +411,14 @@ def missing_column_2_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -452,14 +452,14 @@ def missing_column_3_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -492,14 +492,14 @@ def missing_column_4_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -533,14 +533,14 @@ def multi_entry_data():
         "change_type": ["change_response", "change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -574,14 +574,14 @@ def valid_excel_data_empty_value():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -614,14 +614,14 @@ def invalid_excel_data_empty_value():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
@@ -654,14 +654,14 @@ def missing_change_type():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [LoadedSheet(
+    loaded_sheets = [SheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
                         column_map=[ColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        LoadedSheet(
+                        SheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,

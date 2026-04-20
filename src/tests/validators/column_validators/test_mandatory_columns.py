@@ -5,7 +5,7 @@ import polars as pl
 from rqa_validator.models.base import SheetMapping, ColumnMapping
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 
-from rqa_validator.loaders.excel_loader import ColumnMap, LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
 from rqa_validator.validators.column_validators import MandatoryColumns
 from rqa_validator.validators.base import BaseValidator
 
@@ -62,7 +62,7 @@ def valid_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,

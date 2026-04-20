@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Any, Dict, List
 from thefuzz import fuzz
 from thefuzz import process
 
@@ -17,7 +17,8 @@ class FuzzMatch():
 def match_list_to_list(source: List[str],
                         target: List[str],
                         fuzzy_match: bool,
-                          fuzzy_match_limit: int = 2) -> tuple[list[str], List[FuzzMatch]]:
+                          fuzzy_match_limit: int = 2,
+                          lower_values: bool = True) -> tuple[list[str], List[FuzzMatch]]:
     """Checks if items in a source list are found in a target list. 
         Optionally performs fuzzy matching on columns in the source
         list if there was no literal match found with items in the target
@@ -33,14 +34,21 @@ def match_list_to_list(source: List[str],
         tuple[list[str], List[FuzzMatch]: a list of literal matches, a list of fuzzy matches.
     """
 
-    literal_matches = match_list(source, target)
+    if lower_values:
+        l_source = list(map(str.lower, source))
+        l_target = list(map(str.lower, target))
+    else:
+        l_source = source
+        l_target = target
+
+    literal_matches = match_list(l_source, l_target)
     fuzzy_matched_values: List[FuzzMatch] = []
 
     if fuzzy_match:
         # only do fuzzy match for a column if there was no literal match
-        for search_item in filter_list(source, literal_matches):
+        for search_item in filter_list(l_source, literal_matches):
             match_result = process.extractBests(query=search_item, 
-                                              choices=target, 
+                                              choices=l_target, 
                                               scorer= fuzz.WRatio,#settings.FUZZY_MATCH_SCORER,
                                               score_cutoff = settings.MIN_FUZZY_MATCH_SCORE,
                                               limit = fuzzy_match_limit)
@@ -66,7 +74,15 @@ def filter_list(source: List, target: List) -> list:
     """Returns items in source that are not in target"""
     set_target = set(target)  # this reduces the lookup time from O(n) to O(1)
     return [item for item in source if item not in set_target]
-def duplicate_list_items(source: List):
+def duplicate_list_items(source: List) -> list[Any]:
+    """returns a list of items that appear in a list multiple times.
+
+    Args:
+        source (List): list of items to check
+
+    Returns:
+        list[Any]: list of duplicated items. should be unique list.
+    """
     return [item for item in set(source) if source.count(item) > 1]
 
 

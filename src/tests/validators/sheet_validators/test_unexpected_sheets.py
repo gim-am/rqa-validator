@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
 from rqa_validator.validators.sheet_validators import UnexpectedSheets
 from rqa_validator.validators.base import BaseValidator
 
@@ -17,7 +17,7 @@ def unexpected_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
@@ -38,7 +38,7 @@ def expected_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,

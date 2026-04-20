@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 
-from rqa_validator.loaders.excel_loader import LoadedSheet, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
 from rqa_validator.validators.column_validators import PiiColumns
 from rqa_validator.validators.base import BaseValidator
 
@@ -18,7 +18,7 @@ def valid_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -34,7 +34,7 @@ def invalid_excel_data():
         "phone_number": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -50,7 +50,7 @@ def invalid_fuzzy_excel_data():
         "phone_number1": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = LoadedSheet(
+    loaded_sheet = SheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
