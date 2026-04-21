@@ -132,6 +132,7 @@ class UniqueColumn(BaseValidator):
                                 message = f'For column {mapped_column.data_column_name} in sheet {loaded_sheet_info.data_sheet_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values. Check {output_filename} file for details.'
                                 ,severity = 'error'
                                 ,sheet_name = loaded_sheet_info.schema_sheet_name
+                                , details=unique_duplicated_rows_df.to_dict()
                                 ))                            
 
         if duplicated_ids_df.height > 0:
