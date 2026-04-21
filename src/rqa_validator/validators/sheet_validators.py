@@ -6,7 +6,7 @@ from typing import  List
 from ..models.base_dataset import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
 from ..common.list_matching import duplicate_list_items, filter_list
-from ..common.schema_matching import get_matching_columns
+from ..common.schema_matching import get_matching_unique_columns
 
 
 class DuplicateSheetMatches(BaseValidator):
@@ -240,7 +240,7 @@ class CrossSheetIdCheck(BaseValidator):
             ))  
             return results         
         # likely only 1 column
-        master_matching_columns = get_matching_columns(self.schema,master_loaded_sheet, self.master_sheet)
+        master_matching_columns = get_matching_unique_columns(self.schema,master_loaded_sheet, self.master_sheet)
         if not master_matching_columns:
             results.append(ValidationResult(
                 rule = self.name,
@@ -262,7 +262,7 @@ class CrossSheetIdCheck(BaseValidator):
                 continue
 
             # likely only 1 column 
-            child_matching_columns = get_matching_columns(self.schema, child_loaded_sheet, sheet)    
+            child_matching_columns = get_matching_unique_columns(self.schema, child_loaded_sheet, sheet)    
 
             if not child_matching_columns:
                 results.append(ValidationResult(

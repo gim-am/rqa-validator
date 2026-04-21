@@ -109,8 +109,12 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         alternate_names =["raw_data"],
                         mandatory_columns= [ColumnMapping(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"],
-                                                           is_unique=True)]
-                                                        ),
+                                                           is_unique=True),
+                                            ColumnMapping(standard_name="consent",
+                                                            alternate_names=[],
+                                                            process_values=[ProcessValueMap(process_name='consent_check_validation',
+                                                                                          values=['yes'])])
+                                            ]),
         SheetMapping(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
                         mandatory_columns = [ColumnMapping(standard_name="uuid",
