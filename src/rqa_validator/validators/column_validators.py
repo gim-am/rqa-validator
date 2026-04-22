@@ -163,10 +163,11 @@ class PiiColumns(BaseValidator):
                 for item in fuzzy_matched_values:
                     results.append(ValidationResult(
                                 rule = self.name + ' fuzzy match comparison',
-                                message = f'The sheet {sheet.data_sheet_name} has a possible pii column. Check to see if it should be removed. standard_name: {item.standard_name}, matches (matched_column, score): {item.matches} '
+                                message = f'The sheet {sheet.data_sheet_name} has a possible pii column. Check to the details to see if it should be removed.'
                                 ,severity = 'warning'
                                 ,sheet_name = sheet.data_sheet_name
                                 ,column_name = item.standard_name
+                                , details=item.matches
                                 ))
                 
         return results
