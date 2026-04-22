@@ -320,7 +320,7 @@ def invalid_excel_data4():
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
-class TestCleaningLog:
+class TestConsentCheck:
     def test_valid_data(self, valid_schema_validator: BaseValidator,
                            valid_excel_data: ExcelLoaderData):
         result = valid_schema_validator.validate(valid_excel_data)

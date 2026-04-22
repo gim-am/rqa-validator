@@ -160,7 +160,7 @@ class ConsentCheck(BaseValidator):
             if clean_data_filter_df.height > 0:
                 results.append(ValidationResult(
                 rule = self.name,
-                message = f'There were {clean_data_filter_df.height} rows in {loaded_clean_data_sheet.data_sheet_name} that did not provide consent. Check the output results for details.'
+                message = f'There were {clean_data_filter_df.height} row/s in {loaded_clean_data_sheet.data_sheet_name} that did not provide consent. Check the output results for details.'
                 ,severity = 'error'
                 ,details=clean_data_filter_df.select([clean_data_id_column.data_column_name]).to_dict()
             ))                                
@@ -303,6 +303,7 @@ class CleaningLog(BaseValidator):
                  clean_data_sheet:str = 'clean_data',
                  cleaning_log_sheet: str = 'cleaning_log',
                  cleaning_log_new_value_column:str = 'new_value', 
+                 cleaning_log_old_value_column:str = 'old_value', 
                  cleaning_log_question_column:str = 'question',
                  cleaning_log_change_type_column:str = 'change_type') -> None:
         """Validates that the items in a cleaning log are reflected in the clean data
@@ -319,6 +320,7 @@ class CleaningLog(BaseValidator):
         self.clean_data_sheet = clean_data_sheet
         self.cleaning_log_sheet = cleaning_log_sheet
         self.cleaning_log_new_value_column = cleaning_log_new_value_column
+        self.cleaning_log_old_value_column = cleaning_log_old_value_column
         self.cleaning_log_question_column = cleaning_log_question_column
         self.cleaning_log_change_type_column = cleaning_log_change_type_column
         # the ProcessValueMap that contains the list of possible values needed in cleaning_log_change_type_column
@@ -397,6 +399,16 @@ class CleaningLog(BaseValidator):
                 , sheet_name= self.cleaning_log_sheet
             ))  
             return results 
+        
+        old_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_old_value_column)
+        if old_value_column is None:
+            results.append(ValidationResult(
+                rule = self.name,
+                message = f'A column for {self.cleaning_log_old_value_column} is expected.'
+                ,severity = 'error'
+                , sheet_name= self.cleaning_log_sheet
+            ))  
+            return results 
 
         question_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_question_column)
         if question_column is None:    
@@ -460,15 +472,22 @@ class CleaningLog(BaseValidator):
         
         # TRANSFORMATION: transforms data in preparation for comparison
 
+        
+
+
         # dataframe of actual changes made
         modified_rows_df = cleaning_log_loaded_sheet.data.filter(pl.col(cleaning_log_change_type_column.data_column_name) \
                                                                  .str.to_lowercase().is_in(schema_change_type_values.values) ) \
                                                         .select([cleaning_log_id_column.data_column_name,
                                                                   new_value_column.data_column_name,
+                                                                  old_value_column.data_column_name,
+                                                                  cleaning_log_change_type_column.data_column_name,
                                                                   question_column.data_column_name]) 
                                                                     
         # racods where the same question was updated more than once for the same id
-        multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name, question_column.data_column_name).is_duplicated()
+        multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name, 
+                                                       question_column.data_column_name, 
+                                                       ).is_duplicated()
         
         multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
 
@@ -476,10 +495,27 @@ class CleaningLog(BaseValidator):
             df_to_csv(data=multiple_change_df, filename = multiple_changes_filename)
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'Some Ids had multiple changes for the same question. These were not validated. Check the output file {multiple_changes_filename} for details.'
+                message = f'{multiple_change_df.select(cleaning_log_id_column.data_column_name) \
+                             .n_unique()} Ids had multiple changes for the same question. \
+                            These were not validated. Check the output file {multiple_changes_filename} for details.'
                 ,severity = 'warning'
                 ,details = multiple_change_df.to_dict()
+            ))
+
+        # scan cleaning log for old value = new value
+        same_value_df = modified_rows_df.filter(pl.col(new_value_column.data_column_name).cast(pl.Utf8) == pl.col(old_value_column.data_column_name).cast(pl.Utf8)) \
+                                                        .select(cleaning_log_id_column.data_column_name,
+                                                                new_value_column.data_column_name,
+                                                                old_value_column.data_column_name,
+                                                                cleaning_log_change_type_column.data_column_name)
+        if same_value_df.height > 0:
+            results.append(ValidationResult(
+                rule = self.name,
+                message = f'{same_value_df.height} row/s had {old_value_column.data_column_name} equal {new_value_column.data_column_name}. Check the output file {multiple_changes_filename} for details.'
+                ,severity = 'warning'
+                ,details = same_value_df.to_dict()
             ))  
+
         # remove records with multiple chages as there is no way to determine which should
         # be the most recent
         unique_modified_rows_df = modified_rows_df.filter(~multiple_change_mask).sort(cleaning_log_id_column.data_column_name)

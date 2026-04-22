@@ -140,7 +140,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                             ColumnMapping(standard_name="change_type",
                                                           alternate_names=["changed"],
                                                           process_values=[ProcessValueMap(process_name='cleaning_log_validation',
-                                                                                          values=['yes', 'change_response'])]),
+                                                                                          values=['yes', 'change_response', 'blank_response'])]),
                                             ColumnMapping(standard_name="question")]),                               
     ])
     schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
@@ -169,3 +169,7 @@ class BaseDataset(ABC):
     @abstractmethod
     def get_validators() -> List[BaseValidator]:
         pass
+
+    # TODO: add list of base validators here and use this in child
+    # classes as a default list
+
