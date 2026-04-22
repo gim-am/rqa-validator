@@ -5,7 +5,7 @@ from typing import  List
 
 from ..models.base_dataset import BaseDatasetSchema
 from ..loaders.excel_loader import ExcelLoaderData
-from ..common.list_matching import duplicate_list_items, filter_list
+from ..common.list_matching import duplicate_list_items, filter_list, match_sheet_columns
 from ..common.schema_matching import get_matching_unique_columns
 
 
@@ -222,6 +222,10 @@ class CrossSheetIdCheck(BaseValidator):
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
 
+            this process assumes that:
+                -if both sheets have a unique column then these should be compared
+                -if one sheet does not have a unique id column then a match is attempted
+                based on schema name.
         Args:
             data (ExcelLoaderData): data to be validated
            
@@ -238,18 +242,20 @@ class CrossSheetIdCheck(BaseValidator):
                 message = f'A sheet for {self.master_sheet} is expected.'
                 ,severity = 'error'
             ))  
-            return results         
+            return results     
+            
         # likely only 1 column
         master_matching_columns = get_matching_unique_columns(self.schema,master_loaded_sheet, self.master_sheet)
-        if not master_matching_columns:
+        if not master_matching_columns or len(master_matching_columns) > 1:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A unique id column for {master_loaded_sheet.data_sheet_name} is expected but none were found.'
+                message = f'A single unique id column for {master_loaded_sheet.data_sheet_name} is expected but none were found.'
                 ,severity = 'error'
                 , sheet_name =  master_loaded_sheet.data_sheet_name
                 # , column_name = ', '.join(master_matching_columns)
             ))
             return results
+        master_matching_columns = master_matching_columns[0]
 
         for sheet in self.child_sheets:
             child_loaded_sheet  = data.get_loaded_sheet(sheet)
@@ -261,75 +267,50 @@ class CrossSheetIdCheck(BaseValidator):
                 ))  
                 continue
 
-            # likely only 1 column 
-            child_matching_columns = get_matching_unique_columns(self.schema, child_loaded_sheet, sheet)    
+            # gets ids from a child sheet that are not present in a master sheet
+            
+            # this process assumes that:
+            # if both sheets have a unique column then these should be compared
+            # if one sheet does not have a unique id column then a match is attempted
+            #   based on schema name.
+            
+            child_matching_columns = get_matching_unique_columns(self.schema, child_loaded_sheet, sheet)  
 
             if not child_matching_columns:
+                # some sheets will have a non unique uuid column so try to match based on name
+                child_matching_columns = match_sheet_columns(child_loaded_sheet.column_map, 
+                                                             [master_matching_columns])
+            if len(child_matching_columns) != 1:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'A unique id column for {child_loaded_sheet.data_sheet_name} is expected but none were found. '
+                    message = f'A unique or matching id column for {child_loaded_sheet.data_sheet_name} is expected but none were found. '
                     ,severity = 'error'
                     , sheet_name = child_loaded_sheet.data_sheet_name
                 ))
                 continue
 
-            # gets ids from a child sheet that are not present in a master sheet
-            for master_id_column in master_matching_columns:
-                # realistically, should only be one id column in master
-                # TODO: if there is only one id in each assume they are the same?
-                child_match_id = [item for item in child_matching_columns if item.schema_column_name == master_id_column.schema_column_name]
-                # no duplicate columns names would be loaded so only check if there is one
-                if len(child_match_id) == 1:
-                    missing_ids = child_loaded_sheet.data.select(child_match_id[0].data_column_name).join(other=master_loaded_sheet.data.select(master_id_column.data_column_name),
-                                            how='anti',
-                                            left_on=child_match_id[0].data_column_name,
-                                            right_on=master_id_column.data_column_name).to_series().to_list()
-                    if missing_ids:
-                        results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_match_id[0].data_column_name} were not found in sheet {master_loaded_sheet.data_sheet_name} column {master_id_column.data_column_name}. ids: {*missing_ids,}'
-                            ,severity = 'error'
-                            , sheet_name = child_loaded_sheet.data_sheet_name
-                            , column_name = child_match_id[0].data_column_name
-                        ))
-                else:
-                    # dont think this actually happens
-                    results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'No matching id columns were found for sheet {child_loaded_sheet.data_sheet_name} and  {master_loaded_sheet.data_sheet_name}.'
-                            ,severity = 'error'
-                            , sheet_name = f'{master_loaded_sheet.data_sheet_name}  {child_loaded_sheet.data_sheet_name}'
-                            
-                        ))
+            child_matching_columns = child_matching_columns[0]        
+            
+            missing_ids = child_loaded_sheet.data.select(child_matching_columns.data_column_name).join(
+                                    other=master_loaded_sheet.data.select(master_matching_columns.data_column_name),
+                                    how='anti',
+                                    left_on=child_matching_columns.data_column_name,
+                                    right_on=master_matching_columns.data_column_name).to_series().to_list()
+            if missing_ids:
+                results.append(ValidationResult(
+                    rule = self.name,
+                    message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_matching_columns.data_column_name} were not found in sheet {master_loaded_sheet.data_sheet_name} column {master_matching_columns.data_column_name}. Check output for details. '
+                    ,severity = 'error'
+                    , sheet_name = child_loaded_sheet.data_sheet_name
+                    , column_name = child_matching_columns.data_column_name
+                    , details=  {child_matching_columns.data_column_name: missing_ids}
+                ))
+
         return results
 
 
 
-    
-    # def _get_matching_columns(self, loaded_data: LoadedSheet, sheet_name: str)  -> List[ColumnMap]:
-    #     """matches schema unique columns to loaded data column
 
-    #     Args:
-    #         loaded_data (LoadedSheet): the excel loaded data sheet to match with
-    #         sheet_name (str): the schema sheet to match with
-
-    #     Returns:
-    #         list[Any] | list[str]: a list of matched columns
-    #     """
-
-    #     sheet = self.schema.get_schema_sheet(sheet_name)
-    #     matching_columns: List[ColumnMap] = []
-
-    #     if sheet is not None:
-    #         unique_columns = sheet.get_unique_columns()
-            
-    #         if unique_columns is not None:
-    #             for column in unique_columns:
-    #                 column_map = loaded_data.get_column_map(column.standard_name)
-    #                 if column_map is not None:
-    #                     matching_columns.append(column_map)
-                
-    #     return matching_columns
 
 
 

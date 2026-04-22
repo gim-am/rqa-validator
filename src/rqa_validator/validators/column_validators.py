@@ -1,3 +1,4 @@
+import re
 from typing import  List
 import polars as pl
 from ..common.file_export import df_to_csv
@@ -60,23 +61,6 @@ class MandatoryColumns(BaseValidator):
 
 
         return results
-
-    # polars reanames duplicate columns making this more effort 
-# class DuplicateColumns(BaseValidator):
-#     name = "DuplicateColumns"
-
-#     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
-#         results: List[ValidationResult] = []
-
-#         for _, item in data.loaded_sheets.items():
-#             df_columns = item['data'].columns
-#             duplicates = [column for column in set(df_columns) if df_columns.count(column) > 1]
-#             if duplicates:
-#                 results.append(ValidationResult(
-#                         message = f'The sheet for {item['original_sheet_name']} has duplicate column names for the following columns: {duplicates}.'
-#                         ,severity = 'error'
-#                         ,sheet_name=item['original_sheet_name']
-#                         ))
     
 class UniqueColumn(BaseValidator):
 
@@ -164,7 +148,7 @@ class PiiColumns(BaseValidator):
 
         pii_columns = get_pii_columns()
         for sheet in data.loaded_sheets:
-            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.data_columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
+            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.data.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
             
             if literal_matches:
                 for item in literal_matches:
@@ -185,4 +169,45 @@ class PiiColumns(BaseValidator):
                                 ,column_name = item.standard_name
                                 ))
                 
+        return results
+    
+class ColumnNameCheck(BaseValidator):
+    """Check column names are variables instead of labels. 
+
+    """
+    @property
+    def name(self) -> str:
+        return 'ColumnNameCheck'
+
+    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+        """Check column names are variables instead of labels.
+
+        This is done through regex matching that checks if there
+        are any characters other than:
+        - A-Z
+        - a-z
+        - 0-9
+        - . or _
+
+        Args:
+            data (ExcelLoaderData): data to be validated
+
+        Returns:
+            List[ValidationResult]: list of validation errors
+        """
+        results: List[ValidationResult] = [] 
+        pattern = re.compile(r'[^a-zA-Z_.\d:]')
+
+        for sheet in data.loaded_sheets:
+            matches = list(filter(pattern.search, sheet.data_columns))
+            if matches:
+
+                results.append(ValidationResult(
+                    rule = self.name ,
+                    message = f'The sheet {sheet.data_sheet_name} has column names that appear to be labels instead of variables. Check the output for details.'
+                    ,severity = 'error'
+                    ,sheet_name = sheet.data_sheet_name
+                    , details= {sheet.data_sheet_name: matches}
+                    ))
+
         return results

@@ -131,8 +131,10 @@ class ExcelLoader:
                                                    or not u_mapped_name)))):
                 # sheets that are expected and loaded for further data validation
                 df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars() 
-                df = df.rename(str.lower)
+                # dont lower the columns as the caseing is needed for validation checks
                 df_columns = df.columns
+                df = df.rename(str.lower)
+                
 
                 schema_sheet = self.schema.get_schema_loaded_sheet(l_mapped_name)
                 if schema_sheet is not None:

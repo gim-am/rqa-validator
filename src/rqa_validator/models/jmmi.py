@@ -4,7 +4,7 @@ from .base import SheetMapping, ColumnMapping
 from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 
 from ..validators.sheet_validators import CrossSheetRowSumCheck, DuplicateSheetMatches,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
-from ..validators.column_validators import  PiiColumns, MandatoryColumns, UniqueColumn
+from ..validators.column_validators import  ColumnNameCheck, PiiColumns, MandatoryColumns, UniqueColumn
 from ..validators.data_validators import CleaningLog, NaNCheck, ConsentCheck
 from ..validators.base import BaseValidator
 
@@ -47,4 +47,5 @@ class JMMIDataset(BaseDataset):
             , CleaningLog(schema=schema)
             , NaNCheck(schema=schema)
             , ConsentCheck(schema=schema)
+            , ColumnNameCheck()
         ]

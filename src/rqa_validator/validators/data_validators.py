@@ -237,7 +237,7 @@ class NaNCheck(BaseValidator):
             nan_value_expressions = []
 
             # build expression to find possible invalid values or NaNs
-            for column in loaded_sheet.data_columns:
+            for column in loaded_sheet.data.columns:
 
                 expression = pl.any_horizontal(
                     (
@@ -252,7 +252,7 @@ class NaNCheck(BaseValidator):
             
             # get a df that has nan/invalid data in a row
             nan_df = loaded_sheet.data.with_columns(nan_value_expressions)
-            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in loaded_sheet.data_columns])
+            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in loaded_sheet.data.columns])
             nan_only_df = nan_df.filter(has_nan)
 
             output_rows = []
@@ -261,7 +261,7 @@ class NaNCheck(BaseValidator):
             if not nan_only_df.is_empty():
                 for row in nan_only_df.iter_rows(named=True):
                     uuid = row[id_column.data_column_name]
-                    for column in loaded_sheet.data_columns:
+                    for column in loaded_sheet.data.columns:
                         is_changed = row[f"is_{column}_nan_value"]
                         
                         if is_changed:
@@ -525,7 +525,7 @@ class CleaningLog(BaseValidator):
         # get a list of questions that had values changed
         questions = unique_modified_rows_df.select(question_column.data_column_name).unique().to_series().str.to_lowercase().to_list()
 
-        missing_quesitons = filter_list(questions, clean_data_loaded_sheet.data_columns)
+        missing_quesitons = filter_list(questions, clean_data_loaded_sheet.data.columns)
         if missing_quesitons:
             results.append(ValidationResult(
                 rule = self.name,
