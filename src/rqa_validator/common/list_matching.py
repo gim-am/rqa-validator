@@ -34,6 +34,8 @@ def match_list_to_list(source: List[str],
         tuple[list[str], List[FuzzMatch]: a list of literal matches, a list of fuzzy matches.
     """
 
+    
+
     if lower_values:
         l_source = list(map(str.lower, source))
         l_target = list(map(str.lower, target))
@@ -47,18 +49,22 @@ def match_list_to_list(source: List[str],
     if fuzzy_match:
         # only do fuzzy match for a column if there was no literal match
         for search_item in filter_list(l_source, literal_matches):
-            match_result = process.extractBests(query=search_item, 
-                                              choices=l_target, 
-                                              scorer= fuzz.WRatio,#settings.FUZZY_MATCH_SCORER,
-                                              score_cutoff = settings.MIN_FUZZY_MATCH_SCORE,
-                                              limit = fuzzy_match_limit)
+            # check if the items have a similar length
+            l_target_tolerance = filter_list_with_tolerance(search_item, l_target)
             
-            if match_result:
-                details = FuzzMatch(standard_name=search_item)
-                for match_item in match_result:
-                    details.matches[match_item[0]] = match_item[1]
+            if l_target_tolerance:
+                match_result = process.extractBests(query=search_item, 
+                                                choices=l_target_tolerance, 
+                                                scorer= fuzz.WRatio,#settings.FUZZY_MATCH_SCORER,
+                                                score_cutoff = settings.MIN_FUZZY_MATCH_SCORE,
+                                                limit = fuzzy_match_limit)
                 
-                fuzzy_matched_values.append(details)
+                if match_result:
+                    details = FuzzMatch(standard_name=search_item)
+                    for match_item in match_result:
+                        details.matches[match_item[0]] = match_item[1]
+                    
+                    fuzzy_matched_values.append(details)
     return literal_matches, fuzzy_matched_values
             
 def match_list(source: List, target: List) -> list:
@@ -66,14 +72,34 @@ def match_list(source: List, target: List) -> list:
     set_target = set(target)
     return [item for item in source if item in set_target]
 
-def unique_list(source: List):
+def unique_list(source: List) -> list[Any]:
     """returns a list of unique items"""
     return list(set(source))
 
 def filter_list(source: List, target: List) -> list:
     """Returns items in source that are not in target"""
-    set_target = set(target)  # this reduces the lookup time from O(n) to O(1)
+    set_target = set(target) 
     return [item for item in source if item not in set_target]
+
+def filter_list_with_tolerance(source: str, 
+                               target: List[str], 
+                               tolerance_ratio:float = settings.FUZZY_MATCH_STRING_LENGTH_RATIO) -> List[str]:
+    """ Filters a list based on a comparison between the string length
+    of source and items in a target list using a tolerance factor.
+    
+    So strings of a similar enough length will be returned but if the length
+    difference is too great then they will not be returned."""
+    def _check_length_tolerance(search_item: str, 
+                                target_item: str):
+        length_search_item = len(search_item)
+        length_target_item = len(target_item)
+        
+        ratio = min(length_target_item, length_search_item) / max(length_target_item, length_search_item)
+    
+        return ratio >= tolerance_ratio
+    
+    return [item for item in target if _check_length_tolerance(source, item)]
+
 def duplicate_list_items(source: List) -> list[Any]:
     """returns a list of items that appear in a list multiple times.
 
