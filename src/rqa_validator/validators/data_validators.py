@@ -9,7 +9,6 @@ from ..validators.base import ValidationResult, BaseValidator
 from ..loaders.excel_loader import ExcelLoaderData
 from config import settings
 
-
 class ConsentCheck(BaseValidator):
     """Checks that records in raw_data that did not provide consent are
     not present in clean_data"""
@@ -390,8 +389,8 @@ class CleaningLog(BaseValidator):
             return results  
         
         # make sure that the cleaning log has the columns needed
-        new_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_new_value_column)
-        if new_value_column is None:
+        cleaning_log_new_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_new_value_column)
+        if cleaning_log_new_value_column is None:
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'A column for {self.cleaning_log_new_value_column} is expected.'
@@ -400,8 +399,8 @@ class CleaningLog(BaseValidator):
             ))  
             return results 
         
-        old_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_old_value_column)
-        if old_value_column is None:
+        cleaning_log_old_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_old_value_column)
+        if cleaning_log_old_value_column is None:
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'A column for {self.cleaning_log_old_value_column} is expected.'
@@ -410,8 +409,8 @@ class CleaningLog(BaseValidator):
             ))  
             return results 
 
-        question_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_question_column)
-        if question_column is None:    
+        cleaning_log_question_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_question_column)
+        if cleaning_log_question_column is None:    
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'A column for {self.cleaning_log_question_column} is expected.'
@@ -479,14 +478,14 @@ class CleaningLog(BaseValidator):
         modified_rows_df = cleaning_log_loaded_sheet.data.filter(pl.col(cleaning_log_change_type_column.data_column_name) \
                                                                  .str.to_lowercase().is_in(schema_change_type_values.values) ) \
                                                         .select([cleaning_log_id_column.data_column_name,
-                                                                  new_value_column.data_column_name,
-                                                                  old_value_column.data_column_name,
+                                                                  cleaning_log_new_value_column.data_column_name,
+                                                                  cleaning_log_old_value_column.data_column_name,
                                                                   cleaning_log_change_type_column.data_column_name,
-                                                                  question_column.data_column_name]) 
+                                                                  cleaning_log_question_column.data_column_name]) 
                                                                     
         # racods where the same question was updated more than once for the same id
         multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name, 
-                                                       question_column.data_column_name, 
+                                                       cleaning_log_question_column.data_column_name, 
                                                        ).is_duplicated()
         
         multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
@@ -503,15 +502,15 @@ class CleaningLog(BaseValidator):
             ))
 
         # scan cleaning log for old value = new value
-        same_value_df = modified_rows_df.filter(pl.col(new_value_column.data_column_name).cast(pl.Utf8) == pl.col(old_value_column.data_column_name).cast(pl.Utf8)) \
+        same_value_df = modified_rows_df.filter(pl.col(cleaning_log_new_value_column.data_column_name).cast(pl.Utf8) == pl.col(cleaning_log_old_value_column.data_column_name).cast(pl.Utf8)) \
                                                         .select(cleaning_log_id_column.data_column_name,
-                                                                new_value_column.data_column_name,
-                                                                old_value_column.data_column_name,
+                                                                cleaning_log_new_value_column.data_column_name,
+                                                                cleaning_log_old_value_column.data_column_name,
                                                                 cleaning_log_change_type_column.data_column_name)
         if same_value_df.height > 0:
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'{same_value_df.height} row/s had {old_value_column.data_column_name} equal {new_value_column.data_column_name}. Check the output file {multiple_changes_filename} for details.'
+                message = f'{same_value_df.height} row/s had {cleaning_log_old_value_column.data_column_name} equal {cleaning_log_new_value_column.data_column_name}. Check the output file {multiple_changes_filename} for details.'
                 ,severity = 'warning'
                 ,details = same_value_df.to_dict()
             ))  
@@ -523,7 +522,7 @@ class CleaningLog(BaseValidator):
         if unique_modified_rows_df.height < 1:
             return results
         # get a list of questions that had values changed
-        questions = unique_modified_rows_df.select(question_column.data_column_name).unique().to_series().str.to_lowercase().to_list()
+        questions = unique_modified_rows_df.select(cleaning_log_question_column.data_column_name).unique().to_series().str.to_lowercase().to_list()
 
         missing_quesitons = filter_list(questions, clean_data_loaded_sheet.data.columns)
         if missing_quesitons:
@@ -543,12 +542,12 @@ class CleaningLog(BaseValidator):
         # while all other other questions will be null
         # fill null with '' to make comparison easier later
         unique_modified_rows_df = unique_modified_rows_df.with_columns(pl.lit(True).alias('is_update')) \
-                                                        .with_columns(pl.col(new_value_column.data_column_name).fill_null(''))
+                                                        .with_columns(pl.col(cleaning_log_new_value_column.data_column_name).fill_null(''))
         
         # pivot the table for use later. lower the questions/column names.
-        unique_modified_rows_df = unique_modified_rows_df.pivot(on=question_column.data_column_name,
+        unique_modified_rows_df = unique_modified_rows_df.pivot(on=cleaning_log_question_column.data_column_name,
                                                       index=cleaning_log_id_column.data_column_name, 
-                                                      values=[new_value_column.data_column_name, 'is_update']) \
+                                                      values=[cleaning_log_new_value_column.data_column_name, 'is_update']) \
                                                       .rename(str.lower)
         # rename for later
         unique_modified_rows_df = unique_modified_rows_df.rename({f"new_value_{q}": f"{q}_val" 
