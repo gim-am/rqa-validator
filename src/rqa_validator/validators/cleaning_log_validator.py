@@ -319,24 +319,24 @@ class CleaningLog(BaseValidator):
                                 f"{cleaning_log_old_value_column.data_column_name}": str(old_val),
                                 F"{cleaning_log_new_value_column.data_column_name}": str(new_val)
                             })
-            # difference between raw and clean
-            difference_raw_to_clean_df = pl.DataFrame(output_rows, infer_schema_length=None)
+                # difference between raw and clean
+                difference_raw_to_clean_df = pl.DataFrame(output_rows, infer_schema_length=None)
 
-            # difference between above and cleaning log
-            difference_df = difference_raw_to_clean_df.join(other=modified_rows_df,
-                                                            how='anti',
-                                                            left_on='uuid',
-                                                            right_on=cleaning_log_id_column.data_column_name)
-            
-            if difference_df.height > 0:
-                # df_to_csv(data=difference_df, filename=validation_results_filename)
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'There were {difference_df.height} differences found in the {self.clean_data_sheet} sheet that were not reflected in the {self.cleaning_log_sheet} sheet. Check the output for details.'
-                    ,severity = 'error'
-                    ,sheet_name=self.cleaning_log_sheet
-                    , details=difference_df.to_dict()
-                ))
+                # difference between above and cleaning log
+                difference_df = difference_raw_to_clean_df.join(other=modified_rows_df,
+                                                                how='anti',
+                                                                left_on='uuid',
+                                                                right_on=cleaning_log_id_column.data_column_name)
+                
+                if difference_df.height > 0:
+                    # df_to_csv(data=difference_df, filename=validation_results_filename)
+                    results.append(ValidationResult(
+                        rule = self.name,
+                        message = f'There were {difference_df.height} differences found in the {self.clean_data_sheet} sheet that were not reflected in the {self.cleaning_log_sheet} sheet. Check the output for details.'
+                        ,severity = 'error'
+                        ,sheet_name=self.cleaning_log_sheet
+                        , details=difference_df.to_dict()
+                    ))
 
 
         def _compare_log_to_clean(self):           
@@ -396,6 +396,10 @@ class CleaningLog(BaseValidator):
                     ,severity = 'Warning'
                 ))
                 questions = filter_list(questions, missing_quesitons)
+                if len(questions) < 1:
+                    # if no valid questions left to check
+                    return results
+                
                 # return results
 
             # add column to specifiy an update. this helps to specify which
@@ -495,6 +499,7 @@ class CleaningLog(BaseValidator):
                 ))
 
         _compare_log_to_clean(self)
+
         _compare_raw_to_clean_to_log(self)
 
         return results
