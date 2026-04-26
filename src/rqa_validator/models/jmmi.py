@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+from ..validators.cleaning_log_validator import CleaningLog
+
 from .base import SheetMapping, ColumnMapping
 from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 
 from ..validators.sheet_validators import CrossSheetRowSumCheck, DuplicateSheetMatches,UnexpectedSheets, MissingSheets, CrossSheetIdCheck
 from ..validators.column_validators import  ColumnNameCheck, PiiColumns, MandatoryColumns, UniqueColumn
-from ..validators.data_validators import CleaningLog, NaNCheck, ConsentCheck
+from ..validators.data_validators import NaNCheck, ConsentCheck
 from ..validators.base import BaseValidator
 
 from typing import List
