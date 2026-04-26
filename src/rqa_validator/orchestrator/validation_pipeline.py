@@ -6,6 +6,8 @@ from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDataset
 from ..validators.base import ValidationResult
 
+from ..models.test_model import TestModelDataset
+
 
 class ValidationPipeline:
     def __init__(self, dataset_type: str):
@@ -21,6 +23,9 @@ class ValidationPipeline:
         if self.dataset_type == "jmmi":
             self.schema = JMMIDataset.get_schema()
             self.validators = JMMIDataset.get_validators(schema=self.schema)
+        elif self.dataset_type == "testmodel":
+            self.schema = TestModelDataset.get_schema()
+            self.validators = TestModelDataset.get_validators(schema=self.schema)
         else:
             raise ValueError(f"Unknown dataset type: {self.dataset_type}")
         
