@@ -1,8 +1,8 @@
-from rqa_validator.common.list_matching import match_sheet_columns
-from rqa_validator.common.schema_matching import get_matching_unique_columns
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.base import BaseValidator, ValidationResult
+from ...common.list_matching import match_sheet_columns
+from ...common.schema_matching import get_matching_unique_columns
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, ValidationResult
 
 
 from typing import List

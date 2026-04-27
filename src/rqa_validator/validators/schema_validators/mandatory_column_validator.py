@@ -1,6 +1,6 @@
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.base import BaseValidator, ValidationResult
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, ValidationResult
 
 
 from typing import List

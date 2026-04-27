@@ -1,6 +1,6 @@
-from rqa_validator.common.list_matching import duplicate_list_items
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.validators.base import BaseValidator, ValidationResult
+from ...common.list_matching import duplicate_list_items
+from ...loaders.excel_loader import ExcelLoaderData
+from ...validators.base import BaseValidator, ValidationResult
 
 
 from typing import List

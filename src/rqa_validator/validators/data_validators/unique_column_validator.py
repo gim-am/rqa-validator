@@ -1,7 +1,7 @@
-from rqa_validator.common.file_export import df_to_csv
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.base import BaseValidator, ValidationResult
+from ...common.file_export import df_to_csv
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, ValidationResult
 
 
 import polars as pl

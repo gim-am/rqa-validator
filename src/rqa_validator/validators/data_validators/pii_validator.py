@@ -1,9 +1,9 @@
 from config import settings
-from rqa_validator.common.list_matching import match_list_to_list
-from rqa_validator.loaders.base import ColumnMap
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.validators.base import BaseValidator, ValidationResult
-from rqa_validator.validators.config import get_pii_columns
+from ...common.list_matching import match_list_to_list
+from ...loaders.base import ColumnMap
+from ...loaders.excel_loader import ExcelLoaderData
+from ...validators.base import BaseValidator, ValidationResult
+from ...validators.config import get_pii_columns
 
 
 import polars as pl

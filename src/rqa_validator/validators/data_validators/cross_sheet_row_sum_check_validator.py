@@ -1,5 +1,5 @@
-from rqa_validator.loaders.excel_loader import ExcelLoaderData
-from rqa_validator.validators.base import BaseValidator, ValidationResult
+from ...loaders.excel_loader import ExcelLoaderData
+from ...validators.base import BaseValidator, ValidationResult
 
 
 from dataclasses import dataclass
