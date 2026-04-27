@@ -4,7 +4,7 @@ import polars as pl
 from rqa_validator.models.base import SheetMapping, ColumnMapping
 from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.sheet_validators import CrossSheetIdCheck
+from rqa_validator.validators.data_validators.cross_sheet_id_check_validator import CrossSheetIdCheck
 from rqa_validator.validators.base import BaseValidator
 
 @pytest.fixture

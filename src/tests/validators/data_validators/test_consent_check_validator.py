@@ -4,7 +4,7 @@ import polars as pl
 from rqa_validator.models.base import  ProcessValueMap, SheetMapping, ColumnMapping
 from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.data_validators import ConsentCheck
+from rqa_validator.validators.data_validators.consent_check_validator import ConsentCheck
 from rqa_validator.validators.base import BaseValidator
 
 @pytest.fixture

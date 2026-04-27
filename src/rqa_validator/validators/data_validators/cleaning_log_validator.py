@@ -1,10 +1,10 @@
-from ..common.file_export import df_to_csv
-from ..common.list_matching import filter_list, match_list, match_sheet_columns
-from ..common.schema_matching import get_matching_unique_columns
-from ..common.expression_builder import create_column_difference_expression
-from ..loaders.excel_loader import ExcelLoaderData
-from ..models.base_dataset import BaseDatasetSchema
-from ..validators.base import BaseValidator, ValidationResult
+from ...common.file_export import df_to_csv
+from ...common.list_matching import filter_list, match_list, match_sheet_columns
+from ...common.schema_matching import get_matching_unique_columns
+from ...common.expression_builder import create_column_difference_expression
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ..base import BaseValidator, ValidationResult
 
 
 import polars as pl
@@ -273,6 +273,7 @@ class CleaningLog(BaseValidator):
             clean_data_columns = filter_list(match_list(clean_data_loaded_sheet.data.columns, 
                                                                 raw_data_loaded_sheet.data.columns), 
                                             [clean_data_id_columns.data_column_name])
+                                            
             clean_data_filtered_df = clean_data_loaded_sheet.data.select([clean_data_id_columns.data_column_name] + clean_data_columns)
             raw_data_filtered_df = raw_data_loaded_sheet.data.select([raw_data_id_columns.data_column_name] + clean_data_columns) \
                                                             .rename({f"{q}": f"{q}_original_value"

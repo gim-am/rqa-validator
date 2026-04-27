@@ -4,7 +4,7 @@ import polars as pl
 
 
 from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
-from rqa_validator.validators.column_validators import ColumnNameCheck
+from rqa_validator.validators.schema_validators.column_name_validator import ColumnNameCheck
 from rqa_validator.validators.base import BaseValidator
 
 

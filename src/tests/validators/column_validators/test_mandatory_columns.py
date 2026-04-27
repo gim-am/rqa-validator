@@ -6,7 +6,7 @@ from rqa_validator.models.base import SheetMapping, ColumnMapping
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 
 from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
-from rqa_validator.validators.column_validators import MandatoryColumns
+from rqa_validator.validators.schema_validators.mandatory_column_validator import MandatoryColumns
 from rqa_validator.validators.base import BaseValidator
 
 @pytest.fixture

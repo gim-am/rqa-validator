@@ -4,7 +4,7 @@ import polars as pl
 from rqa_validator.models.base import SheetMapping, ColumnMapping
 from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.sheet_validators import MissingSheets
+from rqa_validator.validators.schema_validators.missing_sheets_validator import MissingSheets
 from rqa_validator.validators.base import BaseValidator
 
 

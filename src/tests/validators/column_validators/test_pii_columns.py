@@ -3,7 +3,7 @@ import polars as pl
 
 from rqa_validator.loaders.base import ColumnMap
 from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
-from rqa_validator.validators.column_validators import PiiColumns
+from rqa_validator.validators.data_validators.pii_validator import PiiColumns
 from rqa_validator.validators.base import BaseValidator
 
 

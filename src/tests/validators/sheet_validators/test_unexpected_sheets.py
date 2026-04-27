@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
-from rqa_validator.validators.sheet_validators import UnexpectedSheets
+from rqa_validator.validators.schema_validators.unexpected_sheets_validator import UnexpectedSheets
 from rqa_validator.validators.base import BaseValidator
 
 @pytest.fixture

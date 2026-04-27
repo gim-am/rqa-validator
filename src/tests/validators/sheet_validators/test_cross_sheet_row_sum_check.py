@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
-from rqa_validator.validators.sheet_validators import CrossSheetRowSumCheck
+from rqa_validator.validators.data_validators.cross_sheet_row_sum_check_validator import CrossSheetRowSumCheck
 from rqa_validator.validators.base import BaseValidator
 
 @pytest.fixture
