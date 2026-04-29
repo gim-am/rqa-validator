@@ -81,11 +81,11 @@ class CrossSheetIdCheck(BaseValidator):
             if not child_matching_columns:
                 # some sheets will have a non unique uuid column so try to match based on name
                 
-                result, matching_columns = get_matching_id_columns(child_loaded_sheet.column_map, child_loaded_sheet.data_sheet_name, [master_matching_columns], self.master_sheet, self.name)
+                result, child_matching_columns = get_matching_id_columns(child_loaded_sheet.column_map, child_loaded_sheet.data_sheet_name, [master_matching_columns], self.master_sheet, self.name)
                 if result is not None:
                     results.append(result)
                     continue
-                assert matching_columns is not None                
+                assert child_matching_columns is not None                
 
             child_matching_columns = child_matching_columns[0]
 
