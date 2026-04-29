@@ -42,9 +42,13 @@ class SheetMapping:
         for column in self.mandatory_columns:
             if column.standard_name == column_name:
                 return column
-    
+            
+    def get_column_standard_names(self):
+        """Gets the standard names for all mandatory columns."""
+        return [item.standard_name for item in self.mandatory_columns]
     
     def get_unique_columns(self) -> List[ColumnMapping]:
+        """Gets all the columns markes as unique"""
         return [column for column in self.mandatory_columns if column.is_unique]
     
     def matches(self, sheet_name: str)  -> bool:

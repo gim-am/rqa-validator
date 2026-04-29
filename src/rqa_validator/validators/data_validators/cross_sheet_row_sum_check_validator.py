@@ -1,3 +1,5 @@
+from ...validators.helpers import get_data_loaded_sheets
+
 from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, ValidationResult
 
@@ -42,37 +44,29 @@ class CrossSheetRowSumCheck(BaseValidator):
 
         child_counts: List[ChildCounts] = []
 
-        master_data = data.get_loaded_sheet(self.master_sheet)
-        if master_data:
-            master_data_count = master_data.data.height
-        else:
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=[self.master_sheet, 
+                                                                    *self.child_sheets],
+                                                        rule=self.name)
+
+        if result:
+            results.extend(result)
+            return results
+       
+        master_data_count = data_loaded_sheets[self.master_sheet].data.height
+
+        for sheet in self.child_sheets:  
+            child_counts.append(ChildCounts(sheet_name=sheet,
+                                            row_count=data_loaded_sheets[sheet].data.height))
+       
+        child_sum = sum([item.row_count for item in child_counts])
+        missing_rows: int = abs(child_sum - master_data_count)
+        if missing_rows > 0:
+            child_message = ' and '.join([f'{item.sheet_name} ({item.row_count})'for item in child_counts])
             results.append(ValidationResult(
                 rule = self.name,
-                message = f'A sheet for {self.master_sheet} was not found. This sheet is required for checking data counts.'
+                message = f'Sum of row counts for sheets {child_message} does not equal {self.master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
                 ,severity = 'error'
-            ))
-
-        for sheet in self.child_sheets:
-            child_data = data.get_loaded_sheet(sheet)
-            if child_data:
-                child_counts.append(ChildCounts(sheet_name=sheet,
-                                                row_count=child_data.data.height))
-            else:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A sheet for {sheet} was not found. This sheet is required for checking data counts.'
-                    ,severity = 'error'
-                ))
-
-        if not results:
-            child_sum = sum([item.row_count for item in child_counts])
-            missing_rows: int = abs(child_sum - master_data_count)
-            if missing_rows > 0:
-                child_message = ' and '.join([f'{item.sheet_name} ({item.row_count})'for item in child_counts])
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'Sum of row counts for sheets {child_message} does not equal {self.master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
-                    ,severity = 'error'
-            ))
+        ))
 
         return results

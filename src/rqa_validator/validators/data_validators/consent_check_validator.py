@@ -1,4 +1,5 @@
-from ...common.schema_matching import get_matching_unique_columns
+from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheets, get_data_sheet_ids, get_schema_loaded_column, get_schema_loaded_sheets, get_schema_process_value
+
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
@@ -47,120 +48,78 @@ class ConsentCheck(BaseValidator):
         """
         results: List[ValidationResult] = []
 
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=[self.clean_data_sheet,
+                                                                    self.raw_data_sheet],
+                                                        rule=self.name)
 
-        loaded_raw_data_sheet = data.get_loaded_sheet(self.raw_data_sheet)
-
-        if loaded_raw_data_sheet is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'An excel sheet for {self.raw_data_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.raw_data_sheet
-            ))
+        if result:
+            results.extend(result)
             return results
+        
+        result, data_loaded_columns = get_data_loaded_columns(data = {self.schema_consent_column : data_loaded_sheets[self.raw_data_sheet]},
+                                                        rule=self.name)
 
-        loaded_clean_data_sheet = data.get_loaded_sheet(self.clean_data_sheet)
-
-        if loaded_clean_data_sheet is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'An excel sheet for {self.clean_data_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.clean_data_sheet
-            ))
+        if result:
+            results.extend(result)
             return results
+        
+        result, schema_loaded_sheets = get_schema_loaded_sheets(schema=self.schema, 
+                                                       sheet_names=[self.raw_data_sheet],
+                                                        rule=self.name)
 
-        consent_column = loaded_raw_data_sheet.get_column_map(self.schema_consent_column)
+        if result:
+            results.extend(result)
+            return results       
 
-        if consent_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.schema_consent_column} in excel sheet {loaded_raw_data_sheet.data_sheet_name} is expected.'
-                ,severity = 'error'
-                ,sheet_name=loaded_raw_data_sheet.data_sheet_name
-            ))
+
+        result, schema_consent_column = get_schema_loaded_column(schema_loaded_sheets[self.raw_data_sheet], data_loaded_columns[self.schema_consent_column].schema_column_name, self.name )
+        if result is not None:
+            results.append(result)
             return results
-
-        schema_sheet = self.schema.get_schema_loaded_sheet(self.raw_data_sheet)
-
-        if schema_sheet is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A schema sheet for {self.raw_data_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.raw_data_sheet
-            ))
+        
+        assert schema_consent_column is not None  
+        
+        
+        result, consent_values = get_schema_process_value(self.process_value_map_name, 
+                                                          self.raw_data_sheet, 
+                                                          schema_consent_column,
+                                                            self.name)
+        if result is not None:
+            results.append(result)
             return results
+        
+        assert consent_values is not None  
 
-        schema_consent_column = schema_sheet.get_column(consent_column.schema_column_name)
 
-        if schema_consent_column is None:
-            # should not actually happen as its already mapped above.
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {consent_column.schema_column_name} in schema sheet {self.raw_data_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.raw_data_sheet
-            ))
-            return results
+        result, data_sheet_ids = get_data_sheet_ids(schema=self.schema, 
+                                                       data = {self.clean_data_sheet: data_loaded_sheets[self.clean_data_sheet],
+                                                               self.raw_data_sheet: data_loaded_sheets[self.raw_data_sheet]},
+                                                        rule=self.name)
+        
+        if result:
+            results.extend(result)
+            return results 
 
-        consent_values = schema_consent_column.get_process_values(self.process_value_map_name)
 
-        if consent_values is None or len(consent_values.values) == 0:
-            results.append(ValidationResult(
-            rule = self.name,
-            message = f'process_values were expected for column {consent_column.schema_column_name} for process {self.process_value_map_name}.'
-            ,severity = 'error'
-            , sheet_name= self.raw_data_sheet
-            , column_name=consent_column.schema_column_name
-            ))
-            return results
-
-        # get id column for the output dataframe
-        raw_data_id_column = get_matching_unique_columns(schema=self.schema,
-                                            loaded_data=loaded_raw_data_sheet,
-                                            sheet_name=self.raw_data_sheet)
-
-        if len(raw_data_id_column) != 1:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A single unique column for schema sheet {self.raw_data_sheet} and matching excel sheet {loaded_raw_data_sheet.data_sheet_name} was expected.'
-                ,severity = 'error'
-                ,sheet_name=self.raw_data_sheet
-            ))
-            return results
-
-        clean_data_id_column = get_matching_unique_columns(schema=self.schema,
-                                            loaded_data=loaded_clean_data_sheet,
-                                            sheet_name=self.clean_data_sheet)
-
-        if len(clean_data_id_column) != 1:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A single unique column for schema sheet {self.clean_data_sheet} and matching excel sheet {loaded_clean_data_sheet.data_sheet_name} was expected.'
-                ,severity = 'error'
-                ,sheet_name=self.clean_data_sheet
-            ))
-            return results
-
-        raw_data_id_column = raw_data_id_column[0]
-        clean_data_id_column = clean_data_id_column[0]
+        raw_data_id_column = data_sheet_ids[self.raw_data_sheet][0]
+        clean_data_id_column = data_sheet_ids[self.clean_data_sheet][0]
 
         # get records that have not provided consent
-        raw_data_filter_df = loaded_raw_data_sheet.data.filter(~pl.col(consent_column.data_column_name).str.to_lowercase()
+        raw_data_filter_df = data_loaded_sheets[self.raw_data_sheet].data.filter(~pl.col(data_loaded_columns[self.schema_consent_column].data_column_name).str.to_lowercase()
                                                 .is_in(consent_values.values)) \
-                                        .select([raw_data_id_column.data_column_name, consent_column.data_column_name])
+                                        .select([raw_data_id_column.data_column_name, data_loaded_columns[self.schema_consent_column].data_column_name])
 
         if raw_data_filter_df.height > 0:
             # join to clean_data to see if clean_data contains any of the records
-            clean_data_filter_df = loaded_clean_data_sheet.data.join(other=raw_data_filter_df,
+            clean_data_filter_df = data_loaded_sheets[self.clean_data_sheet].data.join(other=raw_data_filter_df,
                                                                      left_on=clean_data_id_column.data_column_name,
                                                                      right_on=raw_data_id_column.data_column_name,
                                                                      how='inner')
             if clean_data_filter_df.height > 0:
                 results.append(ValidationResult(
                 rule = self.name,
-                message = f'There were {clean_data_filter_df.height} row/s in {loaded_clean_data_sheet.data_sheet_name} that did not provide consent. Check the output results for details.'
+                message = f'There were {clean_data_filter_df.height} row/s in {data_loaded_sheets[self.clean_data_sheet].data_sheet_name} that did not provide consent. Check the output results for details.'
                 ,severity = 'error'
                 ,details=clean_data_filter_df.select([clean_data_id_column.data_column_name]).to_dict()
             ))

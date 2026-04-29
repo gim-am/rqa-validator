@@ -1,5 +1,5 @@
 from config import settings
-from ...common.schema_matching import get_matching_unique_columns
+from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
@@ -48,45 +48,33 @@ class NaNCheck(BaseValidator):
                 pl.Series("column",[], dtype=pl.String),
                 pl.Series("value",[], dtype=pl.String)
             ])
+        
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=self.sheets,
+                                                        rule=self.name)
 
-        for sheet in self.sheets:
-            loaded_sheet = data.get_loaded_sheet(sheet)
+        if result:
+            results.extend(result)
+            return results
+        
+        result, sheet_ids = get_data_sheet_ids(self.schema, data_loaded_sheets, self.name)
+        if result:
+            results.extend(result)
+            return results
 
-            if loaded_sheet is None:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A sheet for {sheet} is expected.'
-                    ,severity = 'error'
-                    ,sheet_name=sheet
-                ))
-                continue
 
-            # get id column for the output dataframe
-            id_column = get_matching_unique_columns(schema=self.schema,
-                                              loaded_data=loaded_sheet,
-                                              sheet_name=sheet)
-
-            if len(id_column) != 1:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A single unique column for schema sheet {sheet} and matching excel sheet {loaded_sheet.data_sheet_name} was expected.'
-                    ,severity = 'error'
-                    ,sheet_name=sheet
-                ))
-                continue
-
-            id_column = id_column[0]
+        for sheet in self.sheets:     
 
             nan_value_expressions = []
 
             # build expression to find possible invalid values or NaNs
-            for column in loaded_sheet.data.columns:
+            for column in data_loaded_sheets[sheet].data.columns:
 
                 expression = pl.any_horizontal(
                     (
-                        (pl.col(column).is_nan() | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES))) if loaded_sheet.data.schema[column].is_float() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES) ) if loaded_sheet.data.schema[column].is_integer() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_STRING_VALUES) ) if loaded_sheet.data.schema[column] == pl.String else pl.lit(False)
+                        (pl.col(column).is_nan() | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES))) if data_loaded_sheets[sheet].data.schema[column].is_float() else False
+                        | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES) ) if data_loaded_sheets[sheet].data.schema[column].is_integer() else False
+                        | (pl.col(column).is_in( settings.NANCHECK_STRING_VALUES) ) if data_loaded_sheets[sheet].data.schema[column] == pl.String else pl.lit(False)
 
                     ).alias(f"is_{column}_nan_value")
 
@@ -94,8 +82,8 @@ class NaNCheck(BaseValidator):
                 nan_value_expressions.append(expression)
 
             # get a df that has nan/invalid data in a row
-            nan_df = loaded_sheet.data.with_columns(nan_value_expressions)
-            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in loaded_sheet.data.columns])
+            nan_df = data_loaded_sheets[sheet].data.with_columns(nan_value_expressions)
+            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in data_loaded_sheets[sheet].data.columns])
             nan_only_df = nan_df.filter(has_nan)
 
             output_rows = []
@@ -103,8 +91,8 @@ class NaNCheck(BaseValidator):
             # create df of only invalid data
             if not nan_only_df.is_empty():
                 for row in nan_only_df.iter_rows(named=True):
-                    uuid = row[id_column.data_column_name]
-                    for column in loaded_sheet.data.columns:
+                    uuid = row[sheet_ids[sheet][0].data_column_name]
+                    for column in data_loaded_sheets[sheet].data.columns:
                         is_changed = row[f"is_{column}_nan_value"]
 
                         if is_changed:

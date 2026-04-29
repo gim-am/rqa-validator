@@ -1,10 +1,14 @@
 from ...common.file_export import df_to_csv
-from ...common.list_matching import filter_list, match_list, match_sheet_columns
-from ...common.schema_matching import get_matching_unique_columns
+from ...common.list_matching import filter_list, match_list
 from ...common.expression_builder import create_column_difference_expression
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ..base import BaseValidator, ValidationResult
+from ..helpers import (get_data_loaded_columns, 
+                       get_data_loaded_sheets, 
+                       get_data_sheet_ids, 
+                       get_matching_id_columns, 
+                       get_schema_loaded_sheets, get_schema_process_value)
 
 
 import polars as pl
@@ -95,187 +99,98 @@ class CleaningLog(BaseValidator):
 
         # PRE-VALIDATION - check sheets, columns etc all exist
 
-        clean_data_loaded_sheet = data.get_loaded_sheet(self.clean_data_sheet)
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=[self.clean_data_sheet,
+                                                                    self.raw_data_sheet, 
+                                                                    self.cleaning_log_sheet],
+                                                        rule=self.name)
 
-        if not clean_data_loaded_sheet:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {self.clean_data_sheet} is expected.'
-                ,severity = 'error'
-            ))
+        if result:
+            results.extend(result)
             return results
         
-        raw_data_loaded_sheet = data.get_loaded_sheet(self.raw_data_sheet)
+        result, schema_loaded_sheets = get_schema_loaded_sheets(schema=self.schema, 
+                                                       sheet_names=[self.cleaning_log_sheet],
+                                                        rule=self.name)
 
-        if not raw_data_loaded_sheet:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {self.raw_data_sheet} is expected.'
-                ,severity = 'error'
-            ))
-            return results
-
-        cleaning_log_schema_sheet = self.schema.get_schema_loaded_sheet(self.cleaning_log_sheet)
-        if not cleaning_log_schema_sheet:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A schema sheet for {self.cleaning_log_sheet} is expected.'
-                ,severity = 'error'
-            ))
-            return results
-
-        # get id column
-        clean_data_sheet_ids = get_matching_unique_columns(self.schema, clean_data_loaded_sheet, self.clean_data_sheet)
-
-        if not clean_data_sheet_ids:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A unique id column for {clean_data_loaded_sheet.data_sheet_name} is expected but none were found.'
-                ,severity = 'error'
-                , sheet_name =  clean_data_loaded_sheet.data_sheet_name
-                # , column_name = ', '.join(master_matching_columns)
-            ))
+        if result:
+            results.extend(result)
             return results
         
-        raw_data_sheet_ids = get_matching_unique_columns(self.schema, raw_data_loaded_sheet, self.raw_data_sheet)
+        result, data_sheet_ids = get_data_sheet_ids(schema=self.schema, 
+                                                       data = {self.clean_data_sheet: data_loaded_sheets[self.clean_data_sheet],
+                                                               self.raw_data_sheet: data_loaded_sheets[self.raw_data_sheet]},
+                                                        rule=self.name)
 
-        if not raw_data_sheet_ids:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A unique id column for {raw_data_loaded_sheet.data_sheet_name} is expected but none were found.'
-                ,severity = 'error'
-                , sheet_name =  raw_data_loaded_sheet.data_sheet_name
-                # , column_name = ', '.join(master_matching_columns)
-            ))
+        if result:
+            results.extend(result)
+            return results
+        
+        result, clean_to_log_matching_id_columns = get_matching_id_columns(data_sheet_ids[self.clean_data_sheet], self.clean_data_sheet, data_loaded_sheets[self.cleaning_log_sheet].column_map, self.cleaning_log_sheet, self.name)
+        if result is not None:
+            results.append(result)
+            return results
+        
+        assert clean_to_log_matching_id_columns is not None  
+
+        clean_data_id_columns = clean_to_log_matching_id_columns[0]
+
+        result, raw_to_clean_matching_id_columns = get_matching_id_columns(data_sheet_ids[self.raw_data_sheet], self.raw_data_sheet, data_loaded_sheets[self.clean_data_sheet] .column_map, self.clean_data_sheet, self.name)
+        if result is not None:
+            results.append(result)
+            return results
+        
+        assert raw_to_clean_matching_id_columns is not None  
+
+        raw_data_id_columns = raw_to_clean_matching_id_columns[0]
+        
+        result, data_loaded_columns = get_data_loaded_columns(data = {self.cleaning_log_new_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                                                                      self.cleaning_log_old_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                                                                      self.cleaning_log_question_column: data_loaded_sheets[self.cleaning_log_sheet],
+                                                                      self.cleaning_log_change_type_column: data_loaded_sheets[self.cleaning_log_sheet],
+                                                                      clean_data_id_columns.schema_column_name: data_loaded_sheets[self.cleaning_log_sheet]},
+                                                        rule=self.name)
+
+        if result:
+            results.extend(result)
             return results
 
-        cleaning_log_loaded_sheet = data.get_loaded_sheet(self.cleaning_log_sheet)
-        # wont have a unique column as ids can have multiple updates in the log
-        if not cleaning_log_loaded_sheet:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {self.cleaning_log_sheet} is expected.'
-                ,severity = 'error'
-            ))
-            return results
-
-        # make sure that the cleaning log has the columns needed
-        cleaning_log_new_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_new_value_column)
-        if cleaning_log_new_value_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.cleaning_log_new_value_column} is expected.'
-                ,severity = 'error'
-                , sheet_name= self.cleaning_log_sheet
-            ))
-            return results
-
-        cleaning_log_old_value_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_old_value_column)
-        if cleaning_log_old_value_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.cleaning_log_old_value_column} is expected.'
-                ,severity = 'error'
-                , sheet_name= self.cleaning_log_sheet
-            ))
-            return results
-
-        cleaning_log_question_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_question_column)
-        if cleaning_log_question_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.cleaning_log_question_column} is expected.'
-                ,severity = 'error'
-                , sheet_name= self.cleaning_log_sheet
-            ))
-            return results
-
-        cleaning_log_change_type_column = cleaning_log_loaded_sheet.get_column_map(self.cleaning_log_change_type_column)
-        if cleaning_log_change_type_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.cleaning_log_change_type_column} is expected.'
-                ,severity = 'error'
-                , sheet_name= self.cleaning_log_sheet
-            ))
-            return results
-
-
-        schema_change_type_column = cleaning_log_schema_sheet.get_column(self.cleaning_log_change_type_column)
+        schema_change_type_column = schema_loaded_sheets[self.cleaning_log_sheet].get_column(self.cleaning_log_change_type_column)
         if schema_change_type_column is None:
             # this should already have been validated when checking mandatory columns
             return results
-
-        schema_change_type_values = schema_change_type_column.get_process_values(self.process_value_map_name)
-
-        if schema_change_type_values is None or len(schema_change_type_values.values) == 0:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'process_values were expected for column {self.cleaning_log_change_type_column} for process {self.process_value_map_name}.'
-                ,severity = 'error'
-                , sheet_name= self.cleaning_log_sheet
-                , column_name=self.cleaning_log_change_type_column
-            ))
-            return results
-
-        clean_to_log_matching_id_columns = match_sheet_columns(clean_data_sheet_ids, cleaning_log_loaded_sheet.column_map)
-        # should only be one matching id column between the sheets.
-        if len(clean_to_log_matching_id_columns) != 1:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'Expected 1 linkable ID column for sheets {self.clean_data_sheet} and {self.cleaning_log_sheet} but {len(clean_to_log_matching_id_columns)} were found.'
-                ,severity = 'error'
-            ))
-            return results
-
-        clean_data_id_columns = clean_to_log_matching_id_columns[0]
         
-        cleaning_log_id_column = cleaning_log_loaded_sheet.get_column_map(clean_data_id_columns.schema_column_name)
-
-        if cleaning_log_id_column is None:
-            # should not happen as it was just matched/checked
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'Expected to find a column for {clean_data_id_columns.schema_column_name} in sheet {self.cleaning_log_sheet} but none was found.'
-                ,severity = 'error'
-            ))
+        result, schema_change_type_values = get_schema_process_value(self.process_value_map_name, self.cleaning_log_sheet, schema_change_type_column, self.name)
+        if result is not None:
+            results.append(result)
             return results
         
-        raw_to_clean_matching_id_columns = match_sheet_columns(raw_data_sheet_ids, clean_data_loaded_sheet.column_map)
-        # should only be one matching id column between the sheets.
-        if len(raw_to_clean_matching_id_columns) != 1:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'Expected 1 linkable ID column for sheets {self.clean_data_sheet} and {self.raw_data_sheet} but {len(raw_to_clean_matching_id_columns)} were found.'
-                ,severity = 'error'
-            ))
-            return results
-
-        raw_data_id_columns = raw_to_clean_matching_id_columns[0]
+        assert schema_change_type_values is not None  
+        
 
         # TRANSFORMATION: transforms data in preparation for comparison   
             # the two processes are stored in seperate functions just to
             # make distinguishing the logic between them easier
          # dataframe of actual changes made
-        modified_rows_df = cleaning_log_loaded_sheet.data.filter(pl.col(cleaning_log_change_type_column.data_column_name) \
+        modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet] .data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
                                                                     .str.to_lowercase().is_in(schema_change_type_values.values) ) \
-                                                        .select([cleaning_log_id_column.data_column_name,
-                                                                    cleaning_log_new_value_column.data_column_name,
-                                                                    cleaning_log_old_value_column.data_column_name,
-                                                                    cleaning_log_change_type_column.data_column_name,
-                                                                    cleaning_log_question_column.data_column_name])
+                                                        .select([data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_old_value_column].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_change_type_column].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_question_column].data_column_name])
         
         def _compare_raw_to_clean_to_log(self):
             """Gets the difference between raw and clean sheets and compares 
             this to the cleaning log"""
             # get columns that are in both clean and raw sheets
             # then filter the sheets
-            clean_data_columns = filter_list(match_list(clean_data_loaded_sheet.data.columns, 
-                                                                raw_data_loaded_sheet.data.columns), 
+            clean_data_columns = filter_list(match_list(data_loaded_sheets[self.clean_data_sheet] .data.columns, 
+                                                                data_loaded_sheets[self.raw_data_sheet] .data.columns), 
                                             [clean_data_id_columns.data_column_name])
                                             
-            clean_data_filtered_df = clean_data_loaded_sheet.data.select([clean_data_id_columns.data_column_name] + clean_data_columns)
-            raw_data_filtered_df = raw_data_loaded_sheet.data.select([raw_data_id_columns.data_column_name] + clean_data_columns) \
+            clean_data_filtered_df = data_loaded_sheets[self.clean_data_sheet] .data.select([clean_data_id_columns.data_column_name] + clean_data_columns)
+            raw_data_filtered_df = data_loaded_sheets[self.raw_data_sheet] .data.select([raw_data_id_columns.data_column_name] + clean_data_columns) \
                                                             .rename({f"{q}": f"{q}_original_value"
                                                                             for q in clean_data_columns
                                                                     })
@@ -316,9 +231,9 @@ class CleaningLog(BaseValidator):
                             new_val = row[question]
                             output_rows.append({
                                 'uuid': uuid,
-                                f"{cleaning_log_question_column.data_column_name}": question,
-                                f"{cleaning_log_old_value_column.data_column_name}": str(old_val),
-                                F"{cleaning_log_new_value_column.data_column_name}": str(new_val)
+                                f"{data_loaded_columns[self.cleaning_log_question_column].data_column_name}": question,
+                                f"{data_loaded_columns[self.cleaning_log_old_value_column].data_column_name}": str(old_val),
+                                F"{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}": str(new_val)
                             })
                 # difference between raw and clean
                 difference_raw_to_clean_df = pl.DataFrame(output_rows, infer_schema_length=None)
@@ -327,7 +242,7 @@ class CleaningLog(BaseValidator):
                 difference_df = difference_raw_to_clean_df.join(other=modified_rows_df,
                                                                 how='anti',
                                                                 left_on='uuid',
-                                                                right_on=cleaning_log_id_column.data_column_name)
+                                                                right_on=data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name)
                 
                 if difference_df.height > 0:
                     # df_to_csv(data=difference_df, filename=validation_results_filename)
@@ -344,17 +259,17 @@ class CleaningLog(BaseValidator):
             """Compares the cleaning log to clean_data
             """
             # racods where the same question was updated more than once for the same id
-            multiple_change_mask = modified_rows_df.select(cleaning_log_id_column.data_column_name,
-                                                            cleaning_log_question_column.data_column_name,
+            multiple_change_mask = modified_rows_df.select(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
+                                                            data_loaded_columns[self.cleaning_log_question_column].data_column_name,
                                                             ).is_duplicated()
 
-            multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(cleaning_log_id_column.data_column_name)
+            multiple_change_df = modified_rows_df.filter(multiple_change_mask).sort(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name)
 
             if multiple_change_df.height > 0:
                 df_to_csv(data=multiple_change_df, filename = multiple_changes_filename)
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'{multiple_change_df.select(cleaning_log_id_column.data_column_name) \
+                    message = f'{multiple_change_df.select(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name) \
                                     .n_unique()} Ids had multiple changes for the same question. \
                                 These were not validated. Check the output file {multiple_changes_filename} for details.'
                     ,severity = 'warning'
@@ -362,15 +277,15 @@ class CleaningLog(BaseValidator):
                 ))
 
             # scan cleaning log for old value = new value
-            same_value_df = modified_rows_df.filter(pl.col(cleaning_log_new_value_column.data_column_name).cast(pl.Utf8) == pl.col(cleaning_log_old_value_column.data_column_name).cast(pl.Utf8)) \
-                                                            .select(cleaning_log_id_column.data_column_name,
-                                                                    cleaning_log_new_value_column.data_column_name,
-                                                                    cleaning_log_old_value_column.data_column_name,
-                                                                    cleaning_log_change_type_column.data_column_name)
+            same_value_df = modified_rows_df.filter(pl.col(data_loaded_columns[self.cleaning_log_new_value_column].data_column_name).cast(pl.Utf8) == pl.col(data_loaded_columns[self.cleaning_log_old_value_column].data_column_name).cast(pl.Utf8)) \
+                                                            .select(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_old_value_column].data_column_name,
+                                                                    data_loaded_columns[self.cleaning_log_change_type_column].data_column_name)
             if same_value_df.height > 0:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'{same_value_df.height} row/s had {cleaning_log_old_value_column.data_column_name} equal {cleaning_log_new_value_column.data_column_name}. Check the output file {multiple_changes_filename} for details.'
+                    message = f'{same_value_df.height} row/s had {data_loaded_columns[self.cleaning_log_old_value_column].data_column_name} equal {data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}. Check the output file {multiple_changes_filename} for details.'
                     ,severity = 'warning'
                     ,details = same_value_df.to_dict()
                 ))
@@ -379,21 +294,21 @@ class CleaningLog(BaseValidator):
             # be the most recent
             # also remove other columns as they are no longer necessary
             unique_modified_rows_df = modified_rows_df.filter(~multiple_change_mask)\
-                                                        .sort(cleaning_log_id_column.data_column_name)\
-                                                        .select([cleaning_log_id_column.data_column_name, 
-                                                                 cleaning_log_new_value_column.data_column_name,
-                                                                 cleaning_log_question_column.data_column_name])
+                                                        .sort(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name)\
+                                                        .select([data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name, 
+                                                                 data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                                                                 data_loaded_columns[self.cleaning_log_question_column].data_column_name])
 
             if unique_modified_rows_df.height < 1:
                 return results
             # get a list of questions that had values changed
-            questions = unique_modified_rows_df.select(cleaning_log_question_column.data_column_name).unique().to_series().str.to_lowercase().to_list()
+            questions = unique_modified_rows_df.select(data_loaded_columns[self.cleaning_log_question_column].data_column_name).unique().to_series().str.to_lowercase().to_list()
 
-            missing_quesitons = filter_list(questions, clean_data_loaded_sheet.data.columns)
+            missing_quesitons = filter_list(questions, data_loaded_sheets[self.clean_data_sheet] .data.columns)
             if missing_quesitons:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'The following questions are listed in {cleaning_log_loaded_sheet.data_sheet_name} but were not found in {clean_data_loaded_sheet.data_sheet_name}: {missing_quesitons}.'
+                    message = f'The following questions are listed in {data_loaded_sheets[self.cleaning_log_sheet] .data_sheet_name} but were not found in {data_loaded_sheets[self.clean_data_sheet] .data_sheet_name}: {missing_quesitons}.'
                     ,severity = 'Warning'
                 ))
                 questions = filter_list(questions, missing_quesitons)
@@ -412,12 +327,12 @@ class CleaningLog(BaseValidator):
             # while all other other questions will be null
             # fill null with '' to make comparison easier later
             unique_modified_rows_df = unique_modified_rows_df.with_columns(pl.lit(True).alias('is_update')) \
-                                                            .with_columns(pl.col(cleaning_log_new_value_column.data_column_name))#.fill_null(''))
+                                                            .with_columns(pl.col(data_loaded_columns[self.cleaning_log_new_value_column].data_column_name))#.fill_null(''))
 
             # pivot the table for use later. lower the questions/column names.
-            unique_modified_rows_df = unique_modified_rows_df.pivot(on=cleaning_log_question_column.data_column_name,
-                                                            index=cleaning_log_id_column.data_column_name,
-                                                            values=[cleaning_log_new_value_column.data_column_name, 'is_update']) \
+            unique_modified_rows_df = unique_modified_rows_df.pivot(on=data_loaded_columns[self.cleaning_log_question_column].data_column_name,
+                                                            index=data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
+                                                            values=[data_loaded_columns[self.cleaning_log_new_value_column].data_column_name, 'is_update']) \
                                                             .rename(str.lower)
             # rename for later
             unique_modified_rows_df = unique_modified_rows_df.rename({f"new_value_{q}": f"{q}_val"
@@ -430,12 +345,12 @@ class CleaningLog(BaseValidator):
             # filter the clean_data sheet to only have records that are in the cleaning log
             # and only select the questions that were present in the cleaning log
             # fill empty values to '' to make comparison easier later
-            clean_data_filtered_df = clean_data_loaded_sheet.data.select([clean_data_id_columns.data_column_name] + questions) \
-                                                                    .filter(pl.col(clean_data_id_columns.data_column_name).is_in(unique_modified_rows_df[cleaning_log_id_column.data_column_name].implode())) \
+            clean_data_filtered_df = data_loaded_sheets[self.clean_data_sheet] .data.select([clean_data_id_columns.data_column_name] + questions) \
+                                                                    .filter(pl.col(clean_data_id_columns.data_column_name).is_in(unique_modified_rows_df[data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name].implode())) \
                                                                     # .fill_null('')
             # join dataframes so columns can be matched below
             joined_df = unique_modified_rows_df.join(other=clean_data_filtered_df,
-                                                        left_on=cleaning_log_id_column.data_column_name,
+                                                        left_on=data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
                                                         right_on=clean_data_id_columns.data_column_name,
                                                         how='left')
 
@@ -471,7 +386,7 @@ class CleaningLog(BaseValidator):
             # record the changes
             if not changes_only.is_empty():
                 for row in changes_only.iter_rows(named=True):
-                    uuid = row[cleaning_log_id_column.data_column_name]
+                    uuid = row[data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name]
                     for question in questions:
                         new_col = f"{question}_val"
                         is_changed = row[f"is_{question}_changed"]
@@ -480,7 +395,7 @@ class CleaningLog(BaseValidator):
                             old_val = row[question]
                             new_val = row[new_col]
                             output_rows.append({
-                                cleaning_log_id_column.data_column_name: uuid,
+                                data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name: uuid,
                                 "question": question,
                                 f"{self.cleaning_log_sheet}_value": new_val,
                                 F"{self.clean_data_sheet}_value": old_val

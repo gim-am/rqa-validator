@@ -28,6 +28,21 @@ class BaseDatasetSchema:
                 return sheet
         return None
     
+    def get_loaded_sheets_standard_names(self) -> List[str]:
+        """Gets all the standard names for all the loaded sheets."""
+        return [item.standard_name for item in self.schema_loaded_sheets]
+    
+    def get_unloaded_sheets_standard_names(self) -> List[str]:
+        """Gets all the standard names for all the unloaded sheets."""
+        return [item.standard_name for item in self.schema_unloaded_sheets]
+
+    def get_sheet_column_standard_names(self, sheet_name: str) -> List[str] | None:
+        """gets all the column standard names for a sheet."""
+        sheet = self.get_schema_loaded_sheet(sheet_name)
+        if sheet is not None:
+            return sheet.get_column_standard_names()
+        
+
     def get_schema_unloaded_sheet(self, sheet_name: str)  -> SheetMapping | None:
         """Gets the details and data for an unloaded sheet if it exists.
 
@@ -149,13 +164,15 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                                                                                            values = ['integer', 'decimal']),
                                                                             ProcessValueMap(process_name='data_type_temporal_check',
                                                                                            values = ['date'])]),
-                                             ColumnMapping(standard_name= 'name')]),                             
+                                             ColumnMapping(standard_name= 'name')]), 
+        SheetMapping(standard_name= "kobo_choices", 
+                        alternate_names =["choices"],
+                        mandatory_columns = [ColumnMapping(standard_name='list_name'),
+                                             ColumnMapping(standard_name='name')])                            
     ])
     schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
         SheetMapping(standard_name="read_me", 
-                        alternate_names= ["read_me"]),
-        SheetMapping(standard_name= "kobo_choices", 
-                        alternate_names =["kobo_choices"]),        
+                        alternate_names= ["read_me"]),        
         SheetMapping(standard_name="sampling_info", 
                         alternate_names=["sampling_info"], 
                         required=False),

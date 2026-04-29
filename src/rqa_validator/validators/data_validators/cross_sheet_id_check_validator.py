@@ -1,4 +1,5 @@
-from ...common.list_matching import match_sheet_columns
+from ...validators.helpers import get_data_loaded_sheet, get_data_loaded_sheets, get_data_sheet_ids, get_matching_id_columns
+
 from ...common.schema_matching import get_matching_unique_columns
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
@@ -42,38 +43,31 @@ class CrossSheetIdCheck(BaseValidator):
         """
         results: List[ValidationResult] = []
 
-        master_loaded_sheet = data.get_loaded_sheet(self.master_sheet)
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=[self.master_sheet],
+                                                        rule=self.name)
 
-        if not master_loaded_sheet:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A sheet for {self.master_sheet} is expected.'
-                ,severity = 'error'
-            ))
+        if result:
+            results.extend(result)
             return results
 
-        # likely only 1 column
-        master_matching_columns = get_matching_unique_columns(self.schema,master_loaded_sheet, self.master_sheet)
-        if not master_matching_columns or len(master_matching_columns) > 1:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A single unique id column for {master_loaded_sheet.data_sheet_name} is expected but none were found.'
-                ,severity = 'error'
-                , sheet_name =  master_loaded_sheet.data_sheet_name
-                # , column_name = ', '.join(master_matching_columns)
-            ))
-            return results
-        master_matching_columns = master_matching_columns[0]
+        result, data_sheet_ids = get_data_sheet_ids(schema=self.schema, 
+                                                       data = {self.master_sheet: data_loaded_sheets[self.master_sheet]},
+                                                        rule=self.name)
+        
+        if result:
+            results.extend(result)
+            return results 
+       
+        master_matching_columns = data_sheet_ids[self.master_sheet][0]
 
         for sheet in self.child_sheets:
-            child_loaded_sheet  = data.get_loaded_sheet(sheet)
-            if not child_loaded_sheet:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A sheet for {sheet} is expected.'
-                    ,severity = 'error'
-                ))
+            result, child_loaded_sheet = get_data_loaded_sheet(data, sheet, self.name)
+
+            if result is not None:
+                results.append(result)
                 continue
+            assert child_loaded_sheet is not None
 
             # gets ids from a child sheet that are not present in a master sheet
 
@@ -86,28 +80,24 @@ class CrossSheetIdCheck(BaseValidator):
 
             if not child_matching_columns:
                 # some sheets will have a non unique uuid column so try to match based on name
-                child_matching_columns = match_sheet_columns(child_loaded_sheet.column_map,
-                                                             [master_matching_columns])
-            if len(child_matching_columns) != 1:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A unique or matching id column for {child_loaded_sheet.data_sheet_name} is expected but none were found. '
-                    ,severity = 'error'
-                    , sheet_name = child_loaded_sheet.data_sheet_name
-                ))
-                continue
+                
+                result, matching_columns = get_matching_id_columns(child_loaded_sheet.column_map, child_loaded_sheet.data_sheet_name, [master_matching_columns], self.master_sheet, self.name)
+                if result is not None:
+                    results.append(result)
+                    continue
+                assert matching_columns is not None                
 
             child_matching_columns = child_matching_columns[0]
 
             missing_ids = child_loaded_sheet.data.select(child_matching_columns.data_column_name).join(
-                                    other=master_loaded_sheet.data.select(master_matching_columns.data_column_name),
+                                    other=data_loaded_sheets[self.master_sheet].data.select(master_matching_columns.data_column_name),
                                     how='anti',
                                     left_on=child_matching_columns.data_column_name,
                                     right_on=master_matching_columns.data_column_name).to_series().to_list()
             if missing_ids:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_matching_columns.data_column_name} were not found in sheet {master_loaded_sheet.data_sheet_name} column {master_matching_columns.data_column_name}. Check output for details. '
+                    message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_matching_columns.data_column_name} were not found in sheet {data_loaded_sheets[self.master_sheet].data_sheet_name} column {master_matching_columns.data_column_name}. Check output for details. '
                     ,severity = 'error'
                     , sheet_name = child_loaded_sheet.data_sheet_name
                     , column_name = child_matching_columns.data_column_name

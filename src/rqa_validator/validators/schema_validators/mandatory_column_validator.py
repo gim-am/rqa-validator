@@ -1,3 +1,5 @@
+from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheets
+
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
@@ -28,31 +30,28 @@ class MandatoryColumns(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: List[ValidationResult] = []
-        for sheet in self.schema.schema_loaded_sheets:
 
-            if not sheet.mandatory_columns:
-                continue
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=self.schema.get_loaded_sheets_standard_names(),
+                                                        rule=self.name)
 
-            loaded_sheet_info = data.get_loaded_sheet(sheet.standard_name)
-            if loaded_sheet_info is not None:
+        if result:
+            results.extend(result)
+            return results
 
-                for column in sheet.mandatory_columns:
-                    if not loaded_sheet_info.get_column_map(column.standard_name):
-                        results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'A column for {column.standard_name} was expexted in the {loaded_sheet_info.data_sheet_name} sheet but was not found.'
-                            ,severity = 'error'
-                            ,sheet_name = loaded_sheet_info.data_sheet_name
-                            ))
+        for sheet, loaded_sheet in data_loaded_sheets.items():
 
+            # get all the columns expected for the sheet
+            search_columns = self.schema.get_sheet_column_standard_names(sheet)
+            # sheet it checked above
+            assert search_columns is not None
 
-            else:
-                results.append(ValidationResult(
-                                rule = self.name,
-                                message = f'No sheet was loaded for {sheet.standard_name}.'
-                                ,severity = 'error'
-                                ,sheet_name = sheet.standard_name
-                                ))
+            search_items = {key: loaded_sheet for key in search_columns}
 
+            # try to get all the loaded columns
+            result, columns = get_data_loaded_columns(search_items, self.name)
+
+            if result:
+                results.extend(result)
 
         return results
