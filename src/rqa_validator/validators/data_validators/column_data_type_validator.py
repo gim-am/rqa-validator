@@ -1,7 +1,11 @@
 from typing import List
 import polars as pl
 
-from ...common.schema_matching import get_matching_unique_columns
+from ...validators.helpers import (get_data_loaded_columns, 
+                                   get_data_loaded_sheets, get_data_sheet_ids, 
+                                   get_schema_loaded_columns, 
+                                   get_schema_loaded_sheets, 
+                                   get_schema_process_values)
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
@@ -64,148 +68,88 @@ class DataTypeCheck(BaseValidator):
         results: List[ValidationResult] = []
         # pre-validation
 
-        loaded_survey_sheet = data.get_loaded_sheet(self.survey_sheet)
+        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
+                                                       sheet_names=[self.survey_sheet,
+                                                                    *self.check_sheets],
+                                                        rule=self.name)
 
-        if loaded_survey_sheet is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'An excel sheet for {self.survey_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.survey_sheet
-            ))
+        if result:
+            results.extend(result)
             return results
         
-        type_column = loaded_survey_sheet.get_column_map(self.survey_type_column)
-        if type_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.survey_type_column} in excel sheet {loaded_survey_sheet.data_sheet_name} is expected.'
-                ,severity = 'error'
-                ,sheet_name=loaded_survey_sheet.data_sheet_name
-            ))
-            return results
-        
-        name_column = loaded_survey_sheet.get_column_map(self.survey_name_column)
-        if name_column is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {self.survey_name_column} in excel sheet {loaded_survey_sheet.data_sheet_name} is expected.'
-                ,severity = 'error'
-                ,sheet_name=loaded_survey_sheet.data_sheet_name
-            ))
-            return results
-        
-        schema_survey_sheet = self.schema.get_schema_loaded_sheet(self.survey_sheet)
+        result, data_loaded_columns = get_data_loaded_columns(data = {self.survey_type_column: data_loaded_sheets[self.survey_sheet],
+                                                                      self.survey_name_column: data_loaded_sheets[self.survey_sheet]},
+                                                        rule=self.name)
 
-        if schema_survey_sheet is None:
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A schema sheet for {self.survey_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.survey_sheet
-            ))
+        if result:
+            results.extend(result)
             return results
-        
-        schema_type_column = schema_survey_sheet.get_column(type_column.schema_column_name)
 
-        if schema_type_column is None:
-            # should not actually happen as its already mapped above.
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {type_column.schema_column_name} in schema sheet {self.survey_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.survey_sheet
-            ))
-            return results
+        result, schema_loaded_sheets = get_schema_loaded_sheets(schema=self.schema, 
+                                                       sheet_names=[self.survey_sheet],
+                                                        rule=self.name)
         
-        schema_name_column = schema_survey_sheet.get_column(name_column.schema_column_name)
+        if result:
+            results.extend(result)
+            return results        
 
-        if schema_name_column is None:
-            # should not actually happen as its already mapped above.
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'A column for {name_column.schema_column_name} in schema sheet {self.survey_sheet} is expected.'
-                ,severity = 'error'
-                ,sheet_name=self.survey_sheet
-            ))
+        result, schema_loaded_columns = get_schema_loaded_columns(data={self.survey_type_column: schema_loaded_sheets[self.survey_sheet],
+                                                                        self.survey_name_column: schema_loaded_sheets[self.survey_sheet]},
+                                                        rule=self.name)
+        
+        if result:
+            results.extend(result)
             return results
         
-        type_values_numeric = schema_type_column.get_process_values(self.process_value_map_name_numeric)
-        if type_values_numeric is None or len(type_values_numeric.values) == 0:
-            results.append(ValidationResult(
-            rule = self.name,
-            message = f'process_values were expected for column {name_column.schema_column_name} for process {self.process_value_map_name_numeric}.'
-            ,severity = 'error'
-            , sheet_name= self.survey_sheet
-            , column_name=name_column.schema_column_name
-            ))
-            return results
-        
-        type_values_temporal = schema_type_column.get_process_values(self.process_value_map_name_temporal)
-        if type_values_temporal is None or len(type_values_temporal.values) == 0:
-            results.append(ValidationResult(
-            rule = self.name,
-            message = f'process_values were expected for column {name_column.schema_column_name} for process {self.process_value_map_name_temporal}.'
-            ,severity = 'error'
-            , sheet_name= self.survey_sheet
-            , column_name=name_column.schema_column_name
-            ))
+        result, schema_process_values = get_schema_process_values(data = {self.survey_sheet: {self.process_value_map_name_numeric: schema_loaded_columns[self.survey_type_column],
+                                                                                              self.process_value_map_name_temporal: schema_loaded_columns[self.survey_type_column]},
+                                                                         },
+                                                                 rule=self.name)
+             
+        if result:
+            results.extend(result)
             return results
         
         # get the columns that need checking
-        numeric_columns = loaded_survey_sheet.data.filter(pl.col(type_column.data_column_name)
-                                                                .str
-                                                                .to_lowercase()
-                                                                .is_in(type_values_numeric.values)) \
-                                                    .select([name_column.data_column_name])\
-                                                    .to_series().str.to_lowercase().to_list()
-        temporal_columns = loaded_survey_sheet.data.filter(pl.col(type_column.data_column_name)
-                                                            .str
-                                                            .to_lowercase()
-                                                            .is_in(type_values_temporal.values)) \
-                                                    .select([name_column.data_column_name]) \
-                                                    .to_series().str.to_lowercase().to_list()
+        numeric_columns = data_loaded_sheets[self.survey_sheet].data\
+                                                                .filter(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
+                                                                        .str
+                                                                        .to_lowercase()
+                                                                        .is_in(schema_process_values[self.process_value_map_name_numeric].values)) \
+                                                                .select([data_loaded_columns[self.survey_name_column].data_column_name])\
+                                                                .to_series().str.to_lowercase().to_list()
+        temporal_columns = data_loaded_sheets[self.survey_sheet].data\
+                                                            .filter(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
+                                                                    .str
+                                                                    .to_lowercase()
+                                                                    .is_in(schema_process_values[self.process_value_map_name_temporal].values)) \
+                                                            .select([data_loaded_columns[self.survey_name_column].data_column_name]) \
+                                                            .to_series().str.to_lowercase().to_list()
         
-        
+        search_items = {key: data_loaded_sheets[key] for key in self.check_sheets}
+        result, id_column = get_data_sheet_ids(schema=self.schema, data=search_items, rule=self.name)
+
+        if result:
+            results.extend(result)
+            return results
+
+
         for sheet in self.check_sheets:
-            # validate the sheet
-            loaded_check_sheet = data.get_loaded_sheet(sheet)
+            # # validate the sheet            
 
-            if loaded_check_sheet is None:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'An excel sheet for {sheet} is expected.'
-                    ,severity = 'error'
-                    ,sheet_name=self.survey_sheet
-                ))
-                continue
-
-            check_sheet_id_column = get_matching_unique_columns(schema=self.schema,
-                                        loaded_data=loaded_check_sheet,
-                                        sheet_name=sheet)
-
-            if len(check_sheet_id_column) != 1:
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'A single unique column for schema sheet {sheet} and matching excel sheet {loaded_check_sheet.data_sheet_name} was expected.'
-                    ,severity = 'error'
-                    ,sheet_name=sheet
-                ))
-                continue
-
-            check_sheet_id_column = check_sheet_id_column[0]            
+            check_sheet_id_column = id_column[sheet][0]            
 
             # numeric check
             if numeric_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in numeric_columns if not loaded_check_sheet.data.schema[item].is_numeric()]
+                incorrect_data_type_columns = [item for item in numeric_columns if not data_loaded_sheets[sheet].data.schema[item].is_numeric()]
                 
                 if incorrect_data_type_columns:
                     # if there are dataframe columns with the incorrect data type
                     # then check the column values
 
                     # pivot the table to make the process easier
-                    check_df = loaded_check_sheet.data.select([check_sheet_id_column.data_column_name] + 
+                    check_df = data_loaded_sheets[sheet].data.select([check_sheet_id_column.data_column_name] + 
                                                                 incorrect_data_type_columns)\
                                                         .unpivot(index=check_sheet_id_column.data_column_name,
                                                                     variable_name='question',
@@ -230,14 +174,14 @@ class DataTypeCheck(BaseValidator):
             # temporal check
             if temporal_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in temporal_columns if not loaded_check_sheet.data.schema[item].is_temporal()]
+                incorrect_data_type_columns = [item for item in temporal_columns if not data_loaded_sheets[sheet].data.schema[item].is_temporal()]
 
                 if incorrect_data_type_columns:
                      # if there are dataframe columns with the incorrect data type
                     # then check the column values
 
                     # pivot the table to make the process easier
-                    check_df = loaded_check_sheet.data.select([check_sheet_id_column.data_column_name] + 
+                    check_df = data_loaded_sheets[sheet].data.select([check_sheet_id_column.data_column_name] + 
                                                                 incorrect_data_type_columns)\
                                                         .unpivot(index=check_sheet_id_column.data_column_name,
                                                                     variable_name='question',

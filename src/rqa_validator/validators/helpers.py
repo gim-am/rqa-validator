@@ -167,8 +167,8 @@ def get_schema_loaded_column(loaded_sheet: SheetMapping, column: str, rule: str)
     """Gets a schema column if it exists.
 
     Args:
-        loaded_sheet (SheetMapping): sheet containing the column
-        column (str): column to finf
+        loaded_sheet (SheetMapping): loaded schema sheet containing the column
+        column (str): column to find
         rule (str): validation rule
 
     Returns:
@@ -189,7 +189,29 @@ def get_schema_loaded_column(loaded_sheet: SheetMapping, column: str, rule: str)
         )
     return result, schema_column
 
+def get_schema_loaded_columns(data: dict[str, SheetMapping], rule: str) -> tuple[List[ValidationResult], dict[str, ColumnMapping]]:
+    """Gets a list of schema columns if they exists
 
+    Args:
+        data (dict[str, SheetMapping]): column name, loaded schema sheet
+        rule (str): validation rule
+
+    Returns:
+        tuple[List[ValidationResult], dict[str, ColumnMapping]]: list of validation errors if any, column and schema column map
+    """
+    
+    results: List[ValidationResult] = []
+    loaded_columns: dict[str, ColumnMapping] = {}
+
+    for column, sheet in data.items():
+        result, schema_column = get_schema_loaded_column(sheet, column, rule)
+        if result is None:
+            assert schema_column is not None
+            loaded_columns[column] = schema_column
+        else:
+            results.append(result)
+
+    return results, loaded_columns
 
 
 def get_data_sheet_id(sheet_name: str, schema: BaseDatasetSchema, loaded_sheet: SheetMap, rule: str, expected: int = 1) -> tuple[ValidationResult | None, List[ColumnMap]]:
