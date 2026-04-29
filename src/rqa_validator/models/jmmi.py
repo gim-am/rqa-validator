@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from ..validators.data_validators.survey_choices_validator import SurveyChoicesCheck
+
 from ..validators.data_validators.column_data_type_validator import DataTypeCheck
 from ..validators.data_validators.cross_sheet_row_sum_check_validator import CrossSheetRowSumCheck
 from ..validators.schema_validators.unexpected_sheets_validator import UnexpectedSheets
@@ -60,4 +62,5 @@ class JMMIDataset(BaseDataset):
             , ConsentCheck(schema=schema)
             , ColumnNameCheck()
             , DataTypeCheck(schema=schema)
+            , SurveyChoicesCheck(schema=schema)
         ]

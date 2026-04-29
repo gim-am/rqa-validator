@@ -110,6 +110,13 @@ class DataTypeCheck(BaseValidator):
             results.extend(result)
             return results
         
+        search_items = {key: data_loaded_sheets[key] for key in self.check_sheets}
+        result, data_id_columns = get_data_sheet_ids(schema=self.schema, data=search_items, rule=self.name)
+
+        if result:
+            results.extend(result)
+            return results
+        
         # get the columns that need checking
         numeric_columns = data_loaded_sheets[self.survey_sheet].data\
                                                                 .filter(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
@@ -126,18 +133,11 @@ class DataTypeCheck(BaseValidator):
                                                             .select([data_loaded_columns[self.survey_name_column].data_column_name]) \
                                                             .to_series().str.to_lowercase().to_list()
         
-        search_items = {key: data_loaded_sheets[key] for key in self.check_sheets}
-        result, id_column = get_data_sheet_ids(schema=self.schema, data=search_items, rule=self.name)
-
-        if result:
-            results.extend(result)
-            return results
-
 
         for sheet in self.check_sheets:
             # # validate the sheet            
 
-            check_sheet_id_column = id_column[sheet][0]            
+            check_sheet_id_column = data_id_columns[sheet][0]            
 
             # numeric check
             if numeric_columns:
