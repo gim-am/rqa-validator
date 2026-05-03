@@ -1,9 +1,8 @@
 import argparse
 from pathlib import Path
 from src.rqa_validator.orchestrator.validation_pipeline import ValidationPipeline
-from src.rqa_validator.utils.logging import JIVELogger
+from config import settings
 
-logger = JIVELogger()
 
 def main():
     parser = argparse.ArgumentParser(description="Data Validation Framework")
@@ -34,6 +33,6 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        logger.log_exception(e)
+        settings.logger.log_exception(e)
     
     exit()

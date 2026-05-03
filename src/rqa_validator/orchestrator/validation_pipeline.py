@@ -5,8 +5,7 @@ from ..models.preprocess import lowercase_schema_mappings, validate_schema
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDataset
 from ..validators.base import ValidationResult, SeverityLevel
-from ..utils.logging import JIVELogger
-
+from config import settings
 
 class ValidationPipeline:
     def __init__(self, dataset_type: str):
@@ -42,7 +41,6 @@ class ValidationPipeline:
         """
         all_results:List[ValidationResult] = []
         set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR]) 
-        logger = JIVELogger()
         # pre-validate the schema. checks for duplicate sheet/column
         # names etc
         try:            
@@ -57,7 +55,7 @@ class ValidationPipeline:
                     message=f"Schema validation encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
-            logger.log_exception(e)
+            settings.logger.log_exception(e)
             return self._compile_results(all_results)
 
         # load the excel data
@@ -81,7 +79,7 @@ class ValidationPipeline:
                     message=f"Loading of the excel file {filepath} encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
-            logger.log_exception(e)
+            settings.logger.log_exception(e)
             return self._compile_results(all_results)
         
         # run each of the validators for the dataset. 
@@ -102,7 +100,7 @@ class ValidationPipeline:
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
-                logger.log_exception(e)
+                settings.logger.log_exception(e)
 
         return self._compile_results(all_results)
     

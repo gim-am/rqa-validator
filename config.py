@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from src.rqa_validator.utils.logging import JIVELogger
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -20,6 +21,8 @@ class Settings(BaseSettings):
     NANCHECK_STRING_VALUES: List = ['-999','-99','99', '999', '-88', '-888', '88', '888'] 
 
     VALIDATION_LOG_DIRECTORY: Path = Path('../validation_logs')
+
+    logger: JIVELogger = JIVELogger()
 
 settings = Settings()
 
