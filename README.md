@@ -1,8 +1,18 @@
 # Prototype for validation of RQA datasets
 **Aim**: To develop a hopefully flexible framework that can handle different datasets with non-standard sheet and column names that have different validation rules.
 
+## Suported Datasets
+
+- jmmi datasets
+
+Support for other datasets will be added later.
+
+## Project structure
+
 ```bash
 ├── config.py
+├── Dockerfile
+├── .dockerignore
 ├── .env
 ├── .gitignore
 ├── main.py
@@ -12,6 +22,7 @@
 ├── src
 │   ├── rqa_validator
 │   │   ├── common
+│   │   │   ├── expression_builder.py
 │   │   │   ├── file_export.py
 │   │   │   ├── list_matching.py
 │   │   │   └── schema_matching.py
@@ -30,12 +41,28 @@
 │   │   │   └── validation_pipeline.py
 │   │   └── validators
 │   │       ├── base.py
-│   │       ├── column_validators.py
 │   │       ├── config.py
-│   │       ├── data_validators.py
+│   │       ├── data_validators
+│   │       │   ├── cleaning_log_validator.py
+│   │       │   ├── column_data_type_validator.py
+│   │       │   ├── consent_check_validator.py
+│   │       │   ├── cross_sheet_id_check_validator.py
+│   │       │   ├── cross_sheet_row_sum_check_validator.py
+│   │       │   ├── __init__.py
+│   │       │   ├── nan_check_validator.py
+│   │       │   ├── pii_validator.py
+│   │       │   ├── survey_choices_validator.py
+│   │       │   └── unique_column_validator.py
+│   │       ├── helpers.py
 │   │       ├── __init__.py
-│   │       └── sheet_validators.py
-│   └── tests
+│   │       └── schema_validators
+│   │           ├── column_name_validator.py
+│   │           ├── duplicate_sheet_match_validator.py
+│   │           ├── __init__.py
+│   │           ├── mandatory_column_validator.py
+│   │           ├── missing_sheets_validator.py
+│   │           └── unexpected_sheets_validator.py
+│   └── tests│       
 └── uv.lock
 
 ```
@@ -49,6 +76,7 @@
 3. Download a dataset. Some options include:
 - https://repository.impact-initiatives.org/document/impact/031f3c9b/REACH_SSD_Dataset-Analysis_JMMI_March-2026.xlsx
 - https://repository.impact-initiatives.org/document/impact/b0e5c61a/REACH_SSD_Dataset-Analysis_JMMI_February-2026.xlsx
+
 4. Run the process
 ```
 uv run main.py --dataset-type jmmi Step3DatasetPath
@@ -107,18 +135,25 @@ A structured list of validation errors is produced (errors, warnings) for each r
 These rules are currently based on the minimum standars checklist (1.2)
 
 
-#### Rules currently implemented
-**Column Rules**
-- Mandatory columns: checks if mandatory columns are not present in a sheet
+### Rules currently implemented
+**Data Validation Rules**
 - Unique column values (uuids): checks if a column does not contain unique values
-- Pii columns: checks if any of the columns are possible pii columns
+- Pii columns: checks if any of the columns contain possible pii data
+- Dataset sum check: checks if clean data + deleted data = raw data
+- NAN check: Checks columns for invalid numeric values like NaN and -999
+- Cross sheet id check: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
+- Cleaning log: checks clean_data reflects the cleaning log and the cleaning log reflects raw/clean data changes
+- Column data types: checks columns in clean data have correct data types based on kobo survey
+- Survey choices: checks clean data contains valid values based on kobo choices
+- Consent check: checks that raw data records that did not provide consent are not present in clean data
 
-**Sheet Rules**
+**Schema Validation Rules**
 - Missing sheets: checks if mandatory sheets are not present
 - Unexpected sheets: checks if there are any unexpcedted sheets
 - Multiple sheet matches: checks if multiple excel sheets are matched to the same schema sheet
-- Dataset sum check: checks if clean data + deleted data = raw data
-- Cross sheet id check: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
+- Mandatory columns: checks if mandatory columns are not present in a sheet
+- Column names - Checks column names are variables instead of labels
+
 
 **Data Rules**
 - Cleaning log: checks that all updates listed in the cleaning log sheet are reflected in the clean_data sheet
