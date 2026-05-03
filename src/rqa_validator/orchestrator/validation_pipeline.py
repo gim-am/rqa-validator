@@ -5,6 +5,7 @@ from ..models.preprocess import lowercase_schema_mappings, validate_schema
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDataset
 from ..validators.base import ValidationResult, SeverityLevel
+from ..utils.logging import JIVELogger
 
 
 class ValidationPipeline:
@@ -29,7 +30,7 @@ class ValidationPipeline:
         lowercase_schema_mappings(self.schema)         
 
 
-    def run(self, filepath: Path):
+    def run(self, filepath: Path) -> Dict[str, Any]:
         """Orchestrator for the dataset validation pipeline.
 
         Args:
@@ -37,11 +38,13 @@ class ValidationPipeline:
             call later.
 
         Returns:
-            _type_: 
+            Dict[str, Any]: JSON results. 
         """
         all_results:List[ValidationResult] = []
         set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR]) 
-
+        logger = JIVELogger()
+        # pre-validate the schema. checks for duplicate sheet/column
+        # names etc
         try:            
             validation_errors =  validate_schema(self.schema)  
                 
@@ -54,8 +57,10 @@ class ValidationPipeline:
                     message=f"Schema validation encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
+            logger.log_exception(e)
             return self._compile_results(all_results)
 
+        # load the excel data
         try:
             loader = ExcelLoader(self.schema)
             data, excel_results = loader.load(filepath)
@@ -66,7 +71,7 @@ class ValidationPipeline:
             if not data:
                 all_results.append(ValidationResult(
                     rule='ExcelFileLoading',
-                    message=f"No matching sheets founf in excel file {filepath}.",
+                    message=f"No matching sheets found in excel file {filepath}.",
                     severity= SeverityLevel.ADMIN_ERROR
                 ))
                 return self._compile_results(all_results)
@@ -76,8 +81,10 @@ class ValidationPipeline:
                     message=f"Loading of the excel file {filepath} encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
+            logger.log_exception(e)
             return self._compile_results(all_results)
         
+        # run each of the validators for the dataset. 
         for validator in self.validators:
             try:
                 results = validator.validate(data)
@@ -95,6 +102,7 @@ class ValidationPipeline:
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR
                 ))
+                logger.log_exception(e)
 
         return self._compile_results(all_results)
     
@@ -106,11 +114,9 @@ class ValidationPipeline:
         info = [r for r in results if r.severity == SeverityLevel.INFO ]
         passed = [r for r in results if r.severity == SeverityLevel.PASSED ]
 
-
         return {
             "success": len(errors) == 0 and len(admin_errors) == 0,
             "summary": {
-                # "total_checks": len(results),
                 "passed": len(passed),
                 "admin_errors": len(admin_errors),
                 "errors": len(errors),                
@@ -124,7 +130,6 @@ class ValidationPipeline:
             "passed": [self._result_to_dict(r) for r in passed],
             "metadata": {
                 "dataset_type": self.dataset_type,
-                # "sheets_processed": list(self.schema.required_columns.keys())
             }
         }
 
@@ -133,8 +138,7 @@ class ValidationPipeline:
         return {
             "rule": result.rule,
             "message": result.message,
-            "severity": result.severity,
-            # "validator": result.__class__.__name__,
+            "severity": result.severity.value,
             "sheet_name": result.sheet_name,
             "column_name": result.column_name,
             "details": result.details

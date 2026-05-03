@@ -105,6 +105,7 @@ There are several error types:
 - **Errors**: critical errors from the validation process. Eg: a missing sheet etc
 - **Warnings**: warnings from the validation process. Eg: an optional sheet is missing, possible Pii column found
 - **Info**: information for user awareness. Eg: if fuzzy matching was used to match a column.
+- **Passed**: validation rules that passed without any errors or warnings.
    
 ## Dataset Definitions
 A dataset will have a schema and a list of validation rules that need to be run.
