@@ -4,7 +4,7 @@ from thefuzz import fuzz
 from thefuzz import process
 
 from config import settings
-from ..loaders.base import ColumnMap
+from ..loaders.base import DataColumnMap
 
 @dataclass
 class FuzzMatch():
@@ -146,7 +146,7 @@ def is_in_list(item:str, target: List) -> bool:
 
 
 
-def match_sheet_columns(source:List[ColumnMap], target:List[ColumnMap] ):
+def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] ):
     """matches columns between two column maps where they have the same schema name.
 
     Args:

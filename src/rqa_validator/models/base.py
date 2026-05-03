@@ -12,7 +12,7 @@ class ProcessValueMap:
 
 
 @dataclass
-class ColumnMapping:
+class SchemaColumnMap:
     standard_name: str    
     alternate_names: List[str] = field(default_factory=list) 
     is_unique: bool = False
@@ -31,13 +31,13 @@ class ColumnMapping:
 
 
 @dataclass
-class SheetMapping:
+class SchemaSheetMap:
     standard_name: str 
     alternate_names: List[str] 
-    mandatory_columns: List[ColumnMapping] = field(default_factory=list)
+    mandatory_columns: List[SchemaColumnMap] = field(default_factory=list)
     required: bool = True  
 
-    def get_column(self, column_name: str) -> ColumnMapping | None:
+    def get_column(self, column_name: str) -> SchemaColumnMap | None:
         """ Returns a column from mandatory_columns if a name is matched."""
         for column in self.mandatory_columns:
             if column.standard_name == column_name:
@@ -47,7 +47,7 @@ class SheetMapping:
         """Gets the standard names for all mandatory columns."""
         return [item.standard_name for item in self.mandatory_columns]
     
-    def get_unique_columns(self) -> List[ColumnMapping]:
+    def get_unique_columns(self) -> List[SchemaColumnMap]:
         """Gets all the columns markes as unique"""
         return [column for column in self.mandatory_columns if column.is_unique]
     
@@ -85,7 +85,7 @@ class SheetMapping:
         return add_to_list(self.standard_name, self.alternate_names)
 
 
-    def add_mandatory_column(self, column: ColumnMapping) -> ColumnMapping | None:
+    def add_mandatory_column(self, column: SchemaColumnMap) -> SchemaColumnMap | None:
         """Adds a column to mandatory_columns if the standard_name provided
         does not exist.
         

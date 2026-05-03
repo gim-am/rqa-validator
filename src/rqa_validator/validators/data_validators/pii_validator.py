@@ -1,6 +1,6 @@
 from config import settings
 from ...common.list_matching import match_list_to_list
-from ...loaders.base import ColumnMap
+from ...loaders.base import DataColumnMap
 from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, ValidationResult
 from ...validators.config import get_pii_columns
@@ -85,7 +85,7 @@ class PiiColumns(BaseValidator):
             id_column = sheet.get_column_map(id_column_standard_name)
 
             if id_column is None:
-                id_column = ColumnMap(data_column_name='row_index',
+                id_column = DataColumnMap(data_column_name='row_index',
                                       schema_column_name='row_index')
                 melted_df = sheet.data.with_row_index(id_column.data_column_name) \
                                         .unpivot(index=id_column.data_column_name,

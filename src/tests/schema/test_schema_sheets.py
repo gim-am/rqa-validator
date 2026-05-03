@@ -1,5 +1,5 @@
 import pytest
-from rqa_validator.models.base import SheetMapping, ColumnMapping
+from rqa_validator.models.base import SchemaSheetMap, SchemaColumnMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.models.preprocess import validate_schema, lowercase_schema_mappings
 
@@ -8,12 +8,12 @@ def valid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             )],
-        schema_unloaded_sheets=[SheetMapping(standard_name="read_me", 
+        schema_unloaded_sheets=[SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"])]
     )
 
@@ -22,17 +22,17 @@ def invalid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             ),
-                            SheetMapping(standard_name= "raw_data", 
+                            SchemaSheetMap(standard_name= "raw_data", 
                                         alternate_names =["raw_data"],
-                                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                         alternate_names=["uuid", "X_uuid"])],  
                                         )],
-        schema_unloaded_sheets=[SheetMapping(standard_name="read_me", 
+        schema_unloaded_sheets=[SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"])]
     )
 
@@ -41,14 +41,14 @@ def invalid_schema_2():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             ),
-                            SheetMapping(standard_name= "clean_data", 
+                            SchemaSheetMap(standard_name= "clean_data", 
                                         alternate_names =["raw_data"],
-                                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                         alternate_names=["uuid", "X_uuid"])],  
                                         )],
         schema_unloaded_sheets=[]
@@ -59,19 +59,19 @@ def invalid_schema_3():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             ),
-                            SheetMapping(standard_name= "raw_data", 
+                            SchemaSheetMap(standard_name= "raw_data", 
                                         alternate_names =["raw_data"],
-                                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                         alternate_names=["uuid", "X_uuid"])],  
                                         )],
-        schema_unloaded_sheets=[SheetMapping(standard_name="read_me", 
+        schema_unloaded_sheets=[SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"]),
-                        SheetMapping(standard_name="analysis", 
+                        SchemaSheetMap(standard_name="analysis", 
                         alternate_names= ["read_me"])]
     )
 
@@ -80,19 +80,19 @@ def invalid_schema_4():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             ),
-                            SheetMapping(standard_name= "raw_data", 
+                            SchemaSheetMap(standard_name= "raw_data", 
                                         alternate_names =["raw_data"],
-                                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                         alternate_names=["uuid", "X_uuid"])],  
                                         )],
-        schema_unloaded_sheets=[SheetMapping(standard_name="read_me", 
+        schema_unloaded_sheets=[SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"]),
-                        SheetMapping(standard_name="raw_data", 
+                        SchemaSheetMap(standard_name="raw_data", 
                         alternate_names= ["raw_data"])]
     )
 
@@ -101,19 +101,19 @@ def invalid_schema_5():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                                             alternate_names =["raw_data"],
-                                            mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                            mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                             alternate_names=["uuid", "X_uuid"])],  
                                             ),
-                            SheetMapping(standard_name= "raw_data", 
+                            SchemaSheetMap(standard_name= "raw_data", 
                                         alternate_names =["raw_data"],
-                                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                                         alternate_names=["uuid", "X_uuid"])],  
                                         )],
-        schema_unloaded_sheets=[SheetMapping(standard_name="read_me", 
+        schema_unloaded_sheets=[SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"]),
-                        SheetMapping(standard_name="analysis", 
+                        SchemaSheetMap(standard_name="analysis", 
                         alternate_names= ["raw_data"])]
     )
 

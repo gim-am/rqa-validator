@@ -2,7 +2,7 @@
 from typing import Any, List
 
 from ..validators.base import ValidationResult
-from .base import SheetMapping, ColumnMapping
+from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema
 
 from ..common.list_matching import duplicate_list_items
@@ -64,7 +64,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
     def lowercase_list_strs(str_list: List[Any]) -> None:
         str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
 
-    def process_sheet_mapping(sheet: SheetMapping) -> None:
+    def process_sheet_mapping(sheet: SchemaSheetMap) -> None:
         if sheet.standard_name:
             sheet.standard_name = sheet.standard_name.lower()
         
@@ -73,7 +73,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         for col in sheet.mandatory_columns:
             process_column_mapping(col)
         
-    def process_column_mapping(col: ColumnMapping | None) -> None:
+    def process_column_mapping(col: SchemaColumnMap | None) -> None:
         if col is None:
             return
     

@@ -1,8 +1,8 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import  SheetMapping, ColumnMapping
-from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
+from rqa_validator.models.base import  SchemaSheetMap, SchemaColumnMap
+from rqa_validator.loaders.excel_loader import DataColumnMap, DataSheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.data_validators.nan_check_validator import NaNCheck
 from rqa_validator.validators.base import BaseValidator
@@ -22,9 +22,9 @@ def valid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid", "uuid2"],
                                                            is_unique=True)],  
                         )
@@ -37,12 +37,12 @@ def invalid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True),
-                                            ColumnMapping(standard_name="uuid2",
+                                            SchemaColumnMap(standard_name="uuid2",
                                                            alternate_names=["uuid2"],
                                                            is_unique=True)],  
                         )
@@ -60,12 +60,12 @@ def valid_excel_data():
         "question2":["a", "c", "f", "a", "a"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         ]
     
@@ -81,12 +81,12 @@ def invalid_excel_data():
         "question2":["a", "c", "f", "a", "a"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         ]
     
@@ -102,12 +102,12 @@ def invalid_excel_data2():
         "question2":["a", "999", "f", "a", "a"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         ]
     
@@ -123,12 +123,12 @@ def invalid_excel_data3():
         "question2":["a", "b", "f", "a", "a"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_dataxxx",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
                         ]
     
@@ -145,14 +145,14 @@ def invalid_excel_data4():
         "question2":["a", "b", "f", "a", "a"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "uuid2", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'uuid2',
+                                   DataColumnMap(schema_column_name = 'uuid2',
                                    data_column_name='uuid2')]),
                         ]
     

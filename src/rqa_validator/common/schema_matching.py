@@ -1,9 +1,9 @@
-from ..loaders.base import ColumnMap, SheetMap
+from ..loaders.base import DataColumnMap, DataSheetMap
 from ..models.base_dataset import BaseDatasetSchema
 from typing import  List
 
 
-def get_matching_unique_columns(schema: BaseDatasetSchema, loaded_data: SheetMap, sheet_name: str)  -> List[ColumnMap]:
+def get_matching_unique_columns(schema: BaseDatasetSchema, loaded_data: DataSheetMap, sheet_name: str)  -> List[DataColumnMap]:
         """matches schema unique columns to loaded data column
 
         Args:
@@ -15,7 +15,7 @@ def get_matching_unique_columns(schema: BaseDatasetSchema, loaded_data: SheetMap
         """
 
         sheet = schema.get_schema_loaded_sheet(sheet_name)
-        matching_columns: List[ColumnMap] = []
+        matching_columns: List[DataColumnMap] = []
 
         if sheet is not None:
             unique_columns = sheet.get_unique_columns()

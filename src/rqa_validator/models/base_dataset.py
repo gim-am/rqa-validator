@@ -1,6 +1,6 @@
 from typing import List
 
-from ..models.base import ColumnMapping, SheetMapping, ProcessValueMap
+from ..models.base import SchemaColumnMap, SchemaSheetMap, ProcessValueMap
 
 from ..validators.base import BaseValidator
 from abc import abstractmethod, ABC
@@ -10,11 +10,11 @@ from dataclasses import dataclass, field
 class BaseDatasetSchema:
     dataset_type: str = str()
     # sheets that have to be loaded and used for further validation
-    schema_loaded_sheets: List[SheetMapping]= field(default_factory=list)
+    schema_loaded_sheets: List[SchemaSheetMap]= field(default_factory=list)
     # sheets that should exist but dont need to be loaded
-    schema_unloaded_sheets: List[SheetMapping]   = field(default_factory=list) 
+    schema_unloaded_sheets: List[SchemaSheetMap]   = field(default_factory=list) 
 
-    def get_schema_loaded_sheet(self, sheet_name: str)  -> SheetMapping | None:
+    def get_schema_loaded_sheet(self, sheet_name: str)  -> SchemaSheetMap | None:
         """Gets the details and data for a loaded sheet if it exists.
 
         Args:
@@ -43,7 +43,7 @@ class BaseDatasetSchema:
             return sheet.get_column_standard_names()
         
 
-    def get_schema_unloaded_sheet(self, sheet_name: str)  -> SheetMapping | None:
+    def get_schema_unloaded_sheet(self, sheet_name: str)  -> SchemaSheetMap | None:
         """Gets the details and data for an unloaded sheet if it exists.
 
         Args:
@@ -57,7 +57,7 @@ class BaseDatasetSchema:
                 return sheet
         return None
     
-    def add_loaded_sheet(self, sheet: SheetMapping) -> SheetMapping | None:
+    def add_loaded_sheet(self, sheet: SchemaSheetMap) -> SchemaSheetMap | None:
         """Adds a sheet to schema_loaded_sheets if the standard_name provided
         does not exist.
         
@@ -77,7 +77,7 @@ class BaseDatasetSchema:
             self.schema_loaded_sheets.append(sheet)
             return sheet
     
-    def add_unloaded_sheet(self, sheet: SheetMapping) -> SheetMapping | None:
+    def add_unloaded_sheet(self, sheet: SchemaSheetMap) -> SchemaSheetMap | None:
         """Adds a sheet to schema_unloaded_sheets if the standard_name provided
         does not exist.
         
@@ -97,7 +97,7 @@ class BaseDatasetSchema:
             self.schema_unloaded_sheets.append(sheet)
             return sheet
 
-    def add_mandatory_column_to_sheet(self, sheet_standard_name: str, column: ColumnMapping) -> SheetMapping | None:
+    def add_mandatory_column_to_sheet(self, sheet_standard_name: str, column: SchemaColumnMap) -> SchemaSheetMap | None:
         """Adds a mandatory column to an existing sheet.
            If:
             - the sheet does not exist
@@ -119,66 +119,66 @@ class BaseDatasetSchema:
 
 @dataclass
 class DefaultDatasetSchema(BaseDatasetSchema):
-    schema_loaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
-        SheetMapping(standard_name= "raw_data", 
+    schema_loaded_sheets: List[SchemaSheetMap] = field(default_factory=lambda:[
+        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"],
                                                            is_unique=True),
-                                            ColumnMapping(standard_name="consent",
+                                            SchemaColumnMap(standard_name="consent",
                                                             alternate_names=[],
                                                             process_values=[ProcessValueMap(process_name='consent_check_validation',
                                                                                           values=['yes'])])
                                             ]),
-        SheetMapping(standard_name= "clean_data", 
+        SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns = [ColumnMapping(standard_name="uuid",
+                        mandatory_columns = [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"],
                                                            is_unique=True),                                             
-                                             ColumnMapping(standard_name="pop_group",
+                                             SchemaColumnMap(standard_name="pop_group",
                                                            alternate_names=["pop_group"]),
-                                             ColumnMapping(standard_name="weight",
+                                             SchemaColumnMap(standard_name="weight",
                                                            alternate_names=["weight"]),
-                                             ColumnMapping(standard_name="person_id",
+                                             SchemaColumnMap(standard_name="person_id",
                                                            alternate_names=["person_id"])
                                             ]),
-        SheetMapping(standard_name= "deletion_log", 
+        SchemaSheetMap(standard_name= "deletion_log", 
                         alternate_names =["deletion_log"],                        
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                           is_unique=True),
                                              ]),
-        SheetMapping(standard_name="cleaning_log", 
+        SchemaSheetMap(standard_name="cleaning_log", 
                         alternate_names=["clog_logbook"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="change_type",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="change_type",
                                                           alternate_names=["changed"],
                                                           process_values=[ProcessValueMap(process_name='cleaning_log_validation',
                                                                                           values=['yes', 'change_response', 'blank_response'])]),
-                                            ColumnMapping(standard_name="question")]),  
-        SheetMapping(standard_name="kobo_survey", 
+                                            SchemaColumnMap(standard_name="question")]),  
+        SchemaSheetMap(standard_name="kobo_survey", 
                         alternate_names= ["survey"],
-                        mandatory_columns = [ColumnMapping(standard_name='type',
+                        mandatory_columns = [SchemaColumnMap(standard_name='type',
                                                            process_values=[ProcessValueMap(process_name='data_type_numeric_check',
                                                                                            values = ['integer', 'decimal']),
                                                                             ProcessValueMap(process_name='data_type_temporal_check',
                                                                                            values = ['date'])]),
-                                             ColumnMapping(standard_name= 'name')]), 
-        SheetMapping(standard_name= "kobo_choices", 
+                                             SchemaColumnMap(standard_name= 'name')]), 
+        SchemaSheetMap(standard_name= "kobo_choices", 
                         alternate_names =["choices"],
-                        mandatory_columns = [ColumnMapping(standard_name='list_name'),
-                                             ColumnMapping(standard_name='name')])                            
+                        mandatory_columns = [SchemaColumnMap(standard_name='list_name'),
+                                             SchemaColumnMap(standard_name='name')])                            
     ])
-    schema_unloaded_sheets: List[SheetMapping] = field(default_factory=lambda:[
-        SheetMapping(standard_name="read_me", 
+    schema_unloaded_sheets: List[SchemaSheetMap] = field(default_factory=lambda:[
+        SchemaSheetMap(standard_name="read_me", 
                         alternate_names= ["read_me"]),        
-        SheetMapping(standard_name="sampling_info", 
+        SchemaSheetMap(standard_name="sampling_info", 
                         alternate_names=["sampling_info"], 
                         required=False),
-        SheetMapping(standard_name= "variable_tracker", 
+        SchemaSheetMap(standard_name= "variable_tracker", 
                         alternate_names =["variable_tracker"]),
-        SheetMapping(standard_name="enumerator_performance_log", 
+        SchemaSheetMap(standard_name="enumerator_performance_log", 
                         alternate_names=["enumerator_performance_log"], 
                         required=False)
     ])

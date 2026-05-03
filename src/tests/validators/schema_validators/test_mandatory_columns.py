@@ -2,10 +2,10 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import SheetMapping, ColumnMapping
+from rqa_validator.models.base import SchemaSheetMap, SchemaColumnMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 
-from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import DataColumnMap, DataSheetMap, ExcelLoaderData
 from rqa_validator.validators.schema_validators.mandatory_column_validator import MandatoryColumns
 from rqa_validator.validators.base import BaseValidator
 
@@ -37,9 +37,9 @@ def valid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])],  
                         )],
         schema_unloaded_sheets=[]
@@ -50,7 +50,7 @@ def valid_no_mandatory_columns():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"])],
         schema_unloaded_sheets=[]
     )
@@ -62,12 +62,12 @@ def valid_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
         data_columns=["uuid"]
-        ,column_map=[ColumnMap(schema_column_name = 'uuid',
+        ,column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]
     )
     
@@ -79,13 +79,13 @@ def invalid_schema_missing_sheet():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])]),
-                        SheetMapping(standard_name= "clean_data", 
+                        SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"])])    ],
         schema_unloaded_sheets=[]
     )
@@ -97,10 +97,10 @@ def invalid_schema_missing_mandatory_column():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "raw_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
 
-                        mandatory_columns= [ColumnMapping(standard_name="uuidx",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuidx",
                                                            alternate_names=[ "X_uuid"])]),  ],
         schema_unloaded_sheets=[]
     )

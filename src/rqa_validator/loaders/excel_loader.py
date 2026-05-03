@@ -5,9 +5,9 @@ import polars as pl
 from pathlib import Path
 from typing import List
 
-from .base import SheetMap, ColumnMap
+from .base import DataSheetMap, DataColumnMap
 from ..validators.base import ValidationResult
-from ..models.base import   SheetMapping
+from ..models.base import   SchemaSheetMap
 from ..models.base_dataset import BaseDatasetSchema
 from ..common.list_matching import FuzzMatch, match_list_to_list
 from config import settings
@@ -15,8 +15,8 @@ from config import settings
 
 @dataclass
 class ExcelLoaderData:
-    loaded_sheets: List[SheetMap] = field(default_factory=list)
-    unloaded_sheets: List[SheetMap] = field(default_factory=list)
+    loaded_sheets: List[DataSheetMap] = field(default_factory=list)
+    unloaded_sheets: List[DataSheetMap] = field(default_factory=list)
     unexpected_sheets: List = field(default_factory=list)
 
     def get_loaded_sheet_mapped_names(self) -> List[str]:
@@ -35,7 +35,7 @@ class ExcelLoaderData:
         """
         return [sheet.schema_sheet_name for sheet in self.unloaded_sheets]
     
-    def get_loaded_sheet(self, sheet_name: str)  -> SheetMap | None:
+    def get_loaded_sheet(self, sheet_name: str)  -> DataSheetMap | None:
         """Gets the details and data for a loaded sheet if it exists.
 
         Args:
@@ -49,7 +49,7 @@ class ExcelLoaderData:
                 return sheet
         return None
     
-    def get_sheet_matches(self, sheet_name: str) -> List[SheetMap]:
+    def get_sheet_matches(self, sheet_name: str) -> List[DataSheetMap]:
         """Gets all the sheets matched with a given schema_name.
 
         Args:
@@ -58,7 +58,7 @@ class ExcelLoaderData:
         Returns:
             List[SheetMap] | None: Loaded sheet details if found
         """
-        sheets: List[SheetMap] = []
+        sheets: List[DataSheetMap] = []
         for sheet in self.loaded_sheets:
             if sheet.schema_sheet_name == sheet_name:
                 sheets.append(sheet)
@@ -140,7 +140,7 @@ class ExcelLoader:
                 if schema_sheet is not None:
                     # it should not be none as it was just matched.
                     column_results, column_matches = self.match_excel_columns_to_schema(df_columns, schema_sheet)
-                    data.loaded_sheets.append(SheetMap(schema_sheet_name=l_mapped_name,
+                    data.loaded_sheets.append(DataSheetMap(schema_sheet_name=l_mapped_name,
                                                       data_sheet_name = excel_sheet_name,
                                                       data=df,
                                                       data_columns=df_columns,
@@ -160,7 +160,7 @@ class ExcelLoader:
             # 2, 4
             elif (u_mapped_name ):
                 # sheets that are expected but dont need to be loaded
-                data.unloaded_sheets.append(SheetMap(schema_sheet_name=u_mapped_name,
+                data.unloaded_sheets.append(DataSheetMap(schema_sheet_name=u_mapped_name,
                                                      data_sheet_name=excel_sheet_name))
                 results.extend(u_results)
             else:
@@ -171,9 +171,9 @@ class ExcelLoader:
     
 
     
-    def match_excel_columns_to_schema(self, excel_columns: List, schema_sheet: SheetMapping):
+    def match_excel_columns_to_schema(self, excel_columns: List, schema_sheet: SchemaSheetMap):
         results: List[ValidationResult] = []
-        matches: List[ColumnMap] = []
+        matches: List[DataColumnMap] = []
 
         for column in schema_sheet.mandatory_columns:
             literal_matches, fuzzy_matched_values = match_list_to_list(column.combine(), 
@@ -185,7 +185,7 @@ class ExcelLoader:
                     # because the schema is prevalidated there should only
                     # be one literal match unless there are multiple alternate 
                     # name matches
-                    matches.append(ColumnMap(data_column_name=literal_matches[0]
+                    matches.append(DataColumnMap(data_column_name=literal_matches[0]
                                              ,schema_column_name = column.standard_name))
                     
                 else:
@@ -200,7 +200,7 @@ class ExcelLoader:
                 continue
             elif fuzzy_matched_values:
                 if len(fuzzy_matched_values[0].matches) == 1:
-                    matches.append(ColumnMap(data_column_name=fuzzy_matched_values[0].standard_name
+                    matches.append(DataColumnMap(data_column_name=fuzzy_matched_values[0].standard_name
                                              ,schema_column_name = column.standard_name))
 
                     results.append(ValidationResult(
@@ -220,7 +220,7 @@ class ExcelLoader:
                                     ))  
         return results, matches
 
-    def match_excel_sheet_to_schema(self, excel_sheet_name: str, schema_sheets: List[SheetMapping]) -> tuple[str, List[ValidationResult]]:
+    def match_excel_sheet_to_schema(self, excel_sheet_name: str, schema_sheets: List[SchemaSheetMap]) -> tuple[str, List[ValidationResult]]:
         """Trys to match an excel sheet name to a schema sheet name. 
             
             First, a literal match is attempted. If one is found this 

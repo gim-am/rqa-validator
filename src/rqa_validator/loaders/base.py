@@ -3,21 +3,21 @@ from typing import List
 import polars as pl
 
 @dataclass
-class ColumnMap():
+class DataColumnMap():
     schema_column_name:str
     data_column_name:str
 
 
 @dataclass
-class SheetMap:
+class DataSheetMap:
     schema_sheet_name:str
     data_sheet_name: str
     data: pl.DataFrame = field(default_factory=pl.DataFrame)
     # this operation is ran numerous times so might as well store it once here
     data_columns: List[str] = field(default_factory=list)
-    column_map: List[ColumnMap] = field(default_factory=list)
+    column_map: List[DataColumnMap] = field(default_factory=list)
 
-    def get_column_map(self, search_column: str) -> ColumnMap | None:
+    def get_column_map(self, search_column: str) -> DataColumnMap | None:
         """Searches if a schema column name was mapped during data load.
         Returns a column mapping if found
 

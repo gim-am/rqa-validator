@@ -16,7 +16,7 @@ from ..validators.data_validators.cross_sheet_id_check_validator import CrossShe
 from ..validators.schema_validators.column_name_validator import  ColumnNameCheck
 from ..validators.data_validators.nan_check_validator import NaNCheck
 from ..validators.base import BaseValidator
-from .base import SheetMapping, ColumnMapping
+from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 
 
@@ -28,12 +28,12 @@ from typing import List
 class JMMIDatasetSchema(DefaultDatasetSchema):
     dataset_type = "JMMI"
     def __post_init__(self):
-        self.add_unloaded_sheet(SheetMapping(standard_name="meb_analysis", 
+        self.add_unloaded_sheet(SchemaSheetMap(standard_name="meb_analysis", 
                                                     alternate_names= ["meb"]))
-        self.add_unloaded_sheet(SheetMapping(standard_name="mfs_analysis", 
+        self.add_unloaded_sheet(SchemaSheetMap(standard_name="mfs_analysis", 
                                                     alternate_names= ["mfs"]))
         self.add_mandatory_column_to_sheet('clean_data',
-                                           ColumnMapping(standard_name="stratum",
+                                           SchemaColumnMap(standard_name="stratum",
                                                            alternate_names=["stratum"]))
 
 

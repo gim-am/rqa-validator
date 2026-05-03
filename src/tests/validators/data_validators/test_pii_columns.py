@@ -1,8 +1,8 @@
 import pytest
 import polars as pl
 
-from rqa_validator.loaders.base import ColumnMap
-from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
+from rqa_validator.loaders.base import DataColumnMap
+from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
 from rqa_validator.validators.data_validators.pii_validator import PiiColumns
 from rqa_validator.validators.base import BaseValidator
 
@@ -19,7 +19,7 @@ def valid_excel_data():
         "uuid": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -35,7 +35,7 @@ def invalid_excel_data():
         "phone_number": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -51,7 +51,7 @@ def invalid_fuzzy_excel_data():
         "phone_number1": [1, 2, 3, 4, 5],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -69,7 +69,7 @@ def invalid_excel_data2():
         "another_column": ['1', '2', '3', '4', '0557456783'],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -87,12 +87,12 @@ def invalid_excel_data3():
         "another_column": ['1', '2', '3', '4', '0557456783'],
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
         data_columns=["uuid"],
-        column_map=[ColumnMap(data_column_name='uuid',
+        column_map=[DataColumnMap(data_column_name='uuid',
                               schema_column_name='uuid')]
     )
     

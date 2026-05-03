@@ -1,8 +1,8 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import ProcessValueMap, SheetMapping, ColumnMapping
-from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
+from rqa_validator.models.base import ProcessValueMap, SchemaSheetMap, SchemaColumnMap
+from rqa_validator.loaders.excel_loader import DataColumnMap, DataSheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.data_validators.survey_choices_validator import SurveyChoicesCheck
 from rqa_validator.validators.base import BaseValidator
@@ -19,25 +19,25 @@ def valid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         )                        
-                        ,SheetMapping(standard_name="kobo_survey", 
+                        ,SchemaSheetMap(standard_name="kobo_survey", 
                         alternate_names= ["survey"],
-                        mandatory_columns = [ColumnMapping(standard_name='type',
+                        mandatory_columns = [SchemaColumnMap(standard_name='type',
                                                            process_values=[ProcessValueMap(process_name='data_type_numeric_check',
                                                                                            values = ['integer', 'decimal']),
                                                                             ProcessValueMap(process_name='data_type_temporal_check',
                                                                                            values = ['date'])]),
-                                             ColumnMapping(standard_name= 'name')]),  
+                                             SchemaColumnMap(standard_name= 'name')]),  
                                              
-                        SheetMapping(standard_name= "kobo_choices", 
+                        SchemaSheetMap(standard_name= "kobo_choices", 
                                         alternate_names =["choices"],
-                                        mandatory_columns = [ColumnMapping(standard_name='list_name'),
-                                                            ColumnMapping(standard_name='name')])                              
+                                        mandatory_columns = [SchemaColumnMap(standard_name='list_name'),
+                                                            SchemaColumnMap(standard_name='name')])                              
    ],
         schema_unloaded_sheets=[]
     )
@@ -66,30 +66,30 @@ def valid_excel_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour', 'super_food']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -116,30 +116,30 @@ def missing_sheet_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_surveyXXX",
                         data_sheet_name="kobo_surveyXXX",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -166,30 +166,30 @@ def missing_column_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_nameXXX',
+                        column_map=[DataColumnMap(schema_column_name = 'list_nameXXX',
                                    data_column_name='list_nameXXX'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -217,30 +217,30 @@ def missing_id_column_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuidXXX',
+                        column_map=[DataColumnMap(schema_column_name = 'uuidXXX',
                                    data_column_name='uuidXXX')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -267,30 +267,30 @@ def invalid_select_one_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -317,30 +317,30 @@ def invalid_select_multiple_data():
         "name":['male', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -368,30 +368,30 @@ def invalid_choice_data():
         "name":['male man', 'female', 'other', 'rice','pasta', 'flour']
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2", 'question3', 'other'],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_survey",
                         data_sheet_name="kobo_survey",
                         data=df_survey,
                         data_columns=["type", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'type',
+                        column_map=[DataColumnMap(schema_column_name = 'type',
                                    data_column_name='type'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="kobo_choices",
                         data_sheet_name="kobo_choices",
                         data=df_choices,
                         data_columns=["list_name", "name"],
-                        column_map=[ColumnMap(schema_column_name = 'list_name',
+                        column_map=[DataColumnMap(schema_column_name = 'list_name',
                                    data_column_name='list_name'),
-                                   ColumnMap(schema_column_name = 'name',
+                                   DataColumnMap(schema_column_name = 'name',
                                    data_column_name='name')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)

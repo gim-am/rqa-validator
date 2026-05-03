@@ -1,8 +1,8 @@
 import pytest
 import polars as pl
 
-from rqa_validator.models.base import ProcessValueMap, SheetMapping, ColumnMapping
-from rqa_validator.loaders.excel_loader import ColumnMap, SheetMap, ExcelLoaderData
+from rqa_validator.models.base import ProcessValueMap, SchemaSheetMap, SchemaColumnMap
+from rqa_validator.loaders.excel_loader import DataColumnMap, DataSheetMap, ExcelLoaderData
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.data_validators.cleaning_log_validator import CleaningLog
 from rqa_validator.validators.base import BaseValidator
@@ -37,27 +37,27 @@ def valid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         ),
-                        SheetMapping(standard_name= "raw_data", 
+                        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         )
-                        ,SheetMapping(standard_name= "cleaning_log", 
+                        ,SchemaSheetMap(standard_name= "cleaning_log", 
                         alternate_names =["cleaning_log"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="question"),
-                                            ColumnMapping(standard_name="change_type",
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="question"),
+                                            SchemaColumnMap(standard_name="change_type",
                                                           alternate_names=["changed"],
                                                           process_values=[ProcessValueMap(process_name='cleaning_log_validation',
                                                                                           values=['yes', 'change_response'])])],  
@@ -72,27 +72,27 @@ def invalid_schema():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         ),
-                        SheetMapping(standard_name= "raw_data", 
+                        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         )
-                        ,SheetMapping(standard_name= "cleaning_log", 
+                        ,SchemaSheetMap(standard_name= "cleaning_log", 
                         alternate_names =["cleaning_log"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="question"),
-                                            ColumnMapping(standard_name="change_type")],  
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="question"),
+                                            SchemaColumnMap(standard_name="change_type")],  
                         )                                   
                                                            ],
         schema_unloaded_sheets=[]
@@ -103,27 +103,27 @@ def invalid_schema2():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         ),
-                        SheetMapping(standard_name= "raw_data", 
+                        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         )
-                        ,SheetMapping(standard_name= "cleaning_logxxx", 
+                        ,SchemaSheetMap(standard_name= "cleaning_logxxx", 
                         alternate_names =["cleaning_logxxx"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="question"),
-                                            ColumnMapping(standard_name="change_type")],  
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="question"),
+                                            SchemaColumnMap(standard_name="change_type")],  
                         )                                   
                                                            ],
         schema_unloaded_sheets=[]
@@ -134,26 +134,26 @@ def invalid_schema3():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         ),
-                        SheetMapping(standard_name= "raw_data", 
+                        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuidxxxx",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuidxxxx",
                                                            is_unique=True)],  
                         )
-                        ,SheetMapping(standard_name= "cleaning_log", 
+                        ,SchemaSheetMap(standard_name= "cleaning_log", 
                         alternate_names =["cleaning_log"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="question"),
-                                            ColumnMapping(standard_name="change_type")],  
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="question"),
+                                            SchemaColumnMap(standard_name="change_type")],  
                         )                                   
                                                            ],
         schema_unloaded_sheets=[]
@@ -164,27 +164,27 @@ def invalid_schema4():
     
     return BaseDatasetSchema(
         dataset_type="jmmi",
-        schema_loaded_sheets=[SheetMapping(standard_name= "clean_data", 
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
                         alternate_names =["clean_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         ),
-                        SheetMapping(standard_name= "raw_data", 
+                        SchemaSheetMap(standard_name= "raw_data", 
                         alternate_names =["raw_data"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuidmiss",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuidmiss",
                                                            alternate_names=["uuidx", "X_uuid"],
                                                            is_unique=True)],  
                         )
-                        ,SheetMapping(standard_name= "cleaning_log", 
+                        ,SchemaSheetMap(standard_name= "cleaning_log", 
                         alternate_names =["cleaning_log"],
-                        mandatory_columns= [ColumnMapping(standard_name="uuid",
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
-                                            ColumnMapping(standard_name="new_value"),
-                                            ColumnMapping(standard_name="old_value"),
-                                            ColumnMapping(standard_name="question"),
-                                            ColumnMapping(standard_name="change_type",
+                                            SchemaColumnMap(standard_name="new_value"),
+                                            SchemaColumnMap(standard_name="old_value"),
+                                            SchemaColumnMap(standard_name="question"),
+                                            SchemaColumnMap(standard_name="change_type",
                                                           alternate_names=["changed"],
                                                           process_values=[ProcessValueMap(process_name='cleaning_log_validation',
                                                                                           values=['yes', 'change_response'])])],  
@@ -217,34 +217,34 @@ def valid_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -273,34 +273,34 @@ def invalid_clean_data_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -330,34 +330,34 @@ def invalid_cleanlog_data_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -386,34 +386,34 @@ def missing_question_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question6", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -442,34 +442,34 @@ def missing_question_log_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -499,34 +499,34 @@ def missing_sheet_1_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_datamis",
                         data_sheet_name="clean_datamis",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -555,34 +555,34 @@ def missing_sheet_2_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_logmiss",
                         data_sheet_name="cleaning_logmiss",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -613,34 +613,34 @@ def missing_column_1_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuidmiss", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuidmiss',
+                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
                                    data_column_name='uuidmiss')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -670,34 +670,34 @@ def missing_column_2_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuidmiss", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuidmiss',
+                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
                                    data_column_name='uuidmiss'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -727,34 +727,34 @@ def missing_column_3_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_valuemiss", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_valuemiss',
+                                   DataColumnMap(schema_column_name = 'new_valuemiss',
                                    data_column_name='new_valuemiss'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -783,34 +783,34 @@ def missing_column_4_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuidmiss", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuidmiss',
+                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
                                    data_column_name='uuidmiss')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "questionmiss", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'questionmiss',
+                                   DataColumnMap(schema_column_name = 'questionmiss',
                                    data_column_name='questionmiss'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -839,35 +839,35 @@ def missing_column_5_excel_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuidmiss',
+                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
                                    data_column_name='uuidmiss')]
                         ),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -897,34 +897,34 @@ def multi_entry_data():
         "change_type": ["change_response", "change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')
                                    ])]
     
@@ -954,34 +954,34 @@ def valid_excel_data_empty_value():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1010,34 +1010,34 @@ def invalid_excel_data_empty_value():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1066,32 +1066,32 @@ def missing_change_type():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1120,34 +1120,34 @@ def same_old_data():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1175,32 +1175,32 @@ def missing_old_data_column():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1229,34 +1229,34 @@ def missing_raw_data_sheet():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_dataXXX",
                         data_sheet_name="raw_dataXXX",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1285,34 +1285,34 @@ def invalid_clean_data2():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'question',
+                                   DataColumnMap(schema_column_name = 'question',
                                    data_column_name='question'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
@@ -1342,34 +1342,34 @@ def missing_question_column():
         "change_type": ["change_response"]
     })
     
-    loaded_sheets = [SheetMap(
+    loaded_sheets = [DataSheetMap(
                         schema_sheet_name="clean_data",
                         data_sheet_name="clean_data",
                         data=df_clean,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid')]),
-                        SheetMap(
+                        DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
                         data=df_clean_log,
                         data_columns=["uuid", "questionmiss", "new_value", "change_type", "old_value"],
-                        column_map=[ColumnMap(schema_column_name = 'uuid',
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
                                    data_column_name='uuid'),
-                                   ColumnMap(schema_column_name = 'new_value',
+                                   DataColumnMap(schema_column_name = 'new_value',
                                    data_column_name='new_value'),
-                                   ColumnMap(schema_column_name = 'questionmiss',
+                                   DataColumnMap(schema_column_name = 'questionmiss',
                                    data_column_name='questionmiss'),
-                                   ColumnMap(schema_column_name = 'change_type',
+                                   DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   ColumnMap(schema_column_name = 'old_value',
+                                   DataColumnMap(schema_column_name = 'old_value',
                                    data_column_name='old_value')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)

@@ -3,7 +3,7 @@ import pytest
 import polars as pl
 
 
-from rqa_validator.loaders.excel_loader import SheetMap, ExcelLoaderData
+from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
 from rqa_validator.validators.schema_validators.column_name_validator import ColumnNameCheck
 from rqa_validator.validators.base import BaseValidator
 
@@ -24,7 +24,7 @@ def valid_excel_data():
         "SomeColumn": [1, 2, 3, 4, 5]
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -41,7 +41,7 @@ def invalid_excel_data():
         "some column": [1, 2, 3, 4, 5]
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
@@ -58,7 +58,7 @@ def invalid_excel_data2():
         "some@column": [1, 2, 3, 4, 5]
     })
     
-    loaded_sheet = SheetMap(
+    loaded_sheet = DataSheetMap(
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
