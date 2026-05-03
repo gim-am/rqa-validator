@@ -7,7 +7,7 @@ from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheet
 
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 
@@ -244,7 +244,7 @@ class SurveyChoicesCheck(BaseValidator):
                     results.append(ValidationResult(
                         rule = self.name,
                         message = f'There were {difference_df.height} values found in the {sheet} sheet that were not reflected in the {self.survey_sheet} sheet. Check the output for details.'
-                        ,severity = 'error'
+                        ,severity = SeverityLevel.ERROR
                         ,sheet_name=sheet
                         , details=difference_df.to_dict()
                     ))

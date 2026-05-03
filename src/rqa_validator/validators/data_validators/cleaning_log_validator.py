@@ -3,7 +3,7 @@ from ...common.list_matching import filter_list, match_list
 from ...common.expression_builder import create_column_difference_expression
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ..base import BaseValidator, ValidationResult
+from ..base import BaseValidator, ValidationResult, SeverityLevel
 from ..helpers import (get_data_loaded_columns, 
                        get_data_loaded_sheets, 
                        get_data_sheet_ids, 
@@ -249,7 +249,7 @@ class CleaningLog(BaseValidator):
                     results.append(ValidationResult(
                         rule = self.name,
                         message = f'There were {difference_df.height} differences found in the {self.clean_data_sheet} sheet that were not reflected in the {self.cleaning_log_sheet} sheet. Check the output for details.'
-                        ,severity = 'error'
+                        ,severity = SeverityLevel.ERROR
                         ,sheet_name=self.cleaning_log_sheet
                         , details=difference_df.to_dict()
                     ))
@@ -272,7 +272,7 @@ class CleaningLog(BaseValidator):
                     message = f'{multiple_change_df.select(data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name) \
                                     .n_unique()} Ids had multiple changes for the same question. \
                                 These were not validated. Check the output file {multiple_changes_filename} for details.'
-                    ,severity = 'warning'
+                    ,severity = SeverityLevel.WARNING
                     ,details = multiple_change_df.to_dict()
                 ))
 
@@ -286,7 +286,7 @@ class CleaningLog(BaseValidator):
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'{same_value_df.height} row/s had {data_loaded_columns[self.cleaning_log_old_value_column].data_column_name} equal {data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}. Check the output file {multiple_changes_filename} for details.'
-                    ,severity = 'warning'
+                    ,severity = SeverityLevel.WARNING
                     ,details = same_value_df.to_dict()
                 ))
 
@@ -309,7 +309,7 @@ class CleaningLog(BaseValidator):
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'The following questions are listed in {data_loaded_sheets[self.cleaning_log_sheet] .data_sheet_name} but were not found in {data_loaded_sheets[self.clean_data_sheet] .data_sheet_name}: {missing_quesitons}.'
-                    ,severity = 'Warning'
+                    ,severity = SeverityLevel.WARNING
                 ))
                 questions = filter_list(questions, missing_quesitons)
                 if len(questions) < 1:
@@ -409,7 +409,7 @@ class CleaningLog(BaseValidator):
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the {validation_results_filename} file.'
-                    ,severity = 'error'
+                    ,severity = SeverityLevel.ERROR
                     ,sheet_name=self.cleaning_log_sheet
                     , details=difference_df.to_dict()
                 ))

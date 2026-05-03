@@ -2,7 +2,7 @@ from config import settings
 from ...common.list_matching import match_list_to_list
 from ...loaders.base import DataColumnMap
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 from ...validators.config import get_pii_columns
 
 
@@ -67,7 +67,7 @@ class PiiColumns(BaseValidator):
                     results.append(ValidationResult(
                                 rule = self.name + ' literal comparison',
                                 message = f'The sheet {sheet.data_sheet_name} has a possible pii column. Check to see if it should be removed: {item}.'
-                                ,severity = 'warning'
+                                ,severity = SeverityLevel.WARNING
                                 ,sheet_name = sheet.data_sheet_name
                                 ,column_name = item
                                 ))
@@ -76,7 +76,7 @@ class PiiColumns(BaseValidator):
                     results.append(ValidationResult(
                                 rule = self.name + ' fuzzy match comparison',
                                 message = f'The sheet {sheet.data_sheet_name} has a possible pii column. Check to the details to see if it should be removed.'
-                                ,severity = 'warning'
+                                ,severity = SeverityLevel.WARNING
                                 ,sheet_name = sheet.data_sheet_name
                                 ,column_name = item.standard_name
                                 , details=item.matches
@@ -132,7 +132,7 @@ class PiiColumns(BaseValidator):
                 results.append(ValidationResult(
                             rule = self.name,
                             message = f'The sheet {sheet.data_sheet_name} contains possible pii data. Check the output for details.'
-                            ,severity = 'error'
+                            ,severity = SeverityLevel.ERROR
                             ,sheet_name= sheet.data_sheet_name
                             ,details=final_df.to_dict()
                         ))

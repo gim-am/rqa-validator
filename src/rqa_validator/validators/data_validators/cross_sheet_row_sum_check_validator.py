@@ -1,7 +1,7 @@
 from ...validators.helpers import get_data_loaded_sheets
 
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from dataclasses import dataclass
@@ -66,7 +66,7 @@ class CrossSheetRowSumCheck(BaseValidator):
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'Sum of row counts for sheets {child_message} does not equal {self.master_sheet} rows ({master_data_count}). The difference is {missing_rows}.'
-                ,severity = 'error'
+                ,severity = SeverityLevel.ERROR
         ))
 
         return results

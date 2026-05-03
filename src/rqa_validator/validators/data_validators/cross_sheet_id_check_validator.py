@@ -3,7 +3,7 @@ from ...validators.helpers import get_data_loaded_sheet, get_data_loaded_sheets,
 from ...common.schema_matching import get_matching_unique_columns
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from typing import List
@@ -98,7 +98,7 @@ class CrossSheetIdCheck(BaseValidator):
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_matching_columns.data_column_name} were not found in sheet {data_loaded_sheets[self.master_sheet].data_sheet_name} column {master_matching_columns.data_column_name}. Check output for details. '
-                    ,severity = 'error'
+                    ,severity = SeverityLevel.ERROR
                     , sheet_name = child_loaded_sheet.data_sheet_name
                     , column_name = child_matching_columns.data_column_name
                     , details=  {child_matching_columns.data_column_name: missing_ids}

@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     FUZZY_MATCH_STRING_LENGTH_RATIO: float = 0.7
 
     # for the NaNCheck validator 
-    NANCHECK_NUMERIC_VALUES: List =  [999, -999]
-    NANCHECK_STRING_VALUES: List = ["999", "-999"] 
+    NANCHECK_NUMERIC_VALUES: List =  [-999,-99,99, 999, -88, -888, 88, 888]
+    NANCHECK_STRING_VALUES: List = ['-999','-99','99', '999', '-88', '-888', '88', '888'] 
 
     VALIDATION_LOG_DIRECTORY: Path = Path('../validation_logs')
 

@@ -1,6 +1,6 @@
 from ...common.list_matching import duplicate_list_items
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from typing import List
@@ -34,7 +34,7 @@ class DuplicateSheetMatches(BaseValidator):
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'Multiple excel sheets, {sheet_names}, were mapped to the same schema sheet {item}. There should be at most a 1-1 mapping for each sheet.'
-                    ,severity = 'error'
+                    ,severity = SeverityLevel.ERROR
                     ,sheet_name=item
                 ))
 

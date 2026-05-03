@@ -4,7 +4,7 @@ from ..models.preprocess import lowercase_schema_mappings, validate_schema
 
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDataset
-from ..validators.base import ValidationResult
+from ..validators.base import ValidationResult, SeverityLevel
 
 
 class ValidationPipeline:
@@ -40,6 +40,7 @@ class ValidationPipeline:
             _type_: 
         """
         all_results:List[ValidationResult] = []
+        set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR]) 
 
         try:            
             validation_errors =  validate_schema(self.schema)  
@@ -51,7 +52,7 @@ class ValidationPipeline:
             all_results.append(ValidationResult(
                     rule='SchemaValidation',
                     message=f"Schema validation encountered an error: {str(e)}",
-                    severity="admin_error"
+                    severity=SeverityLevel.ADMIN_ERROR
                 ))
             return self._compile_results(all_results)
 
@@ -66,14 +67,14 @@ class ValidationPipeline:
                 all_results.append(ValidationResult(
                     rule='ExcelFileLoading',
                     message=f"No matching sheets founf in excel file {filepath}.",
-                    severity="admin_error"
+                    severity= SeverityLevel.ADMIN_ERROR
                 ))
                 return self._compile_results(all_results)
         except Exception as e:
             all_results.append(ValidationResult(
                     rule='ExcelFileLoading',
                     message=f"Loading of the excel file {filepath} encountered an error: {str(e)}",
-                    severity="admin_error"
+                    severity=SeverityLevel.ADMIN_ERROR
                 ))
             return self._compile_results(all_results)
         
@@ -82,37 +83,35 @@ class ValidationPipeline:
                 results = validator.validate(data)
                 if results:
                     all_results.extend(results)
+                elif not [item for item in results if item.severity in set_errors]:
+                    all_results.append(ValidationResult(
+                    rule=validator.name,
+                    message=f"Validator {validator.name} passed.",
+                    severity=SeverityLevel.PASSED
+                ))
             except Exception as e:
                 all_results.append(ValidationResult(
                     rule=validator.name,
                     message=f"Validator {validator.name} encountered an error: {str(e)}",
-                    severity="admin_error"
+                    severity=SeverityLevel.ADMIN_ERROR
                 ))
 
         return self._compile_results(all_results)
     
-    def _create_error_result(self, message: str) -> Dict[str, Any]:
-            return {
-                "success": False,
-                "errors": [{"message": message, "severity": "error"}],
-                "warnings": [],
-                "info": [],
-                "metadata": {"dataset_type": self.dataset_type}
-            }
-
     def _compile_results(self, results: List[ValidationResult]) -> Dict[str, Any]:
         """Compile validation results into structured output."""
-        errors = [r for r in results if r.severity == "error" ]
-        admin_errors = [r for r in results if r.severity == "admin_error" ]
-        warnings = [r for r in results if r.severity == "warning" ]
-        info = [r for r in results if r.severity == "info" ]
+        errors = [r for r in results if r.severity == SeverityLevel.ERROR ]
+        admin_errors = [r for r in results if r.severity == SeverityLevel.ADMIN_ERROR ]
+        warnings = [r for r in results if r.severity == SeverityLevel.WARNING ]
+        info = [r for r in results if r.severity == SeverityLevel.INFO ]
+        passed = [r for r in results if r.severity == SeverityLevel.PASSED ]
 
 
         return {
             "success": len(errors) == 0 and len(admin_errors) == 0,
             "summary": {
                 # "total_checks": len(results),
-                # "passed": len(passed),
+                "passed": len(passed),
                 "admin_errors": len(admin_errors),
                 "errors": len(errors),                
                 "warnings": len(warnings),
@@ -122,6 +121,7 @@ class ValidationPipeline:
             "errors": [self._result_to_dict(r) for r in errors],            
             "warnings": [self._result_to_dict(r) for r in warnings],
             "info": [self._result_to_dict(r) for r in info],
+            "passed": [self._result_to_dict(r) for r in passed],
             "metadata": {
                 "dataset_type": self.dataset_type,
                 # "sheets_processed": list(self.schema.required_columns.keys())

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from .base import DataSheetMap, DataColumnMap
-from ..validators.base import ValidationResult
+from ..validators.base import ValidationResult, SeverityLevel
 from ..models.base import   SchemaSheetMap
 from ..models.base_dataset import BaseDatasetSchema
 from ..common.list_matching import FuzzMatch, match_list_to_list
@@ -117,7 +117,7 @@ class ExcelLoader:
                 results.append(ValidationResult(
                                 rule = 'Match excel sheeet to schema',
                                 message = f'Excel sheet {excel_sheet_name} was fuzzy matched with multiple schema sheets. This will lead to validation errors about excel sheets not being found.'
-                                ,severity = 'info'
+                                ,severity = SeverityLevel.INFO
                                 ,sheet_name = excel_sheet_name
                                 )) 
             # 6
@@ -151,7 +151,7 @@ class ExcelLoader:
                     results.append(ValidationResult(
                                     rule = 'Getting Schema Sheet',
                                     message = f'The schema sheet {l_mapped_name} was not found.'
-                                    ,severity = 'error'
+                                    ,severity = SeverityLevel.ERROR
                                     ,sheet_name = l_mapped_name
                                     )) 
                     continue                
@@ -193,7 +193,7 @@ class ExcelLoader:
                     results.append(ValidationResult(
                                     rule = 'Match excel column to schema',
                                     message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} had {len(literal_matches)} matches to  columns. There should be only 1. Check the schema. Literal matches: {literal_matches}.'
-                                    ,severity = 'error'
+                                    ,severity = SeverityLevel.ERROR
                                     ,sheet_name = schema_sheet.standard_name
                                     , column_name=column.standard_name
                                     ))   
@@ -206,7 +206,7 @@ class ExcelLoader:
                     results.append(ValidationResult(
                                     rule = 'Match excel column to schema',
                                     message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} was fuzzy matched with an excel column via column name/s and score/s {fuzzy_matched_values[0].matches}.'
-                                    ,severity = 'info'
+                                    ,severity = SeverityLevel.INFO
                                     ,sheet_name = schema_sheet.standard_name
                                     , column_name=column.standard_name
                                     ))  
@@ -214,7 +214,7 @@ class ExcelLoader:
                     results.append(ValidationResult(
                                     rule = 'Match excel column to schema',
                                     message = f'The schema sheet {schema_sheet.standard_name} column {column.standard_name} was fuzzy matched with multiple excel columns so was not matched as this would cause validation errors. Matching results: schema column name/s and score/s {fuzzy_matched_values}.'
-                                    ,severity = 'error'
+                                    ,severity = SeverityLevel.ERROR
                                     ,sheet_name = schema_sheet.standard_name
                                     , column_name=column.standard_name
                                     ))  
@@ -260,7 +260,7 @@ class ExcelLoader:
                 results.append(ValidationResult(
                                     rule = 'Match excel sheeet to schema',
                                     message = f'Excel sheet {excel_sheet_name} was fuzzy matched with schema sheet {fuzzy_matched_values_schema[0].standard_name} via schema sheet name/s and score/s {fuzzy_matched_values_schema[0].matches}.'
-                                    ,severity = 'info'
+                                    ,severity = SeverityLevel.INFO
                                     ,sheet_name = excel_sheet_name
                                     ))     
                 return  fuzzy_matched_values_schema[0].standard_name, results
@@ -269,7 +269,7 @@ class ExcelLoader:
                 results.append(ValidationResult(
                                     rule = 'Match excel sheeet to schema',
                                     message = f'Excel sheet {excel_sheet_name} was fuzzy matched with multiple schema sheets via schema sheet name/s and score/s  {fuzzy_matched_values_schema} so was not matched. This will lead to validation errors about excel sheets not being found.'
-                                    ,severity = 'info'
+                                    ,severity = SeverityLevel.INFO
                                     ,sheet_name = excel_sheet_name
                                     ))    
                 

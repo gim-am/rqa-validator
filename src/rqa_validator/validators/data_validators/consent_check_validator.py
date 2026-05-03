@@ -2,7 +2,7 @@ from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheet
 
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 import polars as pl
@@ -120,7 +120,7 @@ class ConsentCheck(BaseValidator):
                 results.append(ValidationResult(
                 rule = self.name,
                 message = f'There were {clean_data_filter_df.height} row/s in {data_loaded_sheets[self.clean_data_sheet].data_sheet_name} that did not provide consent. Check the output results for details.'
-                ,severity = 'error'
+                ,severity = SeverityLevel.ERROR
                 ,details=clean_data_filter_df.select([clean_data_id_column.data_column_name]).to_dict()
             ))
 

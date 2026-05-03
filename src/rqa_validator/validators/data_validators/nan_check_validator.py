@@ -2,7 +2,7 @@ from config import settings
 from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 import polars as pl
@@ -113,7 +113,7 @@ class NaNCheck(BaseValidator):
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'There were {output_difference_df.height} possible invalid values found. Check the output results for details.'
-                ,severity = 'error'
+                ,severity = SeverityLevel.ERROR
                 ,details=output_difference_df.to_dict()
             ))
 

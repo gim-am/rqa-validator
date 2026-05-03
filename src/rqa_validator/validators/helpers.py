@@ -11,7 +11,7 @@ from ..loaders.base import DataColumnMap, DataSheetMap
 
 from ..models.base_dataset import BaseDatasetSchema
 
-from .base import ValidationResult
+from .base import ValidationResult, SeverityLevel
 
 from ..loaders.excel_loader import ExcelLoaderData
 
@@ -34,7 +34,7 @@ def get_data_loaded_sheet(data: ExcelLoaderData, sheet_name: str , rule: str) ->
         result =ValidationResult(
             rule = rule,
             message = f'An excel sheet for {sheet_name} is expected.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             ,sheet_name=sheet_name
         )
 
@@ -83,7 +83,7 @@ def get_schema_loaded_sheet(schema: BaseDatasetSchema, sheet_name: str, rule: st
         result = ValidationResult(
             rule = rule ,
             message = f'A schema sheet for {sheet_name} is expected.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             , sheet_name=sheet_name
         )
 
@@ -132,7 +132,7 @@ def get_data_loaded_column(loaded_sheet: DataSheetMap, column_name: str, rule:st
         result = ValidationResult(
             rule = rule,
             message = f'A column for {column_name} is expected.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             , sheet_name= loaded_sheet.data_sheet_name
         )
         
@@ -183,7 +183,7 @@ def get_schema_loaded_column(loaded_sheet: SchemaSheetMap, column: str, rule: st
         result = ValidationResult(
             rule = rule,
             message = f'A column for {column} in schema sheet {loaded_sheet.standard_name} is expected.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             ,sheet_name=loaded_sheet.standard_name
             , column_name=column
         )
@@ -234,14 +234,14 @@ def get_data_sheet_id(sheet_name: str, schema: BaseDatasetSchema, loaded_sheet: 
         result = ValidationResult(
             rule = rule,
             message = f'A unique id column for {loaded_sheet.data_sheet_name} is expected but none were found.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             , sheet_name =  loaded_sheet.data_sheet_name
         )
     elif len(ids) != expected:
         result = ValidationResult(
                 rule = rule,
                 message = f'A single unique column for schema sheet {sheet_name} and matching excel sheet {loaded_sheet.data_sheet_name} was expected.'
-                ,severity = 'error'
+                ,severity = SeverityLevel.ERROR
                 ,sheet_name=sheet_name
             )
     return result, ids
@@ -293,7 +293,7 @@ def get_schema_process_value(process_value_map_name: str, sheet_name: str, schem
         result = ValidationResult(
             rule = rule,
             message = f'process_values were expected for column {schema_column.standard_name} for process {process_value_map_name}.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
             , sheet_name= sheet_name
             , column_name=schema_column.standard_name
         )
@@ -348,7 +348,7 @@ def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, targ
         result = ValidationResult(
             rule = rule,
             message = f'Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {len(matching_columns)} were found.'
-            ,severity = 'error'
+            ,severity = SeverityLevel.ERROR
         )
     
     return result, matching_columns

@@ -20,6 +20,7 @@ def main():
     print(f"Errors: {results['summary']['errors']}")
     print(f"Warnings: {results['summary']['warnings']}")
     print(f"info: {results['summary']['info']}")
+    print(f"passed: {results['summary']['passed']}")
     print(results['admin_errors'])
     print(results['errors'])
     print(results['warnings'])

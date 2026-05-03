@@ -1,5 +1,5 @@
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from typing import List
@@ -27,7 +27,7 @@ class UnexpectedSheets(BaseValidator):
             results.append(ValidationResult(
                 rule = self.name,
                 message = f'An unexpected sheet {sheet} was found. Check if this is required to be published/archived.'
-                ,severity = 'warning'
+                ,severity = SeverityLevel.WARNING
             ))
 
         return results

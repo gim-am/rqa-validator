@@ -1,7 +1,7 @@
 from ...common.file_export import df_to_csv
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 import polars as pl
@@ -62,7 +62,7 @@ class UniqueColumn(BaseValidator):
                             results.append(ValidationResult(
                                 rule = self.name,
                                 message = f'For column {mapped_column.data_column_name} in sheet {loaded_sheet_info.data_sheet_name} {unique_duplicated_row_count} non unique values were found. This column should contain unique values. Check {output_filename} file for details.'
-                                ,severity = 'error'
+                                ,severity = SeverityLevel.ERROR
                                 ,sheet_name = loaded_sheet_info.schema_sheet_name
                                 , details=unique_duplicated_rows_df.to_dict()
                                 ))

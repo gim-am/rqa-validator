@@ -1,7 +1,7 @@
 
 from typing import Any, List
 
-from ..validators.base import ValidationResult
+from ..validators.base import ValidationResult, SeverityLevel
 from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema
 
@@ -33,7 +33,7 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
             results.append(ValidationResult(
                     rule = 'Duplicate column names in schema',
                     message = f' For sheet {sheet} the following mandatory column standard/altername names were listed on more than one column: {duplicate_column_names}. Column names should be unique per sheet.'
-                    , severity = 'admin_error'
+                    , severity = SeverityLevel.ADMIN_ERROR
                     , column_name = ', '.join(duplicate_column_names)
                 ))
     for sheet in schema.schema_unloaded_sheets:
@@ -44,7 +44,7 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
         results.append(ValidationResult(
                 rule = 'Duplicate sheet names in schema',
                 message = f'The following possible sheet names were listed for more than one sheet: {duplicate_sheet_names}. Sheet names and alternate sheet names should be unique to each sheet.'
-                , severity = 'admin_error'
+                , severity = SeverityLevel.ADMIN_ERROR
                 , sheet_name= ', '.join(duplicate_sheet_names)
             ))
         

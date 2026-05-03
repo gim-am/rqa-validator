@@ -1,7 +1,7 @@
 from ...common.list_matching import filter_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from typing import List
@@ -46,7 +46,7 @@ class MissingSheets(BaseValidator):
                 rule = self.name,
                 message = f'A sheet for {sheet} was expexted but was not found.'
                 ,sheet_name=sheet
-                ,severity = 'error'
+                ,severity = SeverityLevel.ERROR
             ))
 
         for sheet in optional_missing_sheets:
@@ -55,14 +55,14 @@ class MissingSheets(BaseValidator):
                     rule = self.name,
                     message = f'A sheet for {sheet} is expected when weights are added to the clean data. Add this sheet if required.'
                     ,sheet_name=sheet
-                    ,severity = 'warning'
+                    ,severity = SeverityLevel.WARNING
                 ))
             else:
                 results.append(ValidationResult(
                     rule = self.name,
                     message = f'A sheet for {sheet} is optional. Check if this sheet is required or not for this dataset.'
                     ,sheet_name=sheet
-                    ,severity = 'warning'
+                    ,severity = SeverityLevel.WARNING
                 ))
 
         return results
