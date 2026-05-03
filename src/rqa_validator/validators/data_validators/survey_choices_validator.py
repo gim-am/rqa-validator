@@ -3,9 +3,8 @@ import polars as pl
 
 from ...common.list_matching import match_list
 
-from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheets, get_data_sheet_ids, get_schema_loaded_columns, get_schema_loaded_sheets, get_schema_process_values
+from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheets, get_data_sheet_ids
 
-from ...common.schema_matching import get_matching_unique_columns
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
@@ -14,8 +13,8 @@ from ...validators.base import BaseValidator, ValidationResult
 
 
 class SurveyChoicesCheck(BaseValidator):
-    """Checks that columns and column values are the correct datatype
-        based on the kobo survey.
+    """Checks that clean_data values are valid when they come from
+    kobo select_one or select_multiple quesitons.
     """
     def __init__(self,
                  schema: BaseDatasetSchema,
@@ -33,6 +32,9 @@ class SurveyChoicesCheck(BaseValidator):
             survey_sheet (str, optional): name of the kobo survey sheet in excel. Defaults to 'kobo_survey'.
             survey_type_column (str, optional): name of the type column in the kobo survey sheet. Defaults to 'type'.
             survey_name_column (str, optional): name of the name column in the kobo survey sheet. Defaults to 'name'.
+            choices_sheet (str, optional): name of the kobo choices sheet in excel. Defaults to 'kobo_choices'.
+            choices_name_column (str, optional): name of the name column in the kobo choices sheet. Defaults to 'name'.
+            choices_list_name_column (str, optional): name of the list_name column in the kobo choices sheet. Defaults to 'list_name'.
             check_sheets (List, optional): schema sheet names to check. Defaults to ['clean_data'].
         """
         self.survey_sheet = survey_sheet
@@ -49,20 +51,19 @@ class SurveyChoicesCheck(BaseValidator):
         return 'SurveyChoicesCheck'
     
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
-        """Checks that columns and column values are the correct datatype
-        based on the kobo survey.
+        """Checks that clean_data values are valid when they come from
+    kobo select_one or select_multiple quesitons.
 
-        Currently checking numeric and temporal columns.
-
-        Expects process_values to be present for the kobo_survey schema sheet
-        in the type column to store both the numeric and temporal datatype names
-        found in the kobo_survey type column
-
-        if a column is the correct data type then its safe to assume that
-        all the values are the correct datatype
-
-        if the column is the incorrect data type then the values are checked.
-
+        This process: 
+            -performs prevalidation to make sure expected sheets, columns etc
+                are present
+            - performs some transformations on the kobo questions and choices
+            - for each check_sheet, gets the relevant questions, builds an expression
+                to check for valid values and records invalid values.
+            - the process to build an expression is slightly different for
+                select_one and select_multiple as they have to handle
+                spaces in values differntly. see comments in the code for details.     
+    
         Args:
             data (ExcelLoaderData): excel data to validate
 
@@ -70,6 +71,7 @@ class SurveyChoicesCheck(BaseValidator):
             List[ValidationResult]: list of validation errors
         """
         results: List[ValidationResult] = []
+        # kobo quesiton types to find
         column_selector = r"select_one|select_multiple"
         # pre-validation
 
