@@ -24,7 +24,8 @@ class SurveyChoicesCheck(BaseValidator):
                  choices_sheet: str = 'kobo_choices',
                  choices_name_column: str = 'name',
                  choices_list_name_column: str = 'list_name',
-                 check_sheets: List = ['clean_data']) -> None:
+                 check_sheets: List = ['clean_data'],
+                 select_multiple_value_separator: str = ' ') -> None:
         """
 
         Args:
@@ -36,7 +37,9 @@ class SurveyChoicesCheck(BaseValidator):
             choices_name_column (str, optional): name of the name column in the kobo choices sheet. Defaults to 'name'.
             choices_list_name_column (str, optional): name of the list_name column in the kobo choices sheet. Defaults to 'list_name'.
             check_sheets (List, optional): schema sheet names to check. Defaults to ['clean_data'].
+            select_multiple_value_separator (str, optional): select_multiple value separator. Defaults to ' '.
         """
+        self.schema = schema
         self.survey_sheet = survey_sheet
         self.check_sheets = check_sheets
         self.survey_type_column = survey_type_column
@@ -44,7 +47,9 @@ class SurveyChoicesCheck(BaseValidator):
         self.choices_sheet = choices_sheet
         self.choices_name_column = choices_name_column
         self.choices_list_name_column = choices_list_name_column
-        self.schema = schema
+        # select_multiple values are stored as one value separated by delimiter
+        self.select_multiple_value_separator = select_multiple_value_separator
+
 
     @property
     def name(self) -> str:
@@ -178,7 +183,7 @@ class SurveyChoicesCheck(BaseValidator):
                 
                 difference_expression =( pl.when(pl.col(question).is_not_null() )
                                                 .then(pl.col(question)
-                                                      .str.split(" ")
+                                                      .str.split(self.select_multiple_value_separator)
                                                       .list.eval(pl.element()
                                                                  .str.to_lowercase()
                                                                  .str.replace(r'_', '', n=-1)

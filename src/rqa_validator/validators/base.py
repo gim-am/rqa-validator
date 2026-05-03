@@ -14,7 +14,7 @@ class SeverityLevel(Enum):
 class ValidationResult:
     rule: str
     message: str
-    severity: SeverityLevel  # 'error', 'warning', 'info'
+    severity: SeverityLevel  
     sheet_name: Optional[str] = None
     column_name: Optional[str] = None
     details: Optional[Dict[str, Any]] = None

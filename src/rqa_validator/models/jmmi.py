@@ -57,6 +57,7 @@ class JMMIDataset(BaseDataset):
             , PiiColumns()
             , CrossSheetRowSumCheck()
             , CrossSheetIdCheck(schema=schema)
+            , CrossSheetIdCheck(schema=schema, master_sheet='clean_data', child_sheets=['cleaning_log'])
             , CleaningLog(schema=schema)
             , NaNCheck(schema=schema)
             , ConsentCheck(schema=schema)

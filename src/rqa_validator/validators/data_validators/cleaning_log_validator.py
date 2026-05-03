@@ -29,6 +29,7 @@ class CleaningLog(BaseValidator):
 
     The output includes:
     - items in cleaning log that have multiple updates for the same question
+    - items in cleaning log where a change is recorded but old value = new value
     - questions in cleaning log that are not present in clean_data
     - items where there is a difference between cleaning_log and clean_data values
     - items where there is a difference between raw_data/clean_data and the cleaning log
@@ -172,7 +173,7 @@ class CleaningLog(BaseValidator):
             # the two processes are stored in seperate functions just to
             # make distinguishing the logic between them easier
          # dataframe of actual changes made
-        modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet] .data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
+        modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet].data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
                                                                     .str.to_lowercase().is_in(schema_change_type_values.values) ) \
                                                         .select([data_loaded_columns[clean_data_id_columns.schema_column_name].data_column_name,
                                                                     data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
@@ -308,8 +309,9 @@ class CleaningLog(BaseValidator):
             if missing_quesitons:
                 results.append(ValidationResult(
                     rule = self.name,
-                    message = f'The following questions are listed in {data_loaded_sheets[self.cleaning_log_sheet] .data_sheet_name} but were not found in {data_loaded_sheets[self.clean_data_sheet] .data_sheet_name}: {missing_quesitons}.'
+                    message = f'There are questions listed in {data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name} that were not found in {data_loaded_sheets[self.clean_data_sheet].data_sheet_name}. See output for details.'
                     ,severity = SeverityLevel.WARNING
+                    ,details= {'missing_questions': missing_quesitons}
                 ))
                 questions = filter_list(questions, missing_quesitons)
                 if len(questions) < 1:

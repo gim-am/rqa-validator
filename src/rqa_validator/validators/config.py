@@ -6,12 +6,13 @@ PII_COLUMN_NAMES = [
     'participant_name', 'respondent_name', 'subject_name', 'person_name',
     'given_name', 'family_name', 'primary_name', 'secondary_name',
     'mother_name', 'father_name', 'guardian_name', 'child_name',
+    'nom',
     
     # Phone Numbers
     'phone', 'phone_number', 'phone_no', 'telephone', 'mobile',
     'mobile_number', 'cell_phone', 'contact_number', 'home_phone',
     'work_phone', 'emergency_contact_phone', 'primary_phone',
-    'secondary_phone', 'whatsapp_number', 'telegram_number',
+    'secondary_phone', 'whatsapp_number', 'telegram_number', 'contact',
     
     # Email Addresses
     'email', 'email_address', 'e_mail', 'contact_email', 'primary_email',
@@ -21,7 +22,7 @@ PII_COLUMN_NAMES = [
     'address', 'street_address', 'street', 'house_number', 'building_number',
     'apartment', 'floor', 'postal_address', 'mailing_address',
     'residential_address', 'current_address', 'permanent_address',
-    'previous_address', 'home_address', 'work_address',
+    'previous_address', 'home_address', 'work_address', 'neighbourhood', 'voisinage',
     # 'unit'
     
     # City/Region/Country
@@ -35,7 +36,7 @@ PII_COLUMN_NAMES = [
     'geo_coordinates', 'gps_coordinates', 'location', 'geo_location',
     'geopoint', '_geopoint', 'gps_location', 'survey_location',
     'collection_point', 'field_location', 'site_location',
-    'start_gps', 'end_gps', 'waypoint', 'marker', 'position',
+    'start_gps', 'end_gps', 'waypoint', 'marker', 'position', 'geo'
     
     # KoboToolbox Specific Fields
     '_geopoint',# '_start', '_end', '_submission_time', '_uuid',
