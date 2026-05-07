@@ -1,7 +1,7 @@
 from typing import List
 import polars as pl
 
-from ...common.list_matching import match_list
+from ...common.list_matching import match_list, filter_loaded_sheets
 
 from ...validators.helpers import get_data_loaded_columns, get_data_loaded_sheets, get_data_sheet_ids
 
@@ -101,8 +101,8 @@ class SurveyChoicesCheck(BaseValidator):
             return results       
         
         
-        search_items = {key: data_loaded_sheets[key] for key in self.check_sheets}
-        result, data_id_columns = get_data_sheet_ids(schema=self.schema, data=search_items, rule=self.name)
+        filtered_loaded_sheets = filter_loaded_sheets(self.check_sheets, data_loaded_sheets)
+        result, data_id_columns = get_data_sheet_ids(schema=self.schema, data=filtered_loaded_sheets, rule=self.name)
 
         if result:
             results.extend(result)
@@ -111,11 +111,14 @@ class SurveyChoicesCheck(BaseValidator):
         # get the choices and turn it into a dict
         choices_dict = (
                 data_loaded_sheets[self.choices_sheet].data
-                                                    .select([ data_loaded_columns[self.choices_list_name_column].data_column_name, 
+                                                    .select([ pl.col(data_loaded_columns[self.choices_list_name_column].data_column_name)
+                                                                .str.strip_chars(' '), 
                                                              pl.col(data_loaded_columns[self.choices_name_column].data_column_name)
                                                              .str.to_lowercase()
                                                              .str.replace(r'_', '', n=-1)
                                                              .str.strip_chars(' ')])
+                                                            .filter(pl.col(data_loaded_columns[self.choices_list_name_column].data_column_name).is_not_null() &
+                                                                    (pl.col(data_loaded_columns[self.choices_list_name_column].data_column_name) != ''))
                                                              .group_by(data_loaded_columns[self.choices_list_name_column].data_column_name)
                                                              .agg(v_list=pl.col(data_loaded_columns[self.choices_name_column].data_column_name).implode())
                                                              .with_columns(pl.col("v_list").alias("values"))
@@ -135,10 +138,14 @@ class SurveyChoicesCheck(BaseValidator):
                                                     .str
                                                     .contains(column_selector)) \
                                             .with_columns(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
+                                                        .str.replace(r"[\"']", '')
+                                                        .str.strip_chars(' ')
                                                         .str.split(" ")
                                                         .list.to_struct(fields=['type_only', 'choice_list_name'])
                                                         .alias("choice_list_name")
-                                                        ).unnest('choice_list_name')
+                                                        ).unnest('choice_list_name') \
+                                            .filter(pl.col('choice_list_name').is_not_null() &
+                                                    (pl.col('choice_list_name') != '')) \
         # split out the question types
         survey_category_questions_select_one = survey_category_questions_df.filter(pl.col('type_only') == "select_one")\
                                                         .select([data_loaded_columns[self.survey_name_column].data_column_name])\
@@ -158,9 +165,9 @@ class SurveyChoicesCheck(BaseValidator):
 
         for sheet in self.check_sheets:
             # only check the questions that are present on the sheet
-            filtered_questions_select_one = match_list(survey_category_questions_select_one, 
+            filtered_questions_select_one: List[str] = match_list(survey_category_questions_select_one, 
                                                        data_loaded_sheets[sheet].data.columns)
-            filtered_questions_select_multiple = match_list(survey_category_questions_select_multiple, 
+            filtered_questions_select_multiple:List[str]  = match_list(survey_category_questions_select_multiple, 
                                                             data_loaded_sheets[sheet].data.columns)
             filtered_questions = filtered_questions_select_one + filtered_questions_select_multiple
 
@@ -178,13 +185,15 @@ class SurveyChoicesCheck(BaseValidator):
             # will throw an error for the value being checked
 
             for question in filtered_questions_select_multiple:
-                col_has_difference = f"{question}_has_difference"
+                col_has_difference = f"{question}_has_difference"                
+
                 valid_choices: List[str] = choices_dict[survey_question_choices_dict[question]]
                 
                 difference_expression =( pl.when(pl.col(question).is_not_null() )
                                                 .then(pl.col(question)
                                                       .str.split(self.select_multiple_value_separator)
                                                       .list.eval(pl.element()
+                                                                 .cast(pl.Utf8)
                                                                  .str.to_lowercase()
                                                                  .str.replace(r'_', '', n=-1)
                                                                  .str.strip_chars(' ')
@@ -205,14 +214,18 @@ class SurveyChoicesCheck(BaseValidator):
             # choice values with spaces should not cause errors in this check 
 
             for question in filtered_questions_select_one:
+                if not question: 
+                    continue
                 col_has_difference = f"{question}_has_difference"
+                # print(survey_question_choices_dict[question])
                 valid_choices: List[str] = choices_dict[survey_question_choices_dict[question]]
                 
                 difference_expression =( pl.when(pl.col(question).is_not_null() )
                                                 .then(pl.col(question)
+                                                      .cast(pl.Utf8)
                                                       .str.to_lowercase()
                                                       .str.replace(r'_', '', n=-1)
-                                                      .str.strip_chars(' ')
+                                                      .str.strip_chars(' ')                                                      
                                                       .is_in(valid_choices)
                                                       .not_())\
                                             .otherwise(False)

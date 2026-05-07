@@ -2,9 +2,10 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List
 from thefuzz import fuzz
 from thefuzz import process
+from collections import Counter
 
 from config import settings
-from ..loaders.base import DataColumnMap
+from ..loaders.base import DataColumnMap, DataSheetMap
 
 @dataclass
 class FuzzMatch():
@@ -109,7 +110,8 @@ def duplicate_list_items(source: List) -> list[Any]:
     Returns:
         list[Any]: list of duplicated items. should be unique list.
     """
-    return [item for item in set(source) if source.count(item) > 1]
+    item_counts = Counter(source)
+    return [item for item in set(source) if item_counts[item] > 1]
 
 
 def combine_lists(source: List | None, target: List | None, unique_list: bool = True):
@@ -160,4 +162,48 @@ def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] )
         List: matched columns. 
     """
     # return [column for column in target if column.schema_column_name == source.schema_column_name]
-    return [item for item in source if item.schema_column_name in [column.schema_column_name for column in target]]
+    # return [item for item in source if item.schema_column_name in [column.schema_column_name for column in target]]
+    target_names = {col.schema_column_name: col for col in target}
+    
+    matches: List[tuple] = []
+    for s_item in source:
+        if s_item.schema_column_name in target_names:
+            t_item = target_names[s_item.schema_column_name]
+            matches.append((s_item, t_item))
+            
+    return matches
+
+
+
+def match_sheet_columns_ids(source:List[DataColumnMap], target:List[DataColumnMap] )   -> tuple[list[DataColumnMap], list[DataColumnMap]]:
+    source_len = len(source)
+    target_len = len(target)
+    filtered_source = []
+    filtered_target = []
+    common_id_set = set(settings.COMMON_ID_COLUMN_NAMES)
+
+    if source_len > 1:
+        filtered_source = [item for item in source if item.data_column_name in common_id_set]
+    elif source_len == 1:
+        filtered_source = source
+    if target_len > 1:
+        filtered_target = [item for item in target if item.data_column_name in common_id_set]
+    elif target_len == 1:
+        filtered_target = target
+        
+    return filtered_source, filtered_target
+
+
+
+
+def filter_loaded_sheets(sheets: List[str], loaded_sheets: dict[str, DataSheetMap]) -> Dict[str, DataSheetMap]:
+    """Filters a DataSheetMap dict by the sheets 
+
+    Args:
+        sheets (List[str]): sheets to be ratained from loaded_sheets
+        loaded_sheets (dict[str, DataSheetMap]): data loaded sheets
+
+    Returns:
+        Dict[str, DataSheetMap]: filtered dict of loaded data sheets
+    """
+    return {key: loaded_sheets[key] for key in sheets}

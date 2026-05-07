@@ -1,5 +1,5 @@
 from typing import List
-
+import itertools
 from ..models.base import SchemaColumnMap, SchemaSheetMap, ProcessValueMap
 
 from ..validators.base import BaseValidator
@@ -35,6 +35,18 @@ class BaseDatasetSchema:
     def get_unloaded_sheets_standard_names(self) -> List[str]:
         """Gets all the standard names for all the unloaded sheets."""
         return [item.standard_name for item in self.schema_unloaded_sheets]
+
+    def get_all_sheet_names(self) -> List[str]:
+        """Gets all sheet names, including alternate names
+
+        Returns:
+            List[List[str]]: list of all sheet names
+        """
+        sheet_names = [item.combine_sheet_names() for item in self.schema_loaded_sheets]
+        sheet_names.extend([item.combine_sheet_names() for item in self.schema_unloaded_sheets])
+        
+        
+        return list(itertools.chain.from_iterable(sheet_names))
 
     def get_sheet_column_standard_names(self, sheet_name: str) -> List[str] | None:
         """gets all the column standard names for a sheet."""
@@ -135,12 +147,12 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         mandatory_columns = [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"],
                                                            is_unique=True),                                             
-                                             SchemaColumnMap(standard_name="pop_group",
-                                                           alternate_names=["pop_group"]),
-                                             SchemaColumnMap(standard_name="weight",
-                                                           alternate_names=["weight"]),
-                                             SchemaColumnMap(standard_name="person_id",
-                                                           alternate_names=["person_id"])
+                                            #  SchemaColumnMap(standard_name="pop_group",
+                                            #                alternate_names=["pop_group"]),
+                                            #  SchemaColumnMap(standard_name="weight",
+                                            #                alternate_names=["weight"]),
+                                            #  SchemaColumnMap(standard_name="person_id",
+                                            #                alternate_names=["person_id"])
                                             ]),
         SchemaSheetMap(standard_name= "deletion_log", 
                         alternate_names =["deletion_log"],                        
@@ -172,7 +184,41 @@ class DefaultDatasetSchema(BaseDatasetSchema):
     ])
     schema_unloaded_sheets: List[SchemaSheetMap] = field(default_factory=lambda:[
         SchemaSheetMap(standard_name="read_me", 
-                        alternate_names= ["read_me"]),        
+                        alternate_names= ["read.me", "read me"]),        
+        SchemaSheetMap(standard_name="sampling_info", 
+                        alternate_names=["sampling_info"], 
+                        required=False),
+        SchemaSheetMap(standard_name= "variable_tracker", 
+                        alternate_names =["variable_tracker"]),
+        SchemaSheetMap(standard_name="enumerator_performance_log", 
+                        alternate_names=["enumerator_performance_log"], 
+                        required=False)
+    ])
+
+@dataclass
+class DynamicDatasetSchema(BaseDatasetSchema):
+    schema_loaded_sheets: List[SchemaSheetMap] = field(default_factory=lambda:[
+        
+        SchemaSheetMap(standard_name= "deletion_log", 
+                        alternate_names =["deletion_log"],                        
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
+                                                          is_unique=True)]),
+        SchemaSheetMap(standard_name="kobo_survey", 
+                        alternate_names= ["survey"],
+                        mandatory_columns = [SchemaColumnMap(standard_name='type',
+                                                           process_values=[ProcessValueMap(process_name='data_type_numeric_check',
+                                                                                           values = ['integer', 'decimal']),
+                                                                            ProcessValueMap(process_name='data_type_temporal_check',
+                                                                                           values = ['date'])]),
+                                             SchemaColumnMap(standard_name= 'name')]), 
+        SchemaSheetMap(standard_name= "kobo_choices", 
+                        alternate_names =["choices"],
+                        mandatory_columns = [SchemaColumnMap(standard_name='list_name'),
+                                             SchemaColumnMap(standard_name='name')])                            
+    ])
+    schema_unloaded_sheets: List[SchemaSheetMap] = field(default_factory=lambda:[
+        SchemaSheetMap(standard_name="read_me", 
+                        alternate_names= ["read.me", "read me"]),        
         SchemaSheetMap(standard_name="sampling_info", 
                         alternate_names=["sampling_info"], 
                         required=False),

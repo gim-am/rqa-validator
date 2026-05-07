@@ -1,8 +1,23 @@
 from dataclasses import dataclass, field
 from typing import List
-
+import polars as pl
 
 from ..common.list_matching import is_in_list, add_to_list, unique_list
+
+@dataclass
+class SheetMatching:
+     data: pl.DataFrame
+     id_column: str | None
+     id_column_set: set | None
+     classification: str | None = None
+     log_type: str | None = None
+     parent: str | None = None
+     parent_id_column: str | None = None
+     children: List[str] = field(default_factory=list)
+     linked_cleaning_log: str | None = None
+     linked_raw_sheet: str | None = None
+     linked_clean_sheet: str | None = None
+     log_id_column: str | None = None
 
 @dataclass
 class ProcessValueMap:
@@ -33,8 +48,11 @@ class SchemaColumnMap:
 @dataclass
 class SchemaSheetMap:
     standard_name: str 
-    alternate_names: List[str] 
+    alternate_names: List[str] = field(default_factory=list) 
     mandatory_columns: List[SchemaColumnMap] = field(default_factory=list)
+    parent_sheet: str | None = None
+    parent_linking_column: str | None = None
+    
     required: bool = True  
 
     def get_column(self, column_name: str) -> SchemaColumnMap | None:
@@ -101,6 +119,24 @@ class SchemaSheetMap:
         if self.get_column(column.standard_name) is None:
             self.mandatory_columns.append(column)
             return column
+    
+    def add_alternate_name_to_column(self, column_name: str, name: str):
+        """adds a new alternate name to a mandatory column.
 
+        Args:
+            column_name (str): standard name of existing mandatory column
+            name (str): name to add to alternate names list
+        """
+        for idx, column in enumerate(self.mandatory_columns):
+            if column.standard_name == column_name:
+                self.mandatory_columns[idx].alternate_names = add_to_list(name, self.mandatory_columns[idx].alternate_names)
+
+    def add_alternate_name_to_sheet(self, name: str):
+        """Adds a new alternate name to the sheet
+
+        Args:
+            name (str): name to add to alternate names list
+        """
+        self.alternate_names = add_to_list(name, self.alternate_names)
 
 

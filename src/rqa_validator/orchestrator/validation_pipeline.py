@@ -1,5 +1,9 @@
 from pathlib import Path
 from typing import List, Dict, Any
+
+from ..models.dynamic_model import DynamicDataset
+
+from ..models.base_dataset import DynamicDatasetSchema
 from ..models.preprocess import lowercase_schema_mappings, validate_schema
 
 from ..loaders.excel_loader import ExcelLoader
@@ -21,6 +25,8 @@ class ValidationPipeline:
         if self.dataset_type == "jmmi":
             self.schema = JMMIDataset.get_schema()
             self.validators = JMMIDataset.get_validators(schema=self.schema)
+        elif self.dataset_type == "other":
+            self.schema = DynamicDatasetSchema()
         else:
             raise ValueError(f"Unknown dataset type: {self.dataset_type}")
         
@@ -61,7 +67,8 @@ class ValidationPipeline:
         # load the excel data
         try:
             loader = ExcelLoader(self.schema)
-            data, excel_results = loader.load(filepath)
+            data, excel_results = loader.load(filepath,
+                                              load_all_sheets= True if self.dataset_type == "other" else False )
             
             if excel_results:   
                 all_results.extend(excel_results)
@@ -81,6 +88,16 @@ class ValidationPipeline:
                 ))
             settings.logger.log_exception(e)
             return self._compile_results(all_results)
+        
+        if self.dataset_type == "other":
+            dataset = DynamicDataset(data)
+            results = dataset.process_data()
+            if results:   
+                all_results.extend(results)
+            
+            self.validators = dataset.get_validators()
+            self.schema = dataset.get_schema()
+            data = dataset.data
         
         # run each of the validators for the dataset. 
         for validator in self.validators:

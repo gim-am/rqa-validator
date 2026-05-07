@@ -8,7 +8,7 @@ def main():
     parser = argparse.ArgumentParser(description="Data Validation Framework")
     parser.add_argument("input_file", type=Path, help="Path to Excel file")
     parser.add_argument("--dataset-type", required=True, 
-                       choices=["jmmi"],
+                       choices=["jmmi", "other"],
                        help="Type of dataset to validate")
     # parser.add_argument("--output", type=Path, default=Path("validation_results.json"),
     #                    help="Output path for JSON results")

@@ -1,5 +1,7 @@
 from config import settings
-from ...common.list_matching import match_list_to_list
+from ...validators.helpers import get_data_sheet_id
+from ...models.base_dataset import BaseDatasetSchema
+from ...common.list_matching import filter_list, match_list_to_list
 from ...loaders.base import DataColumnMap
 from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
@@ -14,6 +16,8 @@ from typing import List
 
 class PiiColumns(BaseValidator):
     """Checks all the sheets for possible PII Data"""
+    def __init__(self, schema: BaseDatasetSchema):
+        self.schema = schema
 
     @property
     def name(self) -> str:
@@ -41,8 +45,6 @@ class PiiColumns(BaseValidator):
         results: List[ValidationResult] = []
         pii_columns = get_pii_columns()
 
-        id_column_standard_name = 'uuid'
-
         patterns = {
             "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
 
@@ -59,8 +61,9 @@ class PiiColumns(BaseValidator):
         ]
 
         for sheet in data.loaded_sheets:
+            filtered_df = sheet.data.select(filter_list(sheet.data.columns,settings.IGNORE_COLUMNS_FOR_VALIDATION ))
             # scan column names
-            literal_matches, fuzzy_matched_values = match_list_to_list(sheet.data.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
+            literal_matches, fuzzy_matched_values = match_list_to_list(filtered_df.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS)
 
             if literal_matches:
                 for item in literal_matches:
@@ -82,18 +85,19 @@ class PiiColumns(BaseValidator):
                                 , details=item.matches
                                 ))
             # scan column data
-            id_column = sheet.get_column_map(id_column_standard_name)
-
-            if id_column is None:
+            result, id_column = get_data_sheet_id(sheet.data_sheet_name, self.schema, sheet, self.name)
+            
+            if not id_column :
                 id_column = DataColumnMap(data_column_name='row_index',
                                       schema_column_name='row_index')
-                melted_df = sheet.data.with_row_index(id_column.data_column_name) \
+                melted_df = filtered_df.with_row_index(id_column.data_column_name) \
                                         .unpivot(index=id_column.data_column_name,
                                                 variable_name="column_name",
                                                 value_name="value")
             else:
+                id_column = id_column[0]
             # unpivot to make showing the results easier
-                melted_df = sheet.data.unpivot(index=id_column.data_column_name,
+                melted_df = filtered_df.unpivot(index=id_column.data_column_name,
                                                 variable_name="column_name",
                                                 value_name="value")
 

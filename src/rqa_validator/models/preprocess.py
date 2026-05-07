@@ -1,6 +1,5 @@
 
 from typing import Any, List
-
 from ..validators.base import ValidationResult, SeverityLevel
 from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema
@@ -40,10 +39,10 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
     for sheet in schema.schema_unloaded_sheets:
         sheet_names.extend(sheet.combine_sheet_names())
 
-    duplicate_sheet_names = [item for item in set(sheet_names) if sheet_names.count(item) > 1]
+    duplicate_sheet_names = duplicate_list_items(sheet_names)
     if duplicate_sheet_names:
         results.append(ValidationResult(
-                rule = 'Duplicate sheet names in schema',
+                rule = 'Duplicate sheet names in schema.',
                 message = f'The schema for {schema.dataset_type} contains sheet names that are listed for more than one sheet. Sheet names and alternate sheet names should be unique to each schema. Check the output for details.'
                 , severity = SeverityLevel.ADMIN_ERROR
                 , details={'sheets': duplicate_sheet_names}
@@ -59,15 +58,42 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
     Args:
         schema (BaseDatasetSchema): schema to process
     """
-    
+
+    def expand_list(str_list: List[Any]):
+        existing_items = set(str_list)
+        # result = list(str_list)  # Start with a copy of the original list
+        
+        for item in str_list:
+            if '_' in item:
+                base_name = item.replace('_', ' ')
+                
+                if base_name not in existing_items:
+                    str_list.append(base_name)
+
+                base_name = item.replace(' ', '')
+                
+                if base_name not in existing_items:
+                    str_list.append(base_name)
+
+            if ' ' in item:
+                base_name = item.replace(' ', '')
+                
+                if base_name not in existing_items:
+                    str_list.append(base_name)
+        # str_list = result            
+
     def lowercase_list_strs(str_list: List[Any]) -> None:
         str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
+
+    def process_list(str_list: List[Any]):
+        lowercase_list_strs(str_list)
+        expand_list(str_list)
 
     def process_sheet_mapping(sheet: SchemaSheetMap) -> None:
         if sheet.standard_name:
             sheet.standard_name = sheet.standard_name.lower()
         
-        lowercase_list_strs(sheet.alternate_names)
+        process_list(sheet.alternate_names)
         
         for col in sheet.mandatory_columns:
             process_column_mapping(col)
@@ -79,12 +105,12 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         if col.standard_name:
             col.standard_name = col.standard_name.lower()
         
-        lowercase_list_strs(col.alternate_names)
+        process_list(col.alternate_names)
 
         if col.process_values:
             for process in col.process_values:
                 process.process_name = process.process_name.lower()
-                lowercase_list_strs(process.values)
+                process_list(process.values)
 
     if schema.dataset_type:
         schema.dataset_type = schema.dataset_type.lower()

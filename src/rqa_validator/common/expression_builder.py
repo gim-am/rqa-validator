@@ -21,22 +21,66 @@ def create_column_difference_expression(column_1: str, column_2: str, dtype1: Da
         dtype1 (DataType): data type of first column
         dtype2 (DataType): data type of second column
     """
-   
+    def normalize_to_null_if_empty(expr: Expr, dtype: DataType) -> Expr:
+        """Convert empty strings to null for consistent comparison."""
+        return pl.when(dtype == pl.String) \
+            .then(
+                pl.when(expr.str.strip_chars() == "")
+                .then(None)
+                .otherwise(expr)
+            ) \
+            .otherwise(expr)
     
-    def handle_nulls(expr_result: Expr, column_1_expr: Expr, column_2_expr: Expr):
-        # If result is null (meaning one or both inputs were null)
+    def handle_nulls_and_empty(expr_result: Expr, col1_normalized: Expr, col2_normalized: Expr):
+        """Handle null/empty string equivalence in comparison results.
+        
+        When expr_result is null (meaning at least one input was null/empty):
+        - If BOTH are null/empty → they are equal → return False (not different)
+        - If ONLY ONE is null/empty → they are different → return True
+        """
         return pl.when(expr_result.is_null()) \
-            .then((column_1_expr.is_null() != column_2_expr.is_null())) \
+            .then(
+                pl.when(col1_normalized.is_null() & col2_normalized.is_null())
+                .then(False)  # Both null/empty = equal = NOT different
+                .otherwise(
+                    pl.when(col1_normalized.is_null() | col2_normalized.is_null())
+                    .then(True)   # One null, one not = different
+                    .otherwise(expr_result)  # Neither null (shouldn't happen here)
+                )
+            ) \
             .otherwise(expr_result)
 
     if dtype1.is_numeric() or dtype2.is_numeric():
         # Cast to Float64 to handle Int vs Float
         # Note: If one is string and not numeric, this cast might fail or return null.
-        norm_c1 = pl.col(column_1).cast(pl.Float64)
-        norm_c2 = pl.col(column_2).cast(pl.Float64)
+        # norm_c1 = pl.col(column_1).cast(pl.Float64)
+        norm_c1 = (pl.when(dtype1 == pl.String)
+                   .then(
+                       pl.when(pl.col(column_1)
+                               .str.strip_chars() == "")
+                               .then(None)
+                               .otherwise( pl.col(column_1))
+                               .cast(pl.Float64)
+                               )
+                               .otherwise( pl.col(column_1).cast(pl.Float64))
+        )
+
+        norm_c2 = (pl.when(dtype2 == pl.String)
+                   .then(
+                       pl.when(pl.col(column_2)
+                               .str.strip_chars() == "")
+                               .then(None)
+                               .otherwise( pl.col(column_2))
+                               .cast(pl.Float64)
+                               )
+                               .otherwise( pl.col(column_2).cast(pl.Float64))
+        )
+
+
+        # norm_c2 = pl.col(column_2).cast(pl.Float64)
         
         raw_diff = norm_c1 != norm_c2
-        return handle_nulls(raw_diff, norm_c1, norm_c2)
+        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)
 
     elif dtype1.is_temporal() or dtype2.is_temporal(): 
         # Normalize to Datetime
@@ -51,8 +95,11 @@ def create_column_difference_expression(column_1: str, column_2: str, dtype1: Da
         norm_c2 = to_dt(pl.col(column_2), dtype2)
         
         raw_diff = norm_c1 != norm_c2
-        return handle_nulls(raw_diff, norm_c1, norm_c2)
+        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)
 
     else:
-        raw_diff = pl.col(column_1).cast(pl.Utf8) != pl.col(column_2).cast(pl.Utf8)
-        return handle_nulls(raw_diff, pl.col(column_1), pl.col(column_2))
+        norm_c1 = normalize_to_null_if_empty(pl.col(column_1), dtype1)
+        norm_c2 = normalize_to_null_if_empty(pl.col(column_2), dtype2)
+        
+        raw_diff = norm_c1.cast(pl.Utf8) != norm_c2.cast(pl.Utf8)
+        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)

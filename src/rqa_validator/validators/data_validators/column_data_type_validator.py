@@ -142,7 +142,7 @@ class DataTypeCheck(BaseValidator):
             # numeric check
             if numeric_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in numeric_columns if not data_loaded_sheets[sheet].data.schema[item].is_numeric()]
+                incorrect_data_type_columns = [item for item in numeric_columns if item in data_loaded_sheets[sheet].data.columns and not data_loaded_sheets[sheet].data.schema[item].is_numeric()]
                 
                 if incorrect_data_type_columns:
                     # if there are dataframe columns with the incorrect data type
@@ -174,7 +174,7 @@ class DataTypeCheck(BaseValidator):
             # temporal check
             if temporal_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in temporal_columns if not data_loaded_sheets[sheet].data.schema[item].is_temporal()]
+                incorrect_data_type_columns = [item for item in temporal_columns if item in data_loaded_sheets[sheet].data.columns and  not data_loaded_sheets[sheet].data.schema[item].is_temporal()]
 
                 if incorrect_data_type_columns:
                      # if there are dataframe columns with the incorrect data type

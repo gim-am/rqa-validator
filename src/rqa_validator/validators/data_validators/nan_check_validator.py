@@ -1,4 +1,5 @@
 from config import settings
+from ...common.list_matching import filter_list
 from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
@@ -18,13 +19,13 @@ class NaNCheck(BaseValidator):
     """
     def __init__(self,
                  schema: BaseDatasetSchema,
-                 sheets: List[str] = ['clean_data']) -> None:
+                 check_sheets: List[str] = ['clean_data']) -> None:
         """
         Args:
             schema (BaseDatasetSchema): schema for the dataset
             sheets (List[str], optional): list of sheets to be checked. Defaults to ['clean_data'].
         """
-        self.sheets = sheets
+        self.check_sheets = check_sheets
         self.schema = schema
 
     @property
@@ -50,7 +51,7 @@ class NaNCheck(BaseValidator):
             ])
         
         result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
-                                                       sheet_names=self.sheets,
+                                                       sheet_names=self.check_sheets,
                                                         rule=self.name)
 
         if result:
@@ -63,18 +64,19 @@ class NaNCheck(BaseValidator):
             return results
 
 
-        for sheet in self.sheets:     
+        for sheet in self.check_sheets:     
 
             nan_value_expressions = []
+            filtered_columns = filter_list(data_loaded_sheets[sheet].data.columns,settings.IGNORE_COLUMNS_FOR_VALIDATION )
+            filtered_df = data_loaded_sheets[sheet].data.select(filtered_columns)
 
             # build expression to find possible invalid values or NaNs
-            for column in data_loaded_sheets[sheet].data.columns:
-
+            for column in filtered_columns:
                 expression = pl.any_horizontal(
                     (
-                        (pl.col(column).is_nan() | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES))) if data_loaded_sheets[sheet].data.schema[column].is_float() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES) ) if data_loaded_sheets[sheet].data.schema[column].is_integer() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_STRING_VALUES) ) if data_loaded_sheets[sheet].data.schema[column] == pl.String else pl.lit(False)
+                        (pl.col(column).is_nan() | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES))) if filtered_df.schema[column].is_float() else False
+                        | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES) ) if filtered_df.schema[column].is_integer() else False
+                        | (pl.col(column).is_in( settings.NANCHECK_STRING_VALUES) ) if filtered_df.schema[column] == pl.String else pl.lit(False)
 
                     ).alias(f"is_{column}_nan_value")
 
@@ -82,8 +84,8 @@ class NaNCheck(BaseValidator):
                 nan_value_expressions.append(expression)
 
             # get a df that has nan/invalid data in a row
-            nan_df = data_loaded_sheets[sheet].data.with_columns(nan_value_expressions)
-            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in data_loaded_sheets[sheet].data.columns])
+            nan_df = filtered_df.with_columns(nan_value_expressions)
+            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in filtered_columns])
             nan_only_df = nan_df.filter(has_nan)
 
             output_rows = []
@@ -92,7 +94,7 @@ class NaNCheck(BaseValidator):
             if not nan_only_df.is_empty():
                 for row in nan_only_df.iter_rows(named=True):
                     uuid = row[sheet_ids[sheet][0].data_column_name]
-                    for column in data_loaded_sheets[sheet].data.columns:
+                    for column in filtered_columns:
                         is_changed = row[f"is_{column}_nan_value"]
 
                         if is_changed:
@@ -105,7 +107,8 @@ class NaNCheck(BaseValidator):
                                 "value": str(value),
                             })
                 output_difference_df = pl.concat([output_difference_df,
-                                                        pl.DataFrame(output_rows, infer_schema_length=None)])
+                                                        pl.DataFrame(output_rows, 
+                                                                     infer_schema_length=None)])
 
 
         if output_difference_df.height > 0:

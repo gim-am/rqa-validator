@@ -1,7 +1,7 @@
 
 from typing import List
 
-from ..common.list_matching import match_sheet_columns
+from ..common.list_matching import match_sheet_columns, match_sheet_columns_ids
 
 from ..models.base import SchemaColumnMap, ProcessValueMap, SchemaSheetMap
 
@@ -297,6 +297,8 @@ def get_schema_process_value(process_value_map_name: str, sheet_name: str, schem
             , sheet_name= sheet_name
             , column_name=schema_column.standard_name
         )
+    else:
+        assert process_values is not None
     
     return result, process_values
 
@@ -326,7 +328,7 @@ def get_schema_process_values(data: dict[str, dict[str, SchemaColumnMap]], rule:
 
     return results, process_values
 
-def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str) -> tuple[ValidationResult | None, list[DataColumnMap]]:
+def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str) -> tuple[ValidationResult | None, list[tuple]]:
     """Get matching id columns between sheets.
 
     Args:
@@ -351,8 +353,40 @@ def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, targ
             ,severity = SeverityLevel.ERROR
         )
     
+    if result is None:
+        assert matching_columns is not None
+    
     return result, matching_columns
 
+def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str):
+    result = None 
+
+    source_columns, target_columns = match_sheet_columns_ids(source, target)
+    if len(source_columns) != 1 or len(target_columns) != 1:
+        result = ValidationResult(
+            rule = rule,
+            message = f'Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {source_sheet} had {len(source_columns)} and {target_sheet} had {len(target_columns)}.'
+            ,severity = SeverityLevel.ERROR
+        )
+    if result is None:
+        assert source_columns is not None
+        assert target_columns is not None
+
+    return result, source_columns, target_columns
+
+def get_schema_id_column(source: SchemaSheetMap, rule: str):
+    result = None 
+    matching_columns = source.get_unique_columns()
+    if len(matching_columns) != 1:
+        result = ValidationResult(
+            rule = rule,
+            message = f'Expected 1 ID column for sheet {source.standard_name} but {len(matching_columns)} were found.'
+            ,severity = SeverityLevel.ERROR
+        )
+    if result is None:
+        assert matching_columns is not None
+
+    return result, matching_columns
 
 
 

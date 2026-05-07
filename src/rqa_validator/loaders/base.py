@@ -31,3 +31,8 @@ class DataSheetMap:
         for column in self.column_map:
             if  column.schema_column_name == search_column:
                 return column
+    def add_column_map(self, column_map: DataColumnMap):
+        self.column_map.append(column_map)
+
+    def set_column_map(self, column_maps: List[DataColumnMap]):
+        self.column_map = column_maps

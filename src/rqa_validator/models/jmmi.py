@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from ..validators.data_validators.raw_clean_cleaning_log_validator import RawToCleanToLog
+
 from ..validators.data_validators.survey_choices_validator import SurveyChoicesCheck
 
 from ..validators.data_validators.column_data_type_validator import DataTypeCheck
@@ -11,7 +13,7 @@ from ..validators.schema_validators.mandatory_column_validator import MandatoryC
 from ..validators.data_validators.pii_validator import PiiColumns
 from ..validators.data_validators.unique_column_validator import UniqueColumn
 from ..validators.data_validators.consent_check_validator import ConsentCheck
-from ..validators.data_validators.cleaning_log_validator import CleaningLog
+from ..validators.data_validators.cleaning_log_to_clean_validator import CleaningLogToClean
 from ..validators.data_validators.cross_sheet_id_check_validator import CrossSheetIdCheck
 from ..validators.schema_validators.column_name_validator import  ColumnNameCheck
 from ..validators.data_validators.nan_check_validator import NaNCheck
@@ -54,11 +56,12 @@ class JMMIDataset(BaseDataset):
             , DuplicateSheetMatches()
             , MandatoryColumns(schema=schema)
             , UniqueColumn(schema=schema)
-            , PiiColumns()
-            , CrossSheetRowSumCheck()
+            , PiiColumns(schema=schema)
+            , CrossSheetRowSumCheck(schema = schema)
             , CrossSheetIdCheck(schema=schema)
             , CrossSheetIdCheck(schema=schema, master_sheet='clean_data', child_sheets=['cleaning_log'])
-            , CleaningLog(schema=schema)
+            , CleaningLogToClean(schema=schema)
+            , RawToCleanToLog(schema=schema)
             , NaNCheck(schema=schema)
             , ConsentCheck(schema=schema)
             , ColumnNameCheck()
