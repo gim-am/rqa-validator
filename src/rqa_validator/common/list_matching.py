@@ -148,7 +148,7 @@ def is_in_list(item:str, target: List) -> bool:
 
 
 
-def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] ):
+def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] ) -> List[tuple[DataColumnMap, DataColumnMap]]:
     """matches columns between two column maps where they have the same schema name.
 
     Args:
@@ -159,13 +159,12 @@ def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] )
         wont be matchable
 
     Returns:
-        List: matched columns. 
+        List[tuple[DataColumnMap, DataColumnMap]]:  matched columns from source and target. 
     """
-    # return [column for column in target if column.schema_column_name == source.schema_column_name]
-    # return [item for item in source if item.schema_column_name in [column.schema_column_name for column in target]]
+    
     target_names = {col.schema_column_name: col for col in target}
     
-    matches: List[tuple] = []
+    matches: List[tuple[DataColumnMap, DataColumnMap]] = []
     for s_item in source:
         if s_item.schema_column_name in target_names:
             t_item = target_names[s_item.schema_column_name]
@@ -176,6 +175,20 @@ def match_sheet_columns(source:List[DataColumnMap], target:List[DataColumnMap] )
 
 
 def match_sheet_columns_ids(source:List[DataColumnMap], target:List[DataColumnMap] )   -> tuple[list[DataColumnMap], list[DataColumnMap]]:
+    """A very simple way to try and find id columns that match between two column lists. Attempts to find columns
+       that are the same as commonly used id column names. If one match is found for both using this assumes that
+       the two datasets are linkable through these columns
+
+       This process should be used as a last resort after attempting to directly match the columns using other 
+       processes.
+
+    Args:
+        source (List[DataColumnMap]): list of columns from a soruce dataset
+        target (List[DataColumnMap]): list of columns from a target dataset
+
+    Returns:
+        tuple[list[DataColumnMap], list[DataColumnMap]]: filtered source and target datasets
+    """
     source_len = len(source)
     target_len = len(target)
     filtered_source = []

@@ -3,14 +3,32 @@ import polars as pl
 
 from rqa_validator.loaders.base import DataColumnMap
 from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
+from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
+from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.data_validators.pii_validator import PiiColumns
 from rqa_validator.validators.base import BaseValidator
 
 
 @pytest.fixture
-def validator():
+def validator(valid_schema):
     """Create a UniqueColumn validator instance"""
-    return PiiColumns()
+    return PiiColumns(schema=valid_schema)
+
+@pytest.fixture
+def valid_schema():
+    
+    return BaseDatasetSchema(
+        dataset_type="jmmi",
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "raw_data", 
+                        alternate_names =["raw_data"],
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
+                                                           alternate_names=["uuidx", "X_uuid", "uuid2"],
+                                                           is_unique=True)],  
+                        )
+                        ],
+        schema_unloaded_sheets=[]
+    )
+
 
 @pytest.fixture
 def valid_excel_data():

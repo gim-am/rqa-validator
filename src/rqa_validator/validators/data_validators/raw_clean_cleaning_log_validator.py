@@ -170,8 +170,6 @@ class RawToCleanToLog(BaseValidator):
         
 
         # TRANSFORMATION: transforms data in preparation for comparison   
-            # the two processes are stored in seperate functions just to
-            # make distinguishing the logic between them easier
          # dataframe of actual changes made
             modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet].data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
                                                                         .str.to_lowercase().is_in(schema_change_type_values.values) ) \
@@ -181,8 +179,8 @@ class RawToCleanToLog(BaseValidator):
                                                                         data_loaded_columns[self.cleaning_log_change_type_column].data_column_name,
                                                                         data_loaded_columns[self.cleaning_log_question_column].data_column_name])
         
-        """Gets the difference between raw and clean sheets and compares 
-        this to the cleaning log"""
+        # Gets the difference between raw and clean sheets and compares 
+        # this to the cleaning log
         # get columns that are in both clean and raw sheets
         # then filter the sheets
         clean_data_columns = filter_list(match_list(data_loaded_sheets[self.clean_data_sheet] .data.columns, 

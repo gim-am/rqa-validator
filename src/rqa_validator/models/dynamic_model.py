@@ -81,7 +81,6 @@ class DynamicDataset(BaseDataset):
         for sheet, details in self.sheet_matching.items():
 
             if details.classification == 'clean':
-                # add validation 
                 cleaning_log_sheet = None
                 if details.linked_raw_sheet is not None:
                     if details.linked_cleaning_log is not None:
@@ -178,6 +177,7 @@ class DynamicDataset(BaseDataset):
         return results 
     
     def build_schema(self):
+        """ Builds a schema based on the matched dataset data."""
         consent_sheet = None
         results: List[ValidationResult] = []
         for sheet, details in self.sheet_matching.items():
@@ -242,6 +242,8 @@ class DynamicDataset(BaseDataset):
         return results, consent_sheet
 
     def match_data(self):
+        """ Attempts to identify and match sheets and columns required to build a 
+        schema and for validation rules."""
         results: List[ValidationResult] = []
         
         expected_names = self.schema.get_all_sheet_names()
@@ -249,7 +251,7 @@ class DynamicDataset(BaseDataset):
         name_scaler: float = 0.4
         overlap_scaler: float = 0.6
 
-        for idx, sheet in enumerate(self.data.loaded_sheets):
+        for sheet in self.data.loaded_sheets:
             if sheet.data_sheet_name.lower() in expected_names:
                 # dont need to process existing items that should have
                 # been matched when loading the data

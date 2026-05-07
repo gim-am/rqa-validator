@@ -161,8 +161,6 @@ class CleaningLogToClean(BaseValidator):
         
 
         # TRANSFORMATION: transforms data in preparation for comparison   
-            # the two processes are stored in seperate functions just to
-            # make distinguishing the logic between them easier
          # dataframe of actual changes made
         modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet].data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
                                                                     .str.to_lowercase().is_in(schema_change_type_values.values) ) \
@@ -175,8 +173,8 @@ class CleaningLogToClean(BaseValidator):
         
 
 
-        """Compares the cleaning log to clean_data
-        """
+        # Compares the cleaning log to clean_data
+        
         # racods where the same question was updated more than once for the same id
         multiple_change_mask = modified_rows_df.select(clean_log_id_columns.data_column_name,
                                                         data_loaded_columns[self.cleaning_log_question_column].data_column_name,
@@ -236,8 +234,6 @@ class CleaningLogToClean(BaseValidator):
                 # if no valid questions left to check
                 return results
             
-            # return results
-
         # add column to specifiy an update. this helps to specify which
         # questions were updated later after the pivot as the pivot will
         # add a column for each question even if that question was not updated

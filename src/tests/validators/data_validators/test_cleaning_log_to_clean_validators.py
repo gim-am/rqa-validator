@@ -22,10 +22,6 @@ def invalid_schema2_validator(invalid_schema2):
     """Create a UniqueColumn validator instance"""
     return CleaningLogToClean(schema=invalid_schema2)
 
-@pytest.fixture
-def invalid_schema3_validator(invalid_schema3):
-    """Create a UniqueColumn validator instance"""
-    return CleaningLogToClean(schema=invalid_schema3)
 
 @pytest.fixture
 def invalid_schema4_validator(invalid_schema4):
@@ -117,36 +113,6 @@ def invalid_schema2():
                         )
                         ,SchemaSheetMap(standard_name= "cleaning_logxxx", 
                         alternate_names =["cleaning_logxxx"],
-                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
-                                                           alternate_names=["uuid", "X_uuid"]
-                                                           ),
-                                            SchemaColumnMap(standard_name="new_value"),
-                                            SchemaColumnMap(standard_name="old_value"),
-                                            SchemaColumnMap(standard_name="question"),
-                                            SchemaColumnMap(standard_name="change_type")],  
-                        )                                   
-                                                           ],
-        schema_unloaded_sheets=[]
-    )
-
-@pytest.fixture
-def invalid_schema3():
-    
-    return BaseDatasetSchema(
-        dataset_type="jmmi",
-        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
-                        alternate_names =["clean_data"],
-                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
-                                                           alternate_names=["uuidx", "X_uuid"],
-                                                           is_unique=True)],  
-                        ),
-                        SchemaSheetMap(standard_name= "raw_data", 
-                        alternate_names =["raw_data"],
-                        mandatory_columns= [SchemaColumnMap(standard_name="uuidxxxx",
-                                                           is_unique=True)],  
-                        )
-                        ,SchemaSheetMap(standard_name= "cleaning_log", 
-                        alternate_names =["cleaning_log"],
                         mandatory_columns= [SchemaColumnMap(standard_name="uuid",
                                                            alternate_names=["uuid", "X_uuid"]
                                                            ),
@@ -794,9 +760,9 @@ def missing_column_4_excel_data():
                         schema_sheet_name="raw_data",
                         data_sheet_name="raw_data",
                         data=df_raw,
-                        data_columns=["uuidmiss", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
-                                   data_column_name='uuidmiss')]),
+                        data_columns=["uuid", "question1", "question2"],
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]),
                         DataSheetMap(
                         schema_sheet_name="cleaning_log",
                         data_sheet_name="cleaning_log",
@@ -851,8 +817,8 @@ def missing_column_5_excel_data():
                         data_sheet_name="raw_data",
                         data=df_raw,
                         data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuidmiss',
-                                   data_column_name='uuidmiss')]
+                        column_map=[DataColumnMap(schema_column_name = 'uuid',
+                                   data_column_name='uuid')]
                         ),
                         DataSheetMap(
                         schema_sheet_name="cleaning_log",
@@ -867,8 +833,8 @@ def missing_column_5_excel_data():
                                    data_column_name='question'),
                                    DataColumnMap(schema_column_name = 'change_type',
                                    data_column_name='change_type'),
-                                   DataColumnMap(schema_column_name = 'old_value',
-                                   data_column_name='old_value')])]
+                                   DataColumnMap(schema_column_name = 'old_valueXXX',
+                                   data_column_name='old_valueXXX')])]
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
@@ -1205,117 +1171,6 @@ def missing_old_data_column():
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
-@pytest.fixture
-def missing_raw_data_sheet():
-    """Create ExcelLoaderData with matching columns"""
-
-    df_clean = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 2, 3, 4, 5],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_raw = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 2, 3, 4, 4],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_clean_log = pl.DataFrame({
-        "uuid": [5],
-        "question":['question1'],
-        "new_value":[5],
-        "old_value":[4],
-        "change_type": ["change_response"]
-    })
-    
-    loaded_sheets = [DataSheetMap(
-                        schema_sheet_name="clean_data",
-                        data_sheet_name="clean_data",
-                        data=df_clean,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="raw_dataXXX",
-                        data_sheet_name="raw_dataXXX",
-                        data=df_raw,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="cleaning_log",
-                        data_sheet_name="cleaning_log",
-                        data=df_clean_log,
-                        data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid'),
-                                   DataColumnMap(schema_column_name = 'new_value',
-                                   data_column_name='new_value'),
-                                   DataColumnMap(schema_column_name = 'question',
-                                   data_column_name='question'),
-                                   DataColumnMap(schema_column_name = 'change_type',
-                                   data_column_name='change_type'),
-                                   DataColumnMap(schema_column_name = 'old_value',
-                                   data_column_name='old_value')])]
-    
-    return ExcelLoaderData(loaded_sheets=loaded_sheets)
-
-@pytest.fixture
-def invalid_clean_data2():
-    """Create ExcelLoaderData with matching columns"""
-
-    df_clean = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 7, 3, 4, 5],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_raw = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 2, 3, 4, 4],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_clean_log = pl.DataFrame({
-        "uuid": [5],
-        "question":['question1'],
-        "new_value":[5],
-        "old_value":[4],
-        "change_type": ["change_response"]
-    })
-    
-    loaded_sheets = [DataSheetMap(
-                        schema_sheet_name="clean_data",
-                        data_sheet_name="clean_data",
-                        data=df_clean,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="raw_data",
-                        data_sheet_name="raw_data",
-                        data=df_raw,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="cleaning_log",
-                        data_sheet_name="cleaning_log",
-                        data=df_clean_log,
-                        data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid'),
-                                   DataColumnMap(schema_column_name = 'new_value',
-                                   data_column_name='new_value'),
-                                   DataColumnMap(schema_column_name = 'question',
-                                   data_column_name='question'),
-                                   DataColumnMap(schema_column_name = 'change_type',
-                                   data_column_name='change_type'),
-                                   DataColumnMap(schema_column_name = 'old_value',
-                                   data_column_name='old_value')])]
-    
-    return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
 
 @pytest.fixture
@@ -1516,26 +1371,6 @@ class TestCleaningLog:
         assert isinstance(result, list)
         assert len(result) == 1
 
-    def test_missing_raw_data_sheet(self, valid_schema_validator: BaseValidator,
-                           missing_raw_data_sheet: ExcelLoaderData):
-        result = valid_schema_validator.validate(missing_raw_data_sheet)
-        
-        assert isinstance(result, list)
-        assert len(result) == 1
-
-    def test_missing_raw_data_id_col(self, invalid_schema3_validator: BaseValidator,
-                           valid_excel_data: ExcelLoaderData):
-        result = invalid_schema3_validator.validate(valid_excel_data)
-        
-        assert isinstance(result, list)
-        assert len(result) == 1
-
-    def test_invalid_clean_data2(self, valid_schema_validator: BaseValidator,
-                           invalid_clean_data2: ExcelLoaderData):
-        result = valid_schema_validator.validate(invalid_clean_data2)
-        
-        assert isinstance(result, list)
-        assert len(result) == 1
 
     def test_missing_question_column(self, valid_schema_validator: BaseValidator,
                            missing_question_column: ExcelLoaderData):

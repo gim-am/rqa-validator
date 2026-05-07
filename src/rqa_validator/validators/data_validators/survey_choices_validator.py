@@ -214,10 +214,7 @@ class SurveyChoicesCheck(BaseValidator):
             # choice values with spaces should not cause errors in this check 
 
             for question in filtered_questions_select_one:
-                if not question: 
-                    continue
                 col_has_difference = f"{question}_has_difference"
-                # print(survey_question_choices_dict[question])
                 valid_choices: List[str] = choices_dict[survey_question_choices_dict[question]]
                 
                 difference_expression =( pl.when(pl.col(question).is_not_null() )

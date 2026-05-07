@@ -358,7 +358,21 @@ def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, targ
     
     return result, matching_columns
 
-def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str):
+def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str) -> tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
+    """ Attempts to find two id like columns that could be used to try and link two sheets. 
+    
+        Only is this if other more direct methods have been tried
+
+    Args:
+        source (List[ColumnMap]): list of source columns
+        source_sheet (str): source sheet
+        target (List[ColumnMap]): list of target columns
+        target_sheet (str): target sheet
+        rule (str): validation rule
+
+    Returns:
+        tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]: validation results, matching id columns from source and target
+    """
     result = None 
 
     source_columns, target_columns = match_sheet_columns_ids(source, target)
@@ -374,7 +388,16 @@ def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, 
 
     return result, source_columns, target_columns
 
-def get_schema_id_column(source: SchemaSheetMap, rule: str):
+def get_schema_id_column(source: SchemaSheetMap, rule: str) -> tuple[ValidationResult | None, List[SchemaColumnMap]]:
+    """Gets unique columns for a schema sheet
+
+    Args:
+        source (SchemaSheetMap): Sheet to search 
+        rule (str): validation rule
+
+    Returns:
+        tuple[ValidationResult | None, List[SchemaColumnMap]]: validation results, unique columns if found
+    """
     result = None 
     matching_columns = source.get_unique_columns()
     if len(matching_columns) != 1:

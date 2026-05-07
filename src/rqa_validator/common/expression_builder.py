@@ -41,11 +41,11 @@ def create_column_difference_expression(column_1: str, column_2: str, dtype1: Da
         return pl.when(expr_result.is_null()) \
             .then(
                 pl.when(col1_normalized.is_null() & col2_normalized.is_null())
-                .then(False)  # Both null/empty = equal = NOT different
+                .then(False)  
                 .otherwise(
                     pl.when(col1_normalized.is_null() | col2_normalized.is_null())
-                    .then(True)   # One null, one not = different
-                    .otherwise(expr_result)  # Neither null (shouldn't happen here)
+                    .then(True)  
+                    .otherwise(expr_result)  
                 )
             ) \
             .otherwise(expr_result)
@@ -53,7 +53,6 @@ def create_column_difference_expression(column_1: str, column_2: str, dtype1: Da
     if dtype1.is_numeric() or dtype2.is_numeric():
         # Cast to Float64 to handle Int vs Float
         # Note: If one is string and not numeric, this cast might fail or return null.
-        # norm_c1 = pl.col(column_1).cast(pl.Float64)
         norm_c1 = (pl.when(dtype1 == pl.String)
                    .then(
                        pl.when(pl.col(column_1)
@@ -76,8 +75,6 @@ def create_column_difference_expression(column_1: str, column_2: str, dtype1: Da
                                .otherwise( pl.col(column_2).cast(pl.Float64))
         )
 
-
-        # norm_c2 = pl.col(column_2).cast(pl.Float64)
         
         raw_diff = norm_c1 != norm_c2
         return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)

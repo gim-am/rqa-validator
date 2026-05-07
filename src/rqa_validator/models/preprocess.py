@@ -52,7 +52,7 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
 
 
 def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
-    """lowercase all sheet and column names in a schema to make 
+    """lowercase and expand all sheet and column names in a schema to make 
     comparisons, searches a bit easier.
 
     Args:
@@ -61,7 +61,6 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
 
     def expand_list(str_list: List[Any]):
         existing_items = set(str_list)
-        # result = list(str_list)  # Start with a copy of the original list
         
         for item in str_list:
             if '_' in item:
@@ -80,7 +79,6 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
                 
                 if base_name not in existing_items:
                     str_list.append(base_name)
-        # str_list = result            
 
     def lowercase_list_strs(str_list: List[Any]) -> None:
         str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
