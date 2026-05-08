@@ -1,11 +1,12 @@
 
+from dataclasses import field
 from difflib import SequenceMatcher
 from typing import List
 import polars as pl
 
-from ..validators.base import SeverityLevel, ValidationResult
+from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..loaders.excel_loader import ExcelLoaderData
-from ..models.base import SheetMatching
+from ..models.base import DynamicSheetMatching
 
 from ..validators.data_validators.raw_clean_cleaning_log_validator import RawToCleanToLog
 from ..loaders.helpers import match_excel_columns_to_schema
@@ -31,19 +32,40 @@ from ..validators.data_validators.nan_check_validator import NaNCheck
 
 
 class DynamicDataset(BaseDataset):
+    """This aims to analyse an excel file and attepts to:
+     - idenfity needed sheets, sheet types, sheet relationships
+     - build a dataset schema
+     - initialise the required validators 
+
+     This process focuses on sheets related to loops and non standardised datasets. Specifically:
+     - possible parent/child clean_data sheets
+     - possible parent/child raw_data sheets
+     - possible parent/child cleaning_log sheets
+     - other non standardised datasets
+
+     Some sheets/columns that are always expected are still specified in DynamicDatasetSchema. 
+
+     If sheets and columns are named according to the minimum standards checklist then this process should have a 
+     reasonable chance of succeeding. The less the minimum standards checklist is followed, the more likely
+     this process and the subsequent validation rules are to produce errors related to not finding required sheets
+     or columns.
+     
+     """
     def __init__(self, data: ExcelLoaderData) -> None:
         self.data = data
         self.schema = DynamicDatasetSchema()
-        self.sheet_matching:dict[str, SheetMatching] = {}
+        self.sheet_matching:dict[str, DynamicSheetMatching] = {}
+        self.validators: List[BaseValidator] = field(default_factory=list)
         
 
-    def get_schema(self, *args, **kwargs):
+    def get_schema(self, *args, **kwargs) -> DynamicDatasetSchema:
         return self.schema 
     
-    def get_validators(self, *args, **kwargs):
+    def get_validators(self, *args, **kwargs) -> List[BaseValidator]:
         return self.validators
     
-    def process_data(self):
+    def process_data(self) -> List[ValidationResult]:
+        """Runs all the steps."""
         all_results: List[ValidationResult] = []
 
         results = self.match_data()
@@ -54,6 +76,7 @@ class DynamicDataset(BaseDataset):
         if results:
             all_results.extend(results)
 
+        # this must come after build_schema
         self.validators = [
             MissingSheets(schema=self.schema)
             , UnexpectedSheets()
@@ -70,8 +93,15 @@ class DynamicDataset(BaseDataset):
 
         return all_results
     
-    def build_validators(self, consent_sheet: str | None):
-        """builds a list of validators matched to use the dynamically created schema
+    def build_validators(self, consent_sheet: str | None) -> List[ValidationResult]:
+        """builds a list of validators matched to use the dynamically created schema.
+        Current assumptions:
+        - there is only ever one deletion log and it only lists deleted records for the parent object
+
+        TODO
+        current limitations:
+        - does not support parent-child sheets having a combined cleaning log
+
         """
         results: List[ValidationResult] = []
         clean_sheets = [item for item, value in self.sheet_matching.items() if value.classification == 'clean']
@@ -176,7 +206,7 @@ class DynamicDataset(BaseDataset):
 
         return results 
     
-    def build_schema(self):
+    def build_schema(self) -> tuple[List[ValidationResult], str | None]:
         """ Builds a schema based on the matched dataset data."""
         consent_sheet = None
         results: List[ValidationResult] = []
@@ -241,9 +271,19 @@ class DynamicDataset(BaseDataset):
                     self.data.set_column_map_for_loaded_sheet(sheet, column_map)
         return results, consent_sheet
 
-    def match_data(self):
+    def match_data(self) -> List[ValidationResult]:
         """ Attempts to identify and match sheets and columns required to build a 
-        schema and for validation rules."""
+        schema and for validation rules.
+        
+        This process attempts to:
+        - identify the type of sheet based on simple name matching. eg log, raw, clean
+        - find a unique id column for the sheet, except cleaning log sheets
+        - trys to link cleaning log sheets to clean data sheets
+        - link parent and child sheets if there are loops
+        - link raw data sheets to clean data sheets
+
+
+        """
         results: List[ValidationResult] = []
         
         expected_names = self.schema.get_all_sheet_names()
@@ -257,7 +297,7 @@ class DynamicDataset(BaseDataset):
                 # been matched when loading the data
                 continue
 
-            self.sheet_matching[sheet.data_sheet_name] = SheetMatching(
+            self.sheet_matching[sheet.data_sheet_name] = DynamicSheetMatching(
                 data= sheet.data,
                 id_column = None,
                 id_column_set = None,
@@ -431,9 +471,9 @@ class DynamicDataset(BaseDataset):
 
         return results
 
-    def match_child_parent(self, sheets: List[str], matched_sheets: dict[str, SheetMatching]):
+    def match_child_parent(self, sheets: List[str], matched_sheets: dict[str, DynamicSheetMatching]):
         """Attempt to match child parent sheets based on finding possible
-        foreign keys between the sheets
+        foreign keys between the sheets.
 
        
         """

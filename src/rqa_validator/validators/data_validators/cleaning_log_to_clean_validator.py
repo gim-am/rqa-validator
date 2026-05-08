@@ -18,21 +18,15 @@ from typing import List
 
 
 class CleaningLogToClean(BaseValidator):
-    """This process performs two steps to validate the data in the cleaning log
+    """This process validates the data in the cleaning log
     
-    After making sure that the required sheets and columns have been loaded and matched:
+        After making sure that the required sheets and columns have been loaded and matched
+        the process validates that all the items in a cleaning log are reflected in the clean data.
 
-    - The first step validates that all the items in a cleaning log are reflected in the clean data.
-
-    - The second step compares the differences between the clean and raw data sheets 
-    and then checks that all these differences are reflected in the cleaning log
-
-    The output includes:
-    - items in cleaning log that have multiple updates for the same question
-    - items in cleaning log where a change is recorded but old value = new value
-    - questions in cleaning log that are not present in clean_data
-    - items where there is a difference between cleaning_log and clean_data values
-    - items where there is a difference between raw_data/clean_data and the cleaning log
+        The output includes:
+        - items in cleaning log that have multiple updates for the same question
+        - questions in cleaning log that are not present in clean_data
+        - items where there is a difference between cleaning_log and clean_data values
 
     """
     def __init__(self, schema: BaseDatasetSchema,
@@ -47,7 +41,6 @@ class CleaningLogToClean(BaseValidator):
         Args:
             schema (BaseDatasetSchema): dataset schema for the dataset
             clean_data_sheet (str, optional): name of the clean data sheet. Defaults to 'clean_data'.
-            raw_data_sheet (str, optional): name of the raw data sheet. Defaults to 'raw_data'.
             cleaning_log_sheet (str, optional): name of the cleaning log sheet. Defaults to 'cleaning_log'.
             cleaning_log_new_value_column (str, optional): name of the cleaning log new value column. Defaults to 'new_value'.
             cleaning_log_old_value_column (str, optional): name of the cleaning log old value column. Defaults to 'old_value'.
@@ -308,7 +301,7 @@ class CleaningLogToClean(BaseValidator):
     
             # unpivot new values
             new_values_df = changes_only.unpivot(
-                index=[clean_log_id_columns.data_column_name] + [q for q in questions], 
+                index=[clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions], 
                 on= [f"{q}" for q in questions],
                 variable_name="question",
                 value_name=f"{self.cleaning_log_sheet}_value"
@@ -317,7 +310,7 @@ class CleaningLogToClean(BaseValidator):
         #    unpivot original values
             original_values_df = changes_only.unpivot(
                 index=[clean_log_id_columns.data_column_name],
-                on=questions,
+                on=[f"{q}_val" for q in questions],
                 variable_name="question",
                 value_name=f"{self.clean_data_sheet}_value"
             )

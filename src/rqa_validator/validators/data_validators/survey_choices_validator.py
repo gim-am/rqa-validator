@@ -273,8 +273,6 @@ class SurveyChoicesCheck(BaseValidator):
                     pl.col("invalid_value").cast(pl.Utf8)
                 ])
 
-
-                # difference_df = pl.DataFrame(output_rows, infer_schema_length=None)
                 if difference_df.height > 0:
                     # df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(ValidationResult(

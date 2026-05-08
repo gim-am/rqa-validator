@@ -18,21 +18,12 @@ from typing import List
 
 
 class RawToCleanToLog(BaseValidator):
-    """This process performs two steps to validate the data in the cleaning log
-    
-    After making sure that the required sheets and columns have been loaded and matched:
+    """This process compares the differences between the clean and raw data sheets 
+        and then checks that all these differences are reflected in the cleaning log if provided
 
-    - The first step validates that all the items in a cleaning log are reflected in the clean data.
-
-    - The second step compares the differences between the clean and raw data sheets 
-    and then checks that all these differences are reflected in the cleaning log
-
-    The output includes:
-    - items in cleaning log that have multiple updates for the same question
-    - items in cleaning log where a change is recorded but old value = new value
-    - questions in cleaning log that are not present in clean_data
-    - items where there is a difference between cleaning_log and clean_data values
-    - items where there is a difference between raw_data/clean_data and the cleaning log
+        The output includes:
+        - items where there is a difference between raw_data/clean_data and the cleaning log
+        - if no cleaning log is provided then an error is returned if there are differences between raw and clean
 
     """
     def __init__(self, schema: BaseDatasetSchema,

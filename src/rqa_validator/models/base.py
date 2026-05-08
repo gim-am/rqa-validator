@@ -5,7 +5,7 @@ import polars as pl
 from ..common.list_matching import is_in_list, add_to_list, unique_list
 
 @dataclass
-class SheetMatching:
+class DynamicSheetMatching:
      data: pl.DataFrame
      id_column: str | None
      id_column_set: set | None
