@@ -211,31 +211,70 @@ class RawToCleanToLog(BaseValidator):
                 .alias(f"is_{question}_changed")
             
             difference_expressions.append(difference_expression)
+            
         
         # add the difference flags to the dataframe and checl for changes
         comparison_df = joined_df.with_columns(difference_expressions)
         has_any_change = pl.any_horizontal([pl.col(f"is_{question}_changed") for question in clean_data_columns])
         changes_only = comparison_df.filter(has_any_change)
-        output_rows = []
+        
 
-        # record the changes
+    # The unpivot process transforms the data from a "wide" format (where each question is a separate column) 
+    # into a "long" format (where each question becomes a single row per record). By running this separately
+    #  on the new values, old values, and change flags, we create three aligned vertical lists that can be 
+    # joined together using the uuid and question name. This allows us to filter for changes and compare 
+    # old vs. new values in a single operation.
+        
         if not changes_only.is_empty():
-            for row in changes_only.iter_rows(named=True):
-                uuid = row[clean_data_id_columns.data_column_name]
-                for question in clean_data_columns:
-                    is_changed = row[f"is_{question}_changed"]
-                    if is_changed:
-                        old_val = row[f"{question}_original_value"]
-                        new_val = row[question]
-                        output_rows.append({
-                            'uuid': uuid,
-                            f"{self.cleaning_log_question_column}": question,
-                            f"{self.cleaning_log_old_value_column}": str(old_val),
-                            F"{self.cleaning_log_new_value_column}": str(new_val)
-                        })
-            # difference between raw and clean
-            difference_raw_to_clean_df = pl.DataFrame(output_rows, infer_schema_length=None)
+            
+            # unpivot new values
+            new_values_df = changes_only.unpivot(
+                index=[clean_data_id_columns.data_column_name] + [f"{q}_original_value" for q in clean_data_columns], 
+                on=clean_data_columns,
+                variable_name=self.cleaning_log_question_column,
+                value_name=self.cleaning_log_new_value_column
+            )
 
+            # unpivot original values
+            original_values_df = changes_only.unpivot(
+                index=[clean_data_id_columns.data_column_name],
+                on=[f"{q}_original_value" for q in clean_data_columns],
+                variable_name=self.cleaning_log_question_column, 
+                value_name=self.cleaning_log_old_value_column
+            )
+            
+            # unpivot flags. Extract question name from flag column name
+            flags_long_df = changes_only.unpivot(
+                index=[clean_data_id_columns.data_column_name],
+                on=[f"is_{q}_changed" for q in clean_data_columns],
+                variable_name="flag_column_name",
+                value_name="is_changed"
+                ).with_columns(
+                    pl.col("flag_column_name")
+                    .str.replace("^is_", "", literal=False)
+                    .str.replace("_changed$", "", literal=False)
+                    .alias(self.cleaning_log_question_column)
+                    )
+            
+            # join all together. Filter the changed rows
+            merged_df = new_values_df.join(
+                original_values_df,
+                on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
+                how="inner"
+            ).join(
+                flags_long_df,
+                on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
+                how="inner"
+            ).filter(pl.col("is_changed"))
+                        
+            # select the columns because they are all present in the merged DF
+            difference_raw_to_clean_df = merged_df.select([
+                pl.col(clean_data_id_columns.data_column_name).alias('uuid'),
+                pl.col(self.cleaning_log_question_column),
+                pl.col(self.cleaning_log_old_value_column),
+                pl.col(self.cleaning_log_new_value_column)
+            ])
+         
             # difference between above and cleaning log
             if self.cleaning_log_sheet is not None:
                 difference_df = difference_raw_to_clean_df.join(other=modified_rows_df,

@@ -298,38 +298,73 @@ class CleaningLogToClean(BaseValidator):
         has_any_change = pl.any_horizontal([pl.col(f"is_{question}_changed") for question in questions])
         changes_only = comparison_df.filter(has_any_change)
 
-        output_rows = []
-
         # record the changes
+        # The unpivot process transforms the data from a "wide" format (where each question is a separate column) 
+        # into a "long" format (where each question becomes a single row per record). By running this separately
+        #  on the new values, old values, and change flags, we create three aligned vertical lists that can be 
+        # joined together using the uuid and question name. This allows us to filter for changes and compare 
+        # old vs. new values in a single operation.
         if not changes_only.is_empty():
-            for row in changes_only.iter_rows(named=True):
-                uuid = row[clean_log_id_columns.data_column_name]
-                for question in questions:
-                    new_col = f"{question}_val"
-                    is_changed = row[f"is_{question}_changed"]
-
-                    if is_changed:
-                        old_val = row[question]
-                        new_val = row[new_col]
-                        output_rows.append({
-                            clean_log_id_columns.data_column_name: uuid,
-                            "question": question,
-                            f"{self.cleaning_log_sheet}_value": new_val,
-                            F"{self.clean_data_sheet}_value": old_val
-                        })
-
-        difference_df = pl.DataFrame(output_rows, infer_schema_length=None)
+    
+            # unpivot new values
+            new_values_df = changes_only.unpivot(
+                index=[clean_log_id_columns.data_column_name] + [q for q in questions], 
+                on= [f"{q}" for q in questions],
+                variable_name="question",
+                value_name=f"{self.cleaning_log_sheet}_value"
+            )
+            
+        #    unpivot original values
+            original_values_df = changes_only.unpivot(
+                index=[clean_log_id_columns.data_column_name],
+                on=questions,
+                variable_name="question",
+                value_name=f"{self.clean_data_sheet}_value"
+            )
+            
+            # unpivot flags. Extract question name from flag column name
+            flags_long_df = changes_only.unpivot(
+                index=[clean_log_id_columns.data_column_name],
+                on=[f"is_{q}_changed" for q in questions],
+                variable_name="flag_col_name", 
+                value_name="is_changed"
+                ).with_columns(
+                    pl.col("flag_col_name")
+                    .str.replace("^is_", "", literal=False)
+                    .str.replace("_changed$", "", literal=False)
+                    .alias("question")
+                    )
+            
+            
+            # join all together.  Filter the changed rows
+            merged_df = new_values_df.join(
+                original_values_df,
+                on=[clean_log_id_columns.data_column_name, "question"],
+                how="inner"
+            ).join(
+                flags_long_df,
+                on=[clean_log_id_columns.data_column_name, "question"],
+                how="inner"
+            ).filter(pl.col("is_changed") )
+            
+            # select the columns because they are all present in the merged DF
+            difference_df = merged_df.select([
+                pl.col(clean_log_id_columns.data_column_name).alias(clean_log_id_columns.data_column_name),
+                pl.col("question"),
+                pl.col(f"{self.cleaning_log_sheet}_value"),
+                pl.col(f"{self.clean_data_sheet}_value")
+            ])
 
         # if there are differences found log them
-        if difference_df.height > 0:
-            df_to_csv(data=difference_df, filename=validation_results_filename)
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the {validation_results_filename} file.'
-                ,severity = SeverityLevel.ERROR
-                ,sheet_name=self.cleaning_log_sheet
-                , details=difference_df.to_dict()
-            ))
+            if difference_df.height > 0:
+                df_to_csv(data=difference_df, filename=validation_results_filename)
+                results.append(ValidationResult(
+                    rule = self.name,
+                    message = f'There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the {validation_results_filename} file.'
+                    ,severity = SeverityLevel.ERROR
+                    ,sheet_name=self.cleaning_log_sheet
+                    , details=difference_df.to_dict()
+                ))
 
 
         

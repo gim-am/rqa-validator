@@ -16,9 +16,11 @@ class Settings(BaseSettings):
     MIN_FUZZY_MATCH_SCORE: int = 90
     FUZZY_MATCH_STRING_LENGTH_RATIO: float = 0.7
 
+    # for some validation rules and dynamic model creation
     IGNORE_COLUMNS_FOR_VALIDATION: List[str] = ['enum_id', '_index', '_parent_index', 'start', 'end', 'audit_url', '_id', 'instance_name', 'row_index']
     COMMON_ID_COLUMN_NAMES: List[str] = ['uuid', 'x_uuid', 'person_id']
-
+    
+    # for dynamic model creation
     CLEAN_DATA_SHEET_SEARCH_TERMS: List[str] = ['clean', 'clog_logbook']
     CLEANING_LOG_SHEET_SEARCH_TERMS: List[str] = ['log']
     RAW_DATA_SHEET_SEARCH_TERMS: List[str] = ['raw']

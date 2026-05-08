@@ -88,27 +88,51 @@ class NaNCheck(BaseValidator):
             has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in filtered_columns])
             nan_only_df = nan_df.filter(has_nan)
 
-            output_rows = []
-
             # create df of only invalid data
+            # transform data from a wide format to a long format and join to flags. this allows for
+            # filtering nan values in a single operation
             if not nan_only_df.is_empty():
-                for row in nan_only_df.iter_rows(named=True):
-                    uuid = row[sheet_ids[sheet][0].data_column_name]
-                    for column in filtered_columns:
-                        is_changed = row[f"is_{column}_nan_value"]
+                id_col = sheet_ids[sheet][0].data_column_name
 
-                        if is_changed:
-                            value = row[column]
-                            # new_val = row[new_col]
-                            output_rows.append({
-                                "uuid": uuid,
-                                "sheet": sheet,
-                                "column": column,
-                                "value": str(value),
-                            })
+                # unvpvot values
+                values_df = nan_only_df.unpivot(
+                index=[id_col],
+                on=filtered_columns,
+                variable_name="column",
+                value_name="value"
+                )
+                
+                # unpivot flags. Extract question name from flag column name
+                flags_df = nan_only_df.unpivot(
+                    index=[id_col],
+                    on=[f"is_{c}_nan_value" for c in filtered_columns],
+                    variable_name="flag_col_name", 
+                    value_name="is_changed"
+                    ).with_columns(
+                        pl.col("flag_col_name")
+                        .str.replace("^is_", "", literal=False)
+                        .str.replace("_nan_value$", "", literal=False)
+                        .alias("column")
+                        )
+                
+                # join all together
+                # Filter only rows where the NaN flag is True
+                merged_df = values_df.join(
+                    flags_df,
+                    on=[id_col, "column"],
+                    how="inner"
+                ).filter(pl.col("is_changed") )
+                                
+                # get the valies
+                output_df = merged_df.select([
+                    pl.col(id_col).alias('uuid'),
+                    pl.lit(sheet).alias("sheet"),
+                    pl.col("column"),
+                    pl.col("value").cast(pl.Utf8).alias("value")
+                ])
+                # concat results to those from previous sheets
                 output_difference_df = pl.concat([output_difference_df,
-                                                        pl.DataFrame(output_rows, 
-                                                                     infer_schema_length=None)])
+                                                        output_df])
 
 
         if output_difference_df.height > 0:

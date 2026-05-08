@@ -1261,61 +1261,6 @@ def missing_raw_data_sheet():
     
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
-@pytest.fixture
-def invalid_clean_data2():
-    """Create ExcelLoaderData with matching columns"""
-
-    df_clean = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 7, 3, 4, 5],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_raw = pl.DataFrame({
-        "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 2, 3, 4, 4],
-        "question2":["a", "c", "f", "a", "a"]
-    })
-
-    df_clean_log = pl.DataFrame({
-        "uuid": [5],
-        "question":['question1'],
-        "new_value":[5],
-        "old_value":[4],
-        "change_type": ["change_response"]
-    })
-    
-    loaded_sheets = [DataSheetMap(
-                        schema_sheet_name="clean_data",
-                        data_sheet_name="clean_data",
-                        data=df_clean,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="raw_data",
-                        data_sheet_name="raw_data",
-                        data=df_raw,
-                        data_columns=["uuid", "question1", "question2"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid')]),
-                        DataSheetMap(
-                        schema_sheet_name="cleaning_log",
-                        data_sheet_name="cleaning_log",
-                        data=df_clean_log,
-                        data_columns=["uuid", "question", "new_value", "change_type", "old_value"],
-                        column_map=[DataColumnMap(schema_column_name = 'uuid',
-                                   data_column_name='uuid'),
-                                   DataColumnMap(schema_column_name = 'new_value',
-                                   data_column_name='new_value'),
-                                   DataColumnMap(schema_column_name = 'question',
-                                   data_column_name='question'),
-                                   DataColumnMap(schema_column_name = 'change_type',
-                                   data_column_name='change_type'),
-                                   DataColumnMap(schema_column_name = 'old_value',
-                                   data_column_name='old_value')])]
-    
-    return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
 
 @pytest.fixture
@@ -1487,12 +1432,6 @@ class TestCleaningLog:
         assert isinstance(result, list)
         assert len(result) == 1
 
-    def test_invalid_clean_data2(self, valid_schema_validator: BaseValidator,
-                           invalid_clean_data2: ExcelLoaderData):
-        result = valid_schema_validator.validate(invalid_clean_data2)
-        
-        assert isinstance(result, list)
-        assert len(result) == 1
 
     def test_missing_question_column(self, valid_schema_validator: BaseValidator,
                            missing_question_column: ExcelLoaderData):

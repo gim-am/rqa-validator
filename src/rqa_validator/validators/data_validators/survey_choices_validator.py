@@ -235,25 +235,46 @@ class SurveyChoicesCheck(BaseValidator):
             has_any_change = pl.any_horizontal([pl.col(f"{question}_has_difference") for question in filtered_questions])
             changes_only = comparison_df.filter(has_any_change)
 
-            output_rows = []
-
             check_sheet_id_column = data_id_columns[sheet][0]  
             # report the invalid values if any
+            # transform data from a wide format to a long format and join to flags. this allows for
+            # filtering invalid values in a single operation
             if not changes_only.is_empty():
-                for row in changes_only.iter_rows(named=True):
-                    uuid = row[check_sheet_id_column.data_column_name]
-                    for question in filtered_questions:
-                        is_changed = row[f"{question}_has_difference"]
+                values_df = changes_only.unpivot(
+                index=[check_sheet_id_column.data_column_name],
+                on=filtered_questions,
+                variable_name="question",
+                value_name="invalid_value"
+                )
 
-                        if is_changed:
-                            old_val = row[question]
-                            output_rows.append({
-                                'uuid': uuid,
-                                "question": question,
-                                "invalid_value": old_val
-                            })
+                # unpivot flags. Extract question name from flag column name
+                flags_df = changes_only.unpivot(
+                    index=[check_sheet_id_column.data_column_name],
+                    on=[f"{c}_has_difference" for c in filtered_questions],
+                    variable_name="flag_col_name", 
+                    value_name="is_changed"
+                    ).with_columns(
+                        pl.col("flag_col_name")
+                        .str.replace("^is_", "", literal=False)
+                        .str.replace("_has_difference$", "", literal=False)
+                        .alias("question")
+                        )
+                
+                merged_df = values_df.join(
+                    flags_df,
+                    on=[check_sheet_id_column.data_column_name, "question"],
+                    how="inner"
+                ).filter(pl.col("is_changed") )
 
-                difference_df = pl.DataFrame(output_rows, infer_schema_length=None)
+                difference_df = merged_df.select([
+                    pl.col(check_sheet_id_column.data_column_name).alias('uuid'),
+                    pl.lit(sheet).alias("sheet"),
+                    pl.col("question"),
+                    pl.col("invalid_value").cast(pl.Utf8)
+                ])
+
+
+                # difference_df = pl.DataFrame(output_rows, infer_schema_length=None)
                 if difference_df.height > 0:
                     # df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(ValidationResult(
