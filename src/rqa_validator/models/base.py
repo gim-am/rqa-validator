@@ -11,8 +11,8 @@ class DynamicSheetMatching:
      id_column_set: set | None
      classification: str | None = None
      log_type: str | None = None
-     parent: str | None = None
-     parent_id_column: str | None = None
+     parent_sheet: str | None = None
+     parent_linking_column: str | None = None
      children: List[str] = field(default_factory=list)
      linked_cleaning_log: str | None = None
      linked_raw_sheet: str | None = None
@@ -41,9 +41,6 @@ class SchemaColumnMap:
         for item in self.process_values:
             if item.process_name == process_name:
                 return item
-        
-
-
 
 @dataclass
 class SchemaSheetMap:

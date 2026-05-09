@@ -156,7 +156,7 @@ class DynamicDataset(BaseDataset):
 
                 if clean_sheet is not None:
 
-                    if details.parent is None:
+                    if details.parent_sheet is None:
                         id_check_sheets.append('deletion_log')
                     if clean_sheet.linked_cleaning_log is not None:
                         id_check_sheets.append(clean_sheet.linked_cleaning_log)
@@ -165,10 +165,10 @@ class DynamicDataset(BaseDataset):
                                                         master_sheet=sheet,
                                                         child_sheets=id_check_sheets ))
 
-        if consent_sheet is not None:
-            self.validators.append(ConsentCheck(schema=self.schema,
-                                        raw_data_sheet=consent_sheet,
-                                            clean_data_sheet=self.sheet_matching[consent_sheet].linked_clean_sheet))
+        if consent_sheet is not None :
+                self.validators.append(ConsentCheck(schema=self.schema,
+                                            raw_data_sheet=consent_sheet,
+                                                clean_data_sheet=self.sheet_matching[consent_sheet].linked_clean_sheet))
         else:
             results.append(ValidationResult(
                         rule = 'DynamicDataset Creation build_validators',
@@ -214,24 +214,24 @@ class DynamicDataset(BaseDataset):
             if details.classification in ['log', 'clean', 'raw']:
                 new_sheet = self.schema.add_loaded_sheet(SchemaSheetMap(
                     standard_name=sheet,
-                    parent_sheet = details.parent,
-                    parent_linking_column=details.parent_id_column ))
+                    parent_sheet = details.parent_sheet,
+                    parent_linking_column=details.parent_linking_column ))
                 
 
                 
-                if details.parent_id_column is not None:
+                if details.parent_linking_column is not None:
                     self.schema.add_mandatory_column_to_sheet(sheet, 
-                                                        SchemaColumnMap(standard_name=details.parent_id_column))
+                                                        SchemaColumnMap(standard_name=details.parent_linking_column))
                                                                         
                 if details.id_column is not None:
                     self.schema.add_mandatory_column_to_sheet(sheet, 
                                                         SchemaColumnMap(standard_name=details.id_column,
                                                                                 is_unique=True))
-                if details.parent_id_column is not None:
+                if details.parent_linking_column is not None:
                     self.schema.add_mandatory_column_to_sheet(sheet, 
-                                                        SchemaColumnMap(standard_name=details.parent_id_column))
+                                                        SchemaColumnMap(standard_name=details.parent_linking_column))
                 if details.classification == 'raw':
-                    if details.parent is None:
+                    if details.parent_sheet is None:
                         consent_sheet = sheet
                         self.schema.add_mandatory_column_to_sheet(sheet, 
                                                             SchemaColumnMap(standard_name="consent",
@@ -303,7 +303,7 @@ class DynamicDataset(BaseDataset):
                 id_column_set = None,
                 classification = None,
                 log_type =  None,
-                parent = None) 
+                parent_sheet = None) 
             
             # categorise the sheet based on simple name matching
             # deletion logs are part of the DynamicDatasetSchema already
@@ -457,8 +457,8 @@ class DynamicDataset(BaseDataset):
                                         "id_column": m.id_column,
                                         "classification": m.classification,
                                         "log_type": m.log_type,
-                                        "parent": m.parent,
-                                        "parent_id_column": m.parent_id_column,
+                                        "parent": m.parent_sheet,
+                                        "parent_id_column": m.parent_linking_column,
                                         "children": m.children,
                                         "linked_cleaning_log": m.linked_cleaning_log,
                                         "linked_raw_sheet": m.linked_raw_sheet,
@@ -524,8 +524,8 @@ class DynamicDataset(BaseDataset):
             
             if best_score > 0.8:
                 assert best_parent is not None
-                matched_sheets[child_name].parent = best_parent
-                matched_sheets[child_name].parent_id_column = best_fk_col
+                matched_sheets[child_name].parent_sheet = best_parent
+                matched_sheets[child_name].parent_linking_column = best_fk_col
                 matched_sheets[best_parent].children.append( child_name)
         
 
