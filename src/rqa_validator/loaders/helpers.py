@@ -19,8 +19,8 @@ def match_excel_columns_to_schema( excel_columns: List, schema_sheet: SchemaShee
         one column then no match is returned.
 
     Args:
-        excel_columns (List): _description_
-        schema_sheet (SchemaSheetMap): _description_
+        excel_columns (List): list of escel columns
+        schema_sheet (SchemaSheetMap): schema sheet to search against
 
     Returns:
         tuple[List[ValidationResult], List[DataColumnMap]]: _description_
@@ -54,7 +54,7 @@ def match_excel_columns_to_schema( excel_columns: List, schema_sheet: SchemaShee
             continue
         elif fuzzy_matched_values:
             if len(fuzzy_matched_values[0].matches) == 1:
-                matches.append(DataColumnMap(data_column_name=fuzzy_matched_values[0].standard_name
+                matches.append(DataColumnMap(data_column_name=list(fuzzy_matched_values[0].matches)[0]
                                             ,schema_column_name = column.standard_name))
 
                 results.append(ValidationResult(

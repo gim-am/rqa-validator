@@ -251,7 +251,8 @@ class CleaningLogToClean(BaseValidator):
                                                         values=[data_loaded_columns[self.cleaning_log_new_value_column].data_column_name, 'is_update']) \
                                                         .rename(str.lower)
         # rename for later
-        unique_modified_rows_df = unique_modified_rows_df.rename({f"new_value_{q}": f"{q}_val"
+        # the question prefix comes from the column name in the pivot operation
+        unique_modified_rows_df = unique_modified_rows_df.rename({f"{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}_{q}": f"{q}_val"
                                                                                 for q in questions
                                                                         }).rename({
                                                                             f"is_update_{q}": f"{q}_has_update"
