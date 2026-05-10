@@ -4,8 +4,7 @@
 ## Suported Datasets
 
 - jmmi datasets
-
-Support for other datasets will be added later.
+- other datasets through dynamic schema generation - see below.
 
 ## Project structure
 
@@ -26,24 +25,30 @@ Support for other datasets will be added later.
 │   │   │   ├── file_export.py
 │   │   │   ├── list_matching.py
 │   │   │   └── schema_matching.py
+│   │   ├── __init__.py
 │   │   ├── loaders
 │   │   │   ├── base.py
 │   │   │   ├── excel_loader.py
+│   │   │   ├── helpers.py
 │   │   │   └── __init__.py
 │   │   ├── models
 │   │   │   ├── base_dataset.py
 │   │   │   ├── base.py
+│   │   │   ├── dynamic_model.py
 │   │   │   ├── __init__.py
 │   │   │   ├── jmmi.py
 │   │   │   └── preprocess.py
 │   │   ├── orchestrator
 │   │   │   ├── __init__.py
 │   │   │   └── validation_pipeline.py
+│   │   ├── utils
+│   │   │   ├── __init__.py
+│   │   │   └── logging.py
 │   │   └── validators
 │   │       ├── base.py
 │   │       ├── config.py
 │   │       ├── data_validators
-│   │       │   ├── cleaning_log_validator.py
+│   │       │   ├── cleaning_log_to_clean_validator.py
 │   │       │   ├── column_data_type_validator.py
 │   │       │   ├── consent_check_validator.py
 │   │       │   ├── cross_sheet_id_check_validator.py
@@ -51,6 +56,7 @@ Support for other datasets will be added later.
 │   │       │   ├── __init__.py
 │   │       │   ├── nan_check_validator.py
 │   │       │   ├── pii_validator.py
+│   │       │   ├── raw_clean_cleaning_log_validator.py
 │   │       │   ├── survey_choices_validator.py
 │   │       │   └── unique_column_validator.py
 │   │       ├── helpers.py
@@ -62,7 +68,6 @@ Support for other datasets will be added later.
 │   │           ├── mandatory_column_validator.py
 │   │           ├── missing_sheets_validator.py
 │   │           └── unexpected_sheets_validator.py
-│   └── tests│       
 └── uv.lock
 
 ```
@@ -81,6 +86,11 @@ Support for other datasets will be added later.
 ```
 uv run main.py --dataset-type jmmi Step3DatasetPath
 ```
+or
+```
+uv run main.py --dataset-type other Step3DatasetPath
+```
+
 5. Any validation errors will be output to the terminal.
 
 ### Running process
@@ -128,7 +138,44 @@ Each of the columns listed within a sheet above has:
 - a flag stating if the column should containe unique values, default False
 - a process value map where certain column values that are required for a validation process can be listed. 
 
-### Validation Rules
+### Suported Datasets
+
+**JMMI**
+
+As this dataset is somewhat standardised it has its own schema and validation ruleset specified.
+
+**Other Datasets**
+
+For all other datasets a schema is built from two sources:
+- a list of expexted sheets. These include:
+    - Deletion Log
+    - Kobo Survey
+    - Kobo Choices
+    - Some other unloaded sheets
+- An anlysis of the dataset
+
+The analysis of the dataset attempts to classify and match sheets based on finding:
+- possible parent/child clean_data sheets
+- possible parent/child raw_data sheets
+- possible parent/child cleaning_log sheets
+- other non standardised datasets 
+
+This is acheived by trying to:
+ - identify the type of sheet based on simple name matching. eg log, raw, clean
+- find a unique id column for the sheet, except cleaning log sheets
+- link cleaning log sheets to clean data sheets
+- link parent and child sheets if there are loops. NOTE: loops within loops are currently not supported.
+- link raw data sheets to clean data sheets
+
+Links are determined through a combination of:
+- name similarity
+- the intersection of id column values
+
+After this analysis is complete, the rest of the schema is dynamically generated and the required validation rules are created. If expected sheets cannot be found then validation errors will be returned.
+
+If sheets and columns are named according to the minimum standards then this process should have a reasonable chance of succeeding. The less the minimum standards checklist is followed, the more likely this process and the subsequent validation rules are to produce errors related to not finding required sheets or columns.
+
+## Validation Rules
 Validation rules are split between different categories. Each of these are designed to be able to be run on any dataset by looking at either the dataset, the dataset schema or other config values.
 
 A structured list of validation errors is produced (errors, warnings) for each rule.
@@ -143,7 +190,8 @@ These rules are currently based on the minimum standars checklist (1.2)
 - Dataset sum check: checks if clean data + deleted data = raw data
 - NAN check: Checks columns for invalid numeric values like NaN and -999
 - Cross sheet id check: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
-- Cleaning log: checks clean_data reflects the cleaning log and the cleaning log reflects raw/clean data changes
+- Cleaning log to Clean: Checks that all records in the cleaning log are reflected in the clean_data sheet
+- Raw to Clean to cleaning log: Compares raw data and clean data sheets and makes sure any differences are reflected in the cleaning log
 - Column data types: checks columns in clean data have correct data types based on kobo survey
 - Survey choices: checks clean data contains valid values based on kobo choices
 - Consent check: checks that raw data records that did not provide consent are not present in clean data
@@ -154,6 +202,7 @@ These rules are currently based on the minimum standars checklist (1.2)
 - Multiple sheet matches: checks if multiple excel sheets are matched to the same schema sheet
 - Mandatory columns: checks if mandatory columns are not present in a sheet
 - Column names - Checks column names are variables instead of labels
+
 
 
 **Data Rules**
