@@ -5,7 +5,7 @@ from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
-
+import polars as pl
 from typing import List
 
 
@@ -105,8 +105,16 @@ class CrossSheetIdCheck(BaseValidator):
                 child_data_id_columns = child_matching_columns[0]  
                 master_id_columns = child_matching_columns[0]        
 
-
+            # filter id column. should only actually filter anything if the sheet is a cleaning log sheet
+            # at it contains ids from multiple clean data sheets (loops)
             missing_ids = child_loaded_sheet.data.select(child_data_id_columns.data_column_name) \
+                                                .filter((pl.col(child_data_id_columns.data_column_name)
+                                                        .cast(pl.Utf8)
+                                                        .str.strip_chars(' ')
+                                                        .is_not_null())
+                                                        & (pl.col(child_data_id_columns.data_column_name)
+                                                        .cast(pl.Utf8)
+                                                         .str.strip_chars(' ') != ''))\
                                                 .join(
                                                     other=data_loaded_sheets[self.master_sheet].data.select(master_matching_columns.data_column_name),
                                                     how=join_type,

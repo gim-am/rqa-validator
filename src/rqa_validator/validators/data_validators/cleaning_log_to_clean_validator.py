@@ -157,6 +157,13 @@ class CleaningLogToClean(BaseValidator):
          # dataframe of actual changes made
         modified_rows_df = data_loaded_sheets[self.cleaning_log_sheet].data.filter(pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name) \
                                                                     .str.to_lowercase().is_in(schema_change_type_values.values) ) \
+                                                        .filter((pl.col(clean_log_id_columns.data_column_name)
+                                                        .cast(pl.Utf8)
+                                                        .str.strip_chars(' ')
+                                                        .is_not_null())
+                                                        & (pl.col(clean_log_id_columns.data_column_name)
+                                                        .cast(pl.Utf8)
+                                                         .str.strip_chars(' ') != ''))\
                                                         .select([clean_log_id_columns.data_column_name,
                                                                     data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
                                                                     data_loaded_columns[self.cleaning_log_old_value_column].data_column_name,
@@ -292,25 +299,28 @@ class CleaningLogToClean(BaseValidator):
         changes_only = comparison_df.filter(has_any_change)
 
         # record the changes
-        # The unpivot process transforms the data from a "wide" format (where each question is a separate column) 
-        # into a "long" format (where each question becomes a single row per record). By running this separately
-        #  on the new values, old values, and change flags, we create three aligned vertical lists that can be 
-        # joined together using the uuid and question name. This allows us to filter for changes and compare 
+        # The unpivot process transforms the data from a wide format into a long format.
+        #  By running this separately on the new values, old values, and change flags, we create three aligned vertical 
+        # lists that can be joined together using the uuid and question name. This allows us to filter for changes and compare 
         # old vs. new values in a single operation.
         if not changes_only.is_empty():
     
             # unpivot new values
             new_values_df = changes_only.unpivot(
                 index=[clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions], 
-                on= [f"{q}" for q in questions],
+                on= questions,
                 variable_name="question",
                 value_name=f"{self.cleaning_log_sheet}_value"
             )
             
         #    unpivot original values
-            original_values_df = changes_only.unpivot(
+        # need to rename so question names match
+            original_values_df = changes_only \
+                .select([clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions])\
+                .rename({f"{q}_val": q for q in questions})\
+                .unpivot(
                 index=[clean_log_id_columns.data_column_name],
-                on=[f"{q}_val" for q in questions],
+                on=questions,
                 variable_name="question",
                 value_name=f"{self.clean_data_sheet}_value"
             )

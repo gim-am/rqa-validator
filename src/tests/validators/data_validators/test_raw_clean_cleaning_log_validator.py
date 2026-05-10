@@ -33,6 +33,11 @@ def invalid_schema4_validator(invalid_schema4):
     return RawToCleanToLog(schema=invalid_schema4)
 
 @pytest.fixture
+def valid_schema_validator_no_clean_log(valid_schema_no_cleaning_log):
+    """Create a UniqueColumn validator instance"""
+    return RawToCleanToLog(schema=valid_schema_no_cleaning_log, cleaning_log_sheet=None)
+
+@pytest.fixture
 def valid_schema():
     
     return BaseDatasetSchema(
@@ -194,6 +199,40 @@ def invalid_schema4():
     )
 
 @pytest.fixture
+def valid_schema_no_cleaning_log():
+    
+    return BaseDatasetSchema(
+        dataset_type="jmmi",
+        schema_loaded_sheets=[SchemaSheetMap(standard_name= "clean_data", 
+                        alternate_names =["clean_data"],
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
+                                                           alternate_names=["uuidx", "X_uuid"],
+                                                           is_unique=True)],  
+                        ),
+                        SchemaSheetMap(standard_name= "raw_data", 
+                        alternate_names =["raw_data"],
+                        mandatory_columns= [SchemaColumnMap(standard_name="uuid",
+                                                           alternate_names=["uuidx", "X_uuid"],
+                                                           is_unique=True)],  
+                        )
+                        # ,SchemaSheetMap(standard_name= "cleaning_log", 
+                        # alternate_names =["cleaning_log"],
+                        # mandatory_columns= [SchemaColumnMap(standard_name="uuid",
+                        #                                    alternate_names=["uuid", "X_uuid"]
+                        #                                    ),
+                        #                     SchemaColumnMap(standard_name="new_value"),
+                        #                     SchemaColumnMap(standard_name="old_value"),
+                        #                     SchemaColumnMap(standard_name="question"),
+                        #                     SchemaColumnMap(standard_name="change_type",
+                        #                                   alternate_names=["changed"],
+                        #                                   process_values=[ProcessValueMap(process_name='cleaning_log_validation',
+                        #                                                                   values=['yes', 'change_response'])])],  
+                        # )                                   
+                                                           ],
+        schema_unloaded_sheets=[]
+    )
+
+@pytest.fixture
 def valid_excel_data():
     """Create ExcelLoaderData with matching columns"""
 
@@ -250,7 +289,7 @@ def valid_excel_data():
     return ExcelLoaderData(loaded_sheets=loaded_sheets)
 
 @pytest.fixture
-def invalid_clean_data_excel_data():
+def invalid_clean_raw_data_excel_data():
     """Create ExcelLoaderData with matching columns"""
 
     df_clean = pl.DataFrame({
@@ -261,15 +300,15 @@ def invalid_clean_data_excel_data():
 
     df_raw = pl.DataFrame({
         "uuid": [1, 2, 3, 4, 5],
-        "question1": [1, 2, 3, 4, 4],
+        "question1": [2, 2, 3, 4, 4],
         "question2":["a", "c", "f", "a", "a"]
     })
 
     df_clean_log = pl.DataFrame({
-        "uuid": [5],
+        "uuid": [1],
         "question":['question1'],
-        "new_value":[5],
-        "old_value":[4],
+        "new_value":[1],
+        "old_value":[2],
         "change_type": ["change_response"]
     })
     
@@ -1439,3 +1478,21 @@ class TestCleaningLog:
         
         assert isinstance(result, list)
         assert len(result) == 1
+
+    def test_invalid_clean_raw_data(self, valid_schema_validator: BaseValidator,
+                                    invalid_clean_raw_data_excel_data: ExcelLoaderData):
+        result = valid_schema_validator.validate(invalid_clean_raw_data_excel_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].details is not None
+        assert len(result[0].details['uuid']) == 1
+
+    def test_invalid_clean_raw_data2(self, valid_schema_validator_no_clean_log: BaseValidator,
+                                    invalid_clean_raw_data_excel_data: ExcelLoaderData):
+        result = valid_schema_validator_no_clean_log.validate(invalid_clean_raw_data_excel_data)
+        
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert result[0].details is not None
+        assert len(result[0].details['uuid']) == 2

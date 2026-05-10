@@ -1243,6 +1243,8 @@ class TestCleaningLog:
         
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
+        assert len(result[0].details['uuid']) == 1
 
     def test_invalid_clean_data(self, valid_schema_validator: BaseValidator,
                            invalid_clean_data_excel_data: ExcelLoaderData):
@@ -1250,6 +1252,8 @@ class TestCleaningLog:
         
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
+        assert len(result[0].details['uuid']) == 1
 
     def test_missing_question_clean_data(self, valid_schema_validator: BaseValidator,
                            missing_question_excel_data: ExcelLoaderData):

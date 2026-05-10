@@ -210,10 +210,9 @@ class RawToCleanToLog(BaseValidator):
         changes_only = comparison_df.filter(has_any_change)
         
 
-    # The unpivot process transforms the data from a "wide" format (where each question is a separate column) 
-    # into a "long" format (where each question becomes a single row per record). By running this separately
-    #  on the new values, old values, and change flags, we create three aligned vertical lists that can be 
-    # joined together using the uuid and question name. This allows us to filter for changes and compare 
+    # The unpivot process transforms the data from a wide format into a long format.
+    #  By running this separately on the new values, old values, and change flags, we create three aligned vertical 
+    # lists that can be joined together using the uuid and question name. This allows us to filter for changes and compare 
     # old vs. new values in a single operation.
         
         if not changes_only.is_empty():
@@ -227,9 +226,13 @@ class RawToCleanToLog(BaseValidator):
             )
 
             # unpivot original values
-            original_values_df = changes_only.unpivot(
+            # need to rename so question names match
+            original_values_df = changes_only\
+                .select([clean_data_id_columns.data_column_name] + [f"{q}_original_value" for q in clean_data_columns])\
+                .rename({f"{q}_original_value": q for q in clean_data_columns})\
+                .unpivot(
                 index=[clean_data_id_columns.data_column_name],
-                on=[f"{q}_original_value" for q in clean_data_columns],
+                on=clean_data_columns,
                 variable_name=self.cleaning_log_question_column, 
                 value_name=self.cleaning_log_old_value_column
             )

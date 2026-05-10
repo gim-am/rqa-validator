@@ -49,6 +49,9 @@ class DynamicDataset(BaseDataset):
      reasonable chance of succeeding. The less the minimum standards checklist is followed, the more likely
      this process and the subsequent validation rules are to produce errors related to not finding required sheets
      or columns.
+
+     Limitations:
+     - loops within loops are currently not supported.
      
      """
     def __init__(self, data: ExcelLoaderData) -> None:
@@ -238,23 +241,36 @@ class DynamicDataset(BaseDataset):
                                                                     alternate_names=[],
                                                                     process_values=[ProcessValueMap(process_name='consent_check_validation',
                                                                                                 values=['yes'])]))
-                if details.log_type == "cleaning":       
-
+                if details.log_type == "cleaning": 
+                    # parts of this may seem repetitive
+                    # if there are multiple clean data sheets (from loops) and they dont have their own
+                    # cleaning log then its possible there will be multiple id columns in cleaning data 
+                    # this aims to make sure that all likely id columns are in the schema
                     if details.log_id_column is not None:
                         self.schema.add_mandatory_column_to_sheet(sheet, 
                                                             SchemaColumnMap(standard_name=details.log_id_column))
-                    else:
-                        matches = match_list(settings.COMMON_ID_COLUMN_NAMES, details.data.columns)
-                        if len(matches) == 1:
+                    
+                    matches = match_list(settings.COMMON_ID_COLUMN_NAMES, details.data.columns)
+                    matches = filter_list(matches, ['details.log_id_column'])
+                    if len(matches) > 0:
+                        for match in matches:
                             self.schema.add_mandatory_column_to_sheet(sheet, 
-                                                            SchemaColumnMap(standard_name=matches[0]))
-                            
+                                                            SchemaColumnMap(standard_name=match))
+                        
+                    for column in details.data.columns:  
+                        
+                        if 'id' in column and column not in matches and column != details.log_id_column:   
+                            self.schema.add_mandatory_column_to_sheet(sheet, 
+                                                        SchemaColumnMap(standard_name=column))
+
+
                     self.schema.add_mandatory_column_to_sheet(sheet, 
                                                         SchemaColumnMap(standard_name="old_value"))
                     self.schema.add_mandatory_column_to_sheet(sheet, 
                                                         SchemaColumnMap(standard_name="new_value"))
                     self.schema.add_mandatory_column_to_sheet(sheet, 
-                                                        SchemaColumnMap(standard_name="question"))
+                                                        SchemaColumnMap(standard_name="question",
+                                                                        alternate_names=["question_name"]))
                     self.schema.add_mandatory_column_to_sheet(sheet, 
                                                         SchemaColumnMap(standard_name="change_type",
                                                                                 alternate_names=["changed"],

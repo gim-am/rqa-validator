@@ -632,6 +632,7 @@ class TestDataType:
         
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
         assert len(result[0].details['uuid']) == 1 
 
     def test_invalid_data2(self, valid_schema_validator: BaseValidator,
@@ -640,6 +641,7 @@ class TestDataType:
         
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
         assert len(result[0].details['uuid']) == 1 
 
     def test_invalid_data3(self, valid_schema_validator: BaseValidator,
@@ -648,5 +650,7 @@ class TestDataType:
         
         assert isinstance(result, list)
         assert len(result) == 2
+        assert result[0].details is not None
+        assert result[1].details is not None
         assert len(result[0].details['uuid']) == 1
         assert len(result[1].details['uuid']) == 1
