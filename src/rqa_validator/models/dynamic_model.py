@@ -113,26 +113,42 @@ class DynamicDataset(BaseDataset):
         
         for sheet, details in self.sheet_matching.items():
 
-            if details.classification == 'clean':
+            cleaning_log_sheet = None
+
+            if details.linked_cleaning_log is not None:
+                cleaning_log_sheet = details.linked_cleaning_log
+            elif len(cleaning_log_sheets) == 1:
+                cleaning_log_sheet = cleaning_log_sheets[0]
+            else:
                 cleaning_log_sheet = None
-                if details.linked_raw_sheet is not None:
-                    if details.linked_cleaning_log is not None:
-                        cleaning_log_sheet = details.linked_cleaning_log
-                    elif len(cleaning_log_sheets) == 1:
-                        cleaning_log_sheet = cleaning_log_sheets[0]
-                    else:
-                        cleaning_log_sheet = None
 
-                        
-                    if cleaning_log_sheet is not None:        
-                        self.validators.append(CleaningLogToClean(schema=self.schema,
+            if details.classification == 'clean':
+
+                if cleaning_log_sheet is not None: 
+                    self.validators.append(CrossSheetIdCheck(schema=self.schema,
+                                                            master_sheet=sheet,
+                                                            child_sheets=[cleaning_log_sheet] ))
+                    self.validators.append(CleaningLogToClean(schema=self.schema,
                                                                 cleaning_log_sheet=cleaning_log_sheet,
-                                                                clean_data_sheet=sheet))
-
+                                                                clean_data_sheet=sheet)) 
+                else:
+                    results.append(ValidationResult(
+                                rule = 'DynamicDataset Creation build_validators',
+                                message = f'No linked cleaning data sheet for the sheet {sheet} were found so the CleaningLogToClean and CrossSheetIdCheck rules could not be run.'
+                                ,severity = SeverityLevel.WARNING
+                            )) 
+                
+                if details.linked_raw_sheet is not None:
                     self.validators.append(RawToCleanToLog(schema=self.schema,
                                                             cleaning_log_sheet=cleaning_log_sheet,
                                                             clean_data_sheet=sheet,
                                                             raw_data_sheet=details.linked_raw_sheet))
+                else:
+                    results.append(ValidationResult(
+                                rule = 'DynamicDataset Creation build_validators',
+                                message = f'No linked raw sheet for the sheet {sheet} were found so the RawToCleanToLog rule could not be run.'
+                                ,severity = SeverityLevel.WARNING
+                            )) 
 
 
             elif details.classification == 'raw':
@@ -156,17 +172,29 @@ class DynamicDataset(BaseDataset):
                                                             child_sheets=rowsum_sheets,
                                                             master_deletion_log=master_deletion_log)
                                                             )
+                else:
+                    results.append(ValidationResult(
+                                rule = 'DynamicDataset Creation build_validators',
+                                message = f'No linked sheets for the raw data sheet {sheet} were found so the CrossSheetRowSumCheck rule could not be run.'
+                                ,severity = SeverityLevel.WARNING
+                            ))  
 
                 if clean_sheet is not None:
 
                     if details.parent_sheet is None:
                         id_check_sheets.append('deletion_log')
-                    if clean_sheet.linked_cleaning_log is not None:
-                        id_check_sheets.append(clean_sheet.linked_cleaning_log)
+                    if cleaning_log_sheet is not None:
+                        id_check_sheets.append(cleaning_log_sheet)
                 
                     self.validators.append(CrossSheetIdCheck(schema=self.schema,
                                                         master_sheet=sheet,
                                                         child_sheets=id_check_sheets ))
+                else:
+                    results.append(ValidationResult(
+                                rule = 'DynamicDataset Creation build_validators',
+                                message = f'No linked clean sheet for the raw data sheet {sheet} was found so the CrossSheetIdCheck rule could not be run.'
+                                ,severity = SeverityLevel.WARNING
+                            ))    
 
         if consent_sheet is not None :
                 self.validators.append(ConsentCheck(schema=self.schema,
