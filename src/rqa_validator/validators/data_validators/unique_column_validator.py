@@ -1,6 +1,5 @@
 import polars as pl
 
-from ...common.file_export import df_to_csv
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
@@ -45,9 +44,7 @@ class UniqueColumn(BaseValidator):
 
             if loaded_sheet_info:
                 for column in unique_columns:
-                    mapped_column = loaded_sheet_info.get_column_map(
-                        column.standard_name
-                    )
+                    mapped_column = loaded_sheet_info.get_column_map(column.standard_name)
                     if mapped_column is not None:
                         unique_duplicated_rows_df = (
                             loaded_sheet_info.data.filter(
@@ -58,16 +55,12 @@ class UniqueColumn(BaseValidator):
                             .select(mapped_column.data_column_name)
                             .rename({mapped_column.data_column_name: "uuid"})
                         )
-                        unique_duplicated_row_count = (
-                            unique_duplicated_rows_df.n_unique()
-                        )
+                        unique_duplicated_row_count = unique_duplicated_rows_df.n_unique()
                         if unique_duplicated_row_count > 0:
                             # store for output
                             unique_duplicated_rows_df = (
                                 unique_duplicated_rows_df.unique().with_columns(
-                                    pl.lit(loaded_sheet_info.data_sheet_name).alias(
-                                        "sheet"
-                                    )
+                                    pl.lit(loaded_sheet_info.data_sheet_name).alias("sheet")
                                 )
                             )
                             duplicated_ids_df = pl.concat(

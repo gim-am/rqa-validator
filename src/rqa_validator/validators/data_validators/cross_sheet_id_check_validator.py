@@ -112,14 +112,12 @@ class CrossSheetIdCheck(BaseValidator):
                     self.name,
                 )
                 if result is not None:
-                    result, child_data_id_columns, master_id_columns = (
-                        get_matching_id_columns_alt(
-                            child_loaded_sheet.column_map,
-                            child_loaded_sheet.data_sheet_name,
-                            [master_matching_columns],
-                            self.master_sheet,
-                            self.name,
-                        )
+                    result, child_data_id_columns, master_id_columns = get_matching_id_columns_alt(
+                        child_loaded_sheet.column_map,
+                        child_loaded_sheet.data_sheet_name,
+                        [master_matching_columns],
+                        self.master_sheet,
+                        self.name,
                     )
                     if result is not None:
                         results.append(result)
@@ -168,12 +166,12 @@ class CrossSheetIdCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message="Id values for sheet" \
-                            f" '{child_loaded_sheet.data_sheet_name}' and column "\
-                          f" '{child_data_id_columns.data_column_name}' were not found in"\
-                          f" sheet '{data_loaded_sheets[self.master_sheet].data_sheet_name}'"\
-                             f" column '{master_matching_columns.data_column_name}'."\
-                            "Check output for details. ",
+                        message="Id values for sheet"
+                        f" '{child_loaded_sheet.data_sheet_name}' and column "
+                        f" '{child_data_id_columns.data_column_name}' were not found in"
+                        f" sheet '{data_loaded_sheets[self.master_sheet].data_sheet_name}'"
+                        f" column '{master_matching_columns.data_column_name}'."
+                        "Check output for details. ",
                         severity=SeverityLevel.ERROR,
                         sheet_name=child_loaded_sheet.data_sheet_name,
                         column_name=child_data_id_columns.data_column_name,

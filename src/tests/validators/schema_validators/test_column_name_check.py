@@ -67,25 +67,19 @@ def invalid_excel_data2():
 
 
 class TestColumnNames:
-    def test_valid_data(
-        self, validator: BaseValidator, valid_excel_data: ExcelLoaderData
-    ):
+    def test_valid_data(self, validator: BaseValidator, valid_excel_data: ExcelLoaderData):
         result = validator.validate(valid_excel_data)
 
         assert isinstance(result, list)
         assert len(result) == 0
 
-    def test_invalid_data(
-        self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData
-    ):
+    def test_invalid_data(self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData):
         result = validator.validate(invalid_excel_data)
 
         assert isinstance(result, list)
         assert len(result) == 1
 
-    def test_invalid_data2(
-        self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData
-    ):
+    def test_invalid_data2(self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData):
         result = validator.validate(invalid_excel_data2)
 
         assert isinstance(result, list)

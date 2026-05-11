@@ -89,9 +89,7 @@ def valid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -116,9 +114,7 @@ def invalid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -143,9 +139,7 @@ def invalid_excel_data2():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -170,9 +164,7 @@ def invalid_excel_data3():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 

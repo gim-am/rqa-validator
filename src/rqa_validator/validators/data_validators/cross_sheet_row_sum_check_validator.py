@@ -78,9 +78,7 @@ class CrossSheetRowSumCheck(BaseValidator):
                 and master_schema_sheet.parent_linking_column is not None
                 and self.master_deletion_log is not None
             ):
-                master_filter_loaded_sheet = data.get_loaded_sheet(
-                    self.master_deletion_log
-                )
+                master_filter_loaded_sheet = data.get_loaded_sheet(self.master_deletion_log)
                 if master_filter_loaded_sheet is not None:
                     result, data_sheet_ids = get_data_sheet_id(
                         schema=self.schema,
@@ -111,9 +109,7 @@ class CrossSheetRowSumCheck(BaseValidator):
 
         for sheet in self.child_sheets:
             child_counts.append(
-                ChildCounts(
-                    sheet_name=sheet, row_count=data_loaded_sheets[sheet].data.height
-                )
+                ChildCounts(sheet_name=sheet, row_count=data_loaded_sheets[sheet].data.height)
             )
 
         child_sum = sum([item.row_count for item in child_counts])
@@ -125,9 +121,9 @@ class CrossSheetRowSumCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"Sum of row counts for sheets {child_message} does not"\
-                          f" equal {self.master_sheet} rows ({master_data_count})."\
-                        f" The difference is {missing_rows}.",
+                    message=f"Sum of row counts for sheets {child_message} does not"
+                    f" equal {self.master_sheet} rows ({master_data_count})."
+                    f" The difference is {missing_rows}.",
                     severity=SeverityLevel.ERROR,
                 )
             )

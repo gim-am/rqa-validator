@@ -154,10 +154,7 @@ class ExcelLoader:
             # 1 and 3
             elif l_mapped_name and (
                 not l_results
-                or (
-                    l_results
-                    and (not (u_mapped_name and not u_results) or not u_mapped_name)
-                )
+                or (l_results and (not (u_mapped_name and not u_results) or not u_mapped_name))
             ):
                 # sheets that are expected and loaded for further data validation
                 df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()

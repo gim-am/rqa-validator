@@ -15,9 +15,7 @@ class NaNDataCheck(BaseValidator):
 
     """
 
-    def __init__(
-        self, schema: BaseDatasetSchema, check_sheets: list[str] = ["clean_data"]
-    ) -> None:
+    def __init__(self, schema: BaseDatasetSchema, check_sheets: list[str] = ["clean_data"]) -> None:
         """
         Args:
             schema (BaseDatasetSchema): schema for the dataset
@@ -59,9 +57,7 @@ class NaNDataCheck(BaseValidator):
             results.extend(result)
             return results
 
-        result, sheet_ids = get_data_sheet_ids(
-            self.schema, data_loaded_sheets, self.name
-        )
+        result, sheet_ids = get_data_sheet_ids(self.schema, data_loaded_sheets, self.name)
         if result:
             results.extend(result)
             return results
@@ -83,11 +79,9 @@ class NaNDataCheck(BaseValidator):
                             | (pl.col(column).is_in(settings.NANCHECK_NUMERIC_VALUES))
                         )
                         if filtered_df.schema[column].is_float()
-                        else False
-                        | (pl.col(column).is_in(settings.NANCHECK_NUMERIC_VALUES))
+                        else False | (pl.col(column).is_in(settings.NANCHECK_NUMERIC_VALUES))
                         if filtered_df.schema[column].is_integer()
-                        else False
-                        | (pl.col(column).is_in(settings.NANCHECK_STRING_VALUES))
+                        else False | (pl.col(column).is_in(settings.NANCHECK_STRING_VALUES))
                         if filtered_df.schema[column] == pl.String
                         else pl.lit(False)
                     ).alias(f"is_{column}_nan_value")
@@ -130,9 +124,9 @@ class NaNDataCheck(BaseValidator):
 
                 # join all together
                 # Filter only rows where the NaN flag is True
-                merged_df = values_df.join(
-                    flags_df, on=[id_col, "column"], how="inner"
-                ).filter(pl.col("is_changed"))
+                merged_df = values_df.join(flags_df, on=[id_col, "column"], how="inner").filter(
+                    pl.col("is_changed")
+                )
 
                 # get the valies
                 output_df = merged_df.select(
@@ -150,8 +144,8 @@ class NaNDataCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There were {output_difference_df.height} possible invalid"\
-                          " values found. Check the output for details.",
+                    message=f"There were {output_difference_df.height} possible invalid"
+                    " values found. Check the output for details.",
                     severity=SeverityLevel.ERROR,
                     details=output_difference_df.to_dict(),
                 )

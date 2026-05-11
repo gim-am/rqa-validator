@@ -330,9 +330,7 @@ def schema_missing_process2():
                                 process_name="data_type_numeric_check",
                                 values=["integer", "decimal"],
                             ),
-                            ProcessValueMap(
-                                process_name="data_type_temporal_check", values=[]
-                            ),
+                            ProcessValueMap(process_name="data_type_temporal_check", values=[]),
                         ],
                     ),
                     SchemaColumnMap(standard_name="name"),
@@ -376,9 +374,7 @@ def valid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -428,9 +424,7 @@ def missing_sheet():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_surveyxxx",
@@ -480,9 +474,7 @@ def missing_sheet2():
             data_sheet_name="clean_dataxxx",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -532,9 +524,7 @@ def missing_column1():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuidxxx", data_column_name="uuidxxx")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuidxxx", data_column_name="uuidxxx")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -584,9 +574,7 @@ def missing_column2():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -636,9 +624,7 @@ def missing_column3():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -688,9 +674,7 @@ def invalid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -740,9 +724,7 @@ def invalid_excel_data2():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
@@ -792,9 +774,7 @@ def invalid_excel_data3():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid", "question1", "question2", "question3", "other"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",

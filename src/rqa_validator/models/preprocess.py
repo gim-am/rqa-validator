@@ -91,9 +91,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
                     str_list.append(base_name)
 
     def lowercase_list_strs(str_list: list[Any]) -> None:
-        str_list[:] = [
-            item.lower() if isinstance(item, str) else item for item in str_list
-        ]
+        str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
 
     def process_list(str_list: list[Any]):
         lowercase_list_strs(str_list)

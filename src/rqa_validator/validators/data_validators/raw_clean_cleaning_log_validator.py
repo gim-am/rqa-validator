@@ -150,14 +150,12 @@ class RawToCleanToLog(BaseValidator):
                 self.name,
             )
             if result is not None:
-                result, clean_data_id_columns, clean_log_id_columns = (
-                    get_matching_id_columns_alt(
-                        data_sheet_ids[self.clean_data_sheet],
-                        self.clean_data_sheet,
-                        data_loaded_sheets[self.cleaning_log_sheet].column_map,
-                        self.cleaning_log_sheet,
-                        self.name,
-                    )
+                result, clean_data_id_columns, clean_log_id_columns = get_matching_id_columns_alt(
+                    data_sheet_ids[self.clean_data_sheet],
+                    self.clean_data_sheet,
+                    data_loaded_sheets[self.cleaning_log_sheet].column_map,
+                    self.cleaning_log_sheet,
+                    self.name,
                 )
                 if result is not None:
                     results.append(result)
@@ -171,15 +169,9 @@ class RawToCleanToLog(BaseValidator):
 
             result, data_loaded_columns = get_data_loaded_columns(
                 data={
-                    self.cleaning_log_new_value_column: data_loaded_sheets[
-                        self.cleaning_log_sheet
-                    ],
-                    self.cleaning_log_old_value_column: data_loaded_sheets[
-                        self.cleaning_log_sheet
-                    ],
-                    self.cleaning_log_question_column: data_loaded_sheets[
-                        self.cleaning_log_sheet
-                    ],
+                    self.cleaning_log_new_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                    self.cleaning_log_old_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                    self.cleaning_log_question_column: data_loaded_sheets[self.cleaning_log_sheet],
                     self.cleaning_log_change_type_column: data_loaded_sheets[
                         self.cleaning_log_sheet
                     ],
@@ -200,9 +192,9 @@ class RawToCleanToLog(BaseValidator):
                 results.extend(result)
                 return results
 
-            schema_change_type_column = schema_loaded_sheets[
-                self.cleaning_log_sheet
-            ].get_column(self.cleaning_log_change_type_column)
+            schema_change_type_column = schema_loaded_sheets[self.cleaning_log_sheet].get_column(
+                self.cleaning_log_change_type_column
+            )
             if schema_change_type_column is None:
                 # this should already have been validated when checking
                 # mandatory columns
@@ -226,9 +218,7 @@ class RawToCleanToLog(BaseValidator):
                 data_loaded_sheets[self.cleaning_log_sheet]
                 .data.filter(
                     pl.col(
-                        data_loaded_columns[
-                            self.cleaning_log_change_type_column
-                        ].data_column_name
+                        data_loaded_columns[self.cleaning_log_change_type_column].data_column_name
                     )
                     .str.to_lowercase()
                     .is_in(schema_change_type_values.values)
@@ -236,18 +226,10 @@ class RawToCleanToLog(BaseValidator):
                 .select(
                     [
                         clean_log_id_columns.data_column_name,
-                        data_loaded_columns[
-                            self.cleaning_log_new_value_column
-                        ].data_column_name,
-                        data_loaded_columns[
-                            self.cleaning_log_old_value_column
-                        ].data_column_name,
-                        data_loaded_columns[
-                            self.cleaning_log_change_type_column
-                        ].data_column_name,
-                        data_loaded_columns[
-                            self.cleaning_log_question_column
-                        ].data_column_name,
+                        data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                        data_loaded_columns[self.cleaning_log_old_value_column].data_column_name,
+                        data_loaded_columns[self.cleaning_log_change_type_column].data_column_name,
+                        data_loaded_columns[self.cleaning_log_question_column].data_column_name,
                     ]
                 )
             )

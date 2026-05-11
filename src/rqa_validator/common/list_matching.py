@@ -214,15 +214,11 @@ def match_sheet_columns_ids(
     common_id_set = set(settings.COMMON_ID_COLUMN_NAMES)
 
     if source_len > 1:
-        filtered_source = [
-            item for item in source if item.data_column_name in common_id_set
-        ]
+        filtered_source = [item for item in source if item.data_column_name in common_id_set]
     elif source_len == 1:
         filtered_source = source
     if target_len > 1:
-        filtered_target = [
-            item for item in target if item.data_column_name in common_id_set
-        ]
+        filtered_target = [item for item in target if item.data_column_name in common_id_set]
     elif target_len == 1:
         filtered_target = target
 

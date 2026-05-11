@@ -25,22 +25,14 @@ class MissingSheetsCheck(BaseValidator):
         results: list[ValidationResult] = []
 
         expected_sheets = [
-            sheet.standard_name
-            for sheet in self.schema.schema_loaded_sheets
-            if sheet.required
+            sheet.standard_name for sheet in self.schema.schema_loaded_sheets if sheet.required
         ]
         expected_sheets.extend(
-            [
-                sheet.standard_name
-                for sheet in self.schema.schema_unloaded_sheets
-                if sheet.required
-            ]
+            [sheet.standard_name for sheet in self.schema.schema_unloaded_sheets if sheet.required]
         )
 
         optional_sheets = [
-            sheet.standard_name
-            for sheet in self.schema.schema_loaded_sheets
-            if not sheet.required
+            sheet.standard_name for sheet in self.schema.schema_loaded_sheets if not sheet.required
         ]
         optional_sheets.extend(
             [
@@ -72,8 +64,8 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for '{sheet}' is expected when weights are"\
-                              " added to the clean data. Add this sheet if required.",
+                        message=f"A sheet for '{sheet}' is expected when weights are"
+                        " added to the clean data. Add this sheet if required.",
                         sheet_name=sheet,
                         severity=SeverityLevel.WARNING,
                     )
@@ -82,8 +74,8 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for '{sheet}' is optional. Check if this sheet"\
-                              " is required or not for this dataset.",
+                        message=f"A sheet for '{sheet}' is optional. Check if this sheet"
+                        " is required or not for this dataset.",
                         sheet_name=sheet,
                         severity=SeverityLevel.WARNING,
                     )

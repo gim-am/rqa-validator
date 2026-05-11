@@ -50,9 +50,7 @@ def valid_schema():
                 standard_name="raw_data",
                 alternate_names=["raw_data"],
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             )
         ],
@@ -102,18 +100,14 @@ def invalid_schema_missing_sheet():
                 standard_name="raw_data",
                 alternate_names=["raw_data"],
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             ),
             SchemaSheetMap(
                 standard_name="clean_data",
                 alternate_names=["clean_data"],
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             ),
         ],
@@ -173,9 +167,7 @@ class TestMandatoryColumns:
         invalid_schema_missing_mandatory_column_validator: BaseValidator,
         valid_excel_data: ExcelLoaderData,
     ):
-        result = invalid_schema_missing_mandatory_column_validator.validate(
-            valid_excel_data
-        )
+        result = invalid_schema_missing_mandatory_column_validator.validate(valid_excel_data)
 
         assert isinstance(result, list)
         assert len(result) == 1

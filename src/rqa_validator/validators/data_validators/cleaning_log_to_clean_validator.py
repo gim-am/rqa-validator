@@ -1,7 +1,6 @@
 import polars as pl
 
 from ...common.expression_builder import create_column_difference_expression
-from ...common.file_export import df_to_csv
 from ...common.list_matching import filter_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
@@ -135,14 +134,12 @@ class CleaningLogToClean(BaseValidator):
             self.name,
         )
         if result is not None:
-            result, clean_data_id_columns, clean_log_id_columns = (
-                get_matching_id_columns_alt(
-                    data_sheet_ids[self.clean_data_sheet],
-                    self.clean_data_sheet,
-                    data_loaded_sheets[self.cleaning_log_sheet].column_map,
-                    self.cleaning_log_sheet,
-                    self.name,
-                )
+            result, clean_data_id_columns, clean_log_id_columns = get_matching_id_columns_alt(
+                data_sheet_ids[self.clean_data_sheet],
+                self.clean_data_sheet,
+                data_loaded_sheets[self.cleaning_log_sheet].column_map,
+                self.cleaning_log_sheet,
+                self.name,
             )
             if result is not None:
                 results.append(result)
@@ -156,18 +153,10 @@ class CleaningLogToClean(BaseValidator):
 
         result, data_loaded_columns = get_data_loaded_columns(
             data={
-                self.cleaning_log_new_value_column: data_loaded_sheets[
-                    self.cleaning_log_sheet
-                ],
-                self.cleaning_log_old_value_column: data_loaded_sheets[
-                    self.cleaning_log_sheet
-                ],
-                self.cleaning_log_question_column: data_loaded_sheets[
-                    self.cleaning_log_sheet
-                ],
-                self.cleaning_log_change_type_column: data_loaded_sheets[
-                    self.cleaning_log_sheet
-                ],
+                self.cleaning_log_new_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                self.cleaning_log_old_value_column: data_loaded_sheets[self.cleaning_log_sheet],
+                self.cleaning_log_question_column: data_loaded_sheets[self.cleaning_log_sheet],
+                self.cleaning_log_change_type_column: data_loaded_sheets[self.cleaning_log_sheet],
             },
             rule=self.name,
         )
@@ -176,9 +165,9 @@ class CleaningLogToClean(BaseValidator):
             results.extend(result)
             return results
 
-        schema_change_type_column = schema_loaded_sheets[
-            self.cleaning_log_sheet
-        ].get_column(self.cleaning_log_change_type_column)
+        schema_change_type_column = schema_loaded_sheets[self.cleaning_log_sheet].get_column(
+            self.cleaning_log_change_type_column
+        )
         if schema_change_type_column is None:
             # this should already have been validated when checking mandatory columns
             return results
@@ -200,11 +189,7 @@ class CleaningLogToClean(BaseValidator):
         modified_rows_df = (
             data_loaded_sheets[self.cleaning_log_sheet]
             .data.filter(
-                pl.col(
-                    data_loaded_columns[
-                        self.cleaning_log_change_type_column
-                    ].data_column_name
-                )
+                pl.col(data_loaded_columns[self.cleaning_log_change_type_column].data_column_name)
                 .str.to_lowercase()
                 .is_in(schema_change_type_values.values)
             )
@@ -216,27 +201,17 @@ class CleaningLogToClean(BaseValidator):
                     .is_not_null()
                 )
                 & (
-                    pl.col(clean_log_id_columns.data_column_name)
-                    .cast(pl.Utf8)
-                    .str.strip_chars(" ")
+                    pl.col(clean_log_id_columns.data_column_name).cast(pl.Utf8).str.strip_chars(" ")
                     != ""
                 )
             )
             .select(
                 [
                     clean_log_id_columns.data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_new_value_column
-                    ].data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_old_value_column
-                    ].data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_change_type_column
-                    ].data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_question_column
-                    ].data_column_name,
+                    data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                    data_loaded_columns[self.cleaning_log_old_value_column].data_column_name,
+                    data_loaded_columns[self.cleaning_log_change_type_column].data_column_name,
+                    data_loaded_columns[self.cleaning_log_question_column].data_column_name,
                 ]
             )
         )
@@ -259,9 +234,7 @@ class CleaningLogToClean(BaseValidator):
                 ValidationResult(
                     rule=self.name,
                     message=f"{
-                        multiple_change_df.select(
-                            clean_log_id_columns.data_column_name
-                        ).n_unique()
+                        multiple_change_df.select(clean_log_id_columns.data_column_name).n_unique()
                     } Ids had multiple changes for the same question. "
                     "These were not validated. Check the output for details.",
                     severity=SeverityLevel.WARNING,
@@ -271,9 +244,9 @@ class CleaningLogToClean(BaseValidator):
 
         # scan cleaning log for old value = new value
         same_value_df = modified_rows_df.filter(
-            pl.col(
-                data_loaded_columns[self.cleaning_log_new_value_column].data_column_name
-            ).cast(pl.Utf8)
+            pl.col(data_loaded_columns[self.cleaning_log_new_value_column].data_column_name).cast(
+                pl.Utf8
+            )
             == pl.col(
                 data_loaded_columns[self.cleaning_log_old_value_column].data_column_name
             ).cast(pl.Utf8)
@@ -306,12 +279,8 @@ class CleaningLogToClean(BaseValidator):
             .select(
                 [
                     clean_log_id_columns.data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_new_value_column
-                    ].data_column_name,
-                    data_loaded_columns[
-                        self.cleaning_log_question_column
-                    ].data_column_name,
+                    data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
+                    data_loaded_columns[self.cleaning_log_question_column].data_column_name,
                 ]
             )
         )
@@ -361,9 +330,7 @@ class CleaningLogToClean(BaseValidator):
         unique_modified_rows_df = unique_modified_rows_df.with_columns(
             pl.lit(True).alias("is_update")
         ).with_columns(
-            pl.col(
-                data_loaded_columns[self.cleaning_log_new_value_column].data_column_name
-            )
+            pl.col(data_loaded_columns[self.cleaning_log_new_value_column].data_column_name)
         )  # .fill_null(''))
 
         # pivot the table for use later. lower the questions/column names.
@@ -371,9 +338,7 @@ class CleaningLogToClean(BaseValidator):
             on=data_loaded_columns[self.cleaning_log_question_column].data_column_name,
             index=clean_log_id_columns.data_column_name,
             values=[
-                data_loaded_columns[
-                    self.cleaning_log_new_value_column
-                ].data_column_name,
+                data_loaded_columns[self.cleaning_log_new_value_column].data_column_name,
                 "is_update",
             ],
         ).rename(str.lower)
@@ -381,11 +346,9 @@ class CleaningLogToClean(BaseValidator):
         # the question prefix comes from the column name in the pivot operation
         unique_modified_rows_df = unique_modified_rows_df.rename(
             {
-                f"{
-                    data_loaded_columns[
-                        self.cleaning_log_new_value_column
-                    ].data_column_name
-                }_{q}": f"{q}_val"
+                f"{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}_{
+                    q
+                }": f"{q}_val"
                 for q in questions
             }
         ).rename({f"is_update_{q}": f"{q}_has_update" for q in questions})
@@ -398,9 +361,7 @@ class CleaningLogToClean(BaseValidator):
             .data.select([clean_data_id_columns.data_column_name] + questions)
             .filter(
                 pl.col(clean_data_id_columns.data_column_name).is_in(
-                    unique_modified_rows_df[
-                        clean_log_id_columns.data_column_name
-                    ].implode()
+                    unique_modified_rows_df[clean_log_id_columns.data_column_name].implode()
                 )
             )
         )
@@ -453,8 +414,7 @@ class CleaningLogToClean(BaseValidator):
         if not changes_only.is_empty():
             # unpivot new values
             new_values_df = changes_only.unpivot(
-                index=[clean_log_id_columns.data_column_name]
-                + [f"{q}_val" for q in questions],
+                index=[clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions],
                 on=questions,
                 variable_name="question",
                 value_name=f"{self.cleaning_log_sheet}_value",
@@ -464,8 +424,7 @@ class CleaningLogToClean(BaseValidator):
             # need to rename so question names match
             original_values_df = (
                 changes_only.select(
-                    [clean_log_id_columns.data_column_name]
-                    + [f"{q}_val" for q in questions]
+                    [clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions]
                 )
                 .rename({f"{q}_val": q for q in questions})
                 .unpivot(

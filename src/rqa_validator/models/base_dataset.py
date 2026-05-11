@@ -43,9 +43,7 @@ class BaseDatasetSchema:
             List[List[str]]: list of all sheet names
         """
         sheet_names = [item.combine_sheet_names() for item in self.schema_loaded_sheets]
-        sheet_names.extend(
-            [item.combine_sheet_names() for item in self.schema_unloaded_sheets]
-        )
+        sheet_names.extend([item.combine_sheet_names() for item in self.schema_unloaded_sheets])
 
         return list(itertools.chain.from_iterable(sheet_names))
 
@@ -149,9 +147,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes"]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
                         ],
                     ),
                 ],
@@ -233,17 +229,13 @@ class DefaultDatasetSchema(BaseDatasetSchema):
     )
     schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
-            SchemaSheetMap(
-                standard_name="read_me", alternate_names=["read.me", "read me"]
-            ),
+            SchemaSheetMap(standard_name="read_me", alternate_names=["read.me", "read me"]),
             SchemaSheetMap(
                 standard_name="sampling_info",
                 alternate_names=["sampling_info"],
                 required=False,
             ),
-            SchemaSheetMap(
-                standard_name="variable_tracker", alternate_names=["variable_tracker"]
-            ),
+            SchemaSheetMap(standard_name="variable_tracker", alternate_names=["variable_tracker"]),
             SchemaSheetMap(
                 standard_name="enumerator_performance_log",
                 alternate_names=["enumerator_performance_log"],
@@ -297,17 +289,13 @@ class DynamicDatasetSchema(BaseDatasetSchema):
     )
     schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
-            SchemaSheetMap(
-                standard_name="read_me", alternate_names=["read.me", "read me"]
-            ),
+            SchemaSheetMap(standard_name="read_me", alternate_names=["read.me", "read me"]),
             SchemaSheetMap(
                 standard_name="sampling_info",
                 alternate_names=["sampling_info"],
                 required=False,
             ),
-            SchemaSheetMap(
-                standard_name="variable_tracker", alternate_names=["variable_tracker"]
-            ),
+            SchemaSheetMap(standard_name="variable_tracker", alternate_names=["variable_tracker"]),
             SchemaSheetMap(
                 standard_name="enumerator_performance_log",
                 alternate_names=["enumerator_performance_log"],

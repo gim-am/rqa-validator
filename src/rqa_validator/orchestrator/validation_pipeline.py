@@ -88,7 +88,7 @@ class ValidationPipeline:
                     )
                 )
                 return self._compile_results(all_results)
-            
+
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
@@ -102,8 +102,7 @@ class ValidationPipeline:
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
-                    message=f"Loading of the excel file '{filepath}' encountered" \
-                          f"an error: {str(e)}",
+                    message=f"Loading of the excel file '{filepath}' encounteredan error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
                 )
             )
@@ -123,8 +122,7 @@ class ValidationPipeline:
         all_results.append(
             ValidationResult(
                 rule="Schema Details",
-                message=f"Schema for dataset '{self.dataset_type}' "\
-                        f"and file '{filepath}'",
+                message=f"Schema for dataset '{self.dataset_type}' and file '{filepath}'",
                 severity=SeverityLevel.ADMIN_INFO,
                 details=vars(self.schema),
             )
@@ -202,11 +200,7 @@ class ValidationPipeline:
 
     def _get_validator_params(self, validator: BaseValidator) -> dict[str, Any]:
         """Get validator paramaters for logs but exclude schema."""
-        return {
-            k: v
-            for k, v in vars(validator).items()
-            if not isinstance(v, BaseDatasetSchema)
-        }
+        return {k: v for k, v in vars(validator).items() if not isinstance(v, BaseDatasetSchema)}
 
     def _excel_loader_to_dict(self, excel_loader: ExcelLoaderData) -> dict:
         """Convert ExcelLoaderData to dict, excluding data and column fields."""

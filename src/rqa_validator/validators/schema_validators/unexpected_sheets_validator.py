@@ -24,8 +24,8 @@ class UnexpectedSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"An unexpected sheet '{sheet}' was found. Check if this is"\
-                          " required to be published/archived.",
+                    message=f"An unexpected sheet '{sheet}' was found. Check if this is"
+                    " required to be published/archived.",
                     severity=SeverityLevel.WARNING,
                 )
             )

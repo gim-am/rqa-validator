@@ -108,36 +108,28 @@ def valid_excel_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -183,27 +175,21 @@ def master_extra_id_column_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -235,9 +221,7 @@ def child_extra_id_column_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
@@ -254,18 +238,14 @@ def child_extra_id_column_data():
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -301,36 +281,28 @@ def child_missing_id_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -366,9 +338,7 @@ def child_missing_id_column():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
@@ -381,18 +351,14 @@ def child_missing_id_column():
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -428,36 +394,28 @@ def child_missing_sheets_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_dataxxx",
             data_sheet_name="clean_dataxxx",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_logxxx",
             data_sheet_name="deletion_logxxx",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_logxxx",
             data_sheet_name="cleaning_logxxx",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -499,27 +457,21 @@ def master_no_id_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -555,9 +507,7 @@ def child_no_id_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
@@ -570,18 +520,14 @@ def child_no_id_data():
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -617,36 +563,28 @@ def master_missing_sheets_data():
             data_sheet_name="raw_datax",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 
@@ -682,36 +620,28 @@ def no_match_id_data():
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuidmis"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuidmis", data_column_name="uuidmis")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuidmis", data_column_name="uuidmis")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="cleaning_log",
             data_sheet_name="cleaning_log",
             data=df_clean_log,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 

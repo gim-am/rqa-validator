@@ -49,9 +49,7 @@ class JMMIDataset(BaseDataset):
         return schema
 
     @staticmethod
-    def get_validators(
-        schema: BaseDatasetSchema, *args, **kwargs
-    ) -> list[BaseValidator]:
+    def get_validators(schema: BaseDatasetSchema, *args, **kwargs) -> list[BaseValidator]:
         return [
             MissingSheetsCheck(schema=schema),
             UnexpectedSheetsCheck(),

@@ -138,17 +138,13 @@ def invalid_excel_data3():
 
 
 class TestPiiColumns:
-    def test_valid_data(
-        self, validator: BaseValidator, valid_excel_data: ExcelLoaderData
-    ):
+    def test_valid_data(self, validator: BaseValidator, valid_excel_data: ExcelLoaderData):
         result = validator.validate(valid_excel_data)
 
         assert isinstance(result, list)
         assert len(result) == 0
 
-    def test_invalid_data(
-        self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData
-    ):
+    def test_invalid_data(self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData):
         result = validator.validate(invalid_excel_data)
 
         assert isinstance(result, list)
@@ -162,9 +158,7 @@ class TestPiiColumns:
         assert isinstance(result, list)
         assert len(result) == 1
 
-    def test_invalid_data2(
-        self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData
-    ):
+    def test_invalid_data2(self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData):
         result = validator.validate(invalid_excel_data2)
 
         assert isinstance(result, list)
@@ -172,9 +166,7 @@ class TestPiiColumns:
         assert result[0].details is not None
         assert len(result[0].details["row_index"]) == 2
 
-    def test_invalid_data3(
-        self, validator: BaseValidator, invalid_excel_data3: ExcelLoaderData
-    ):
+    def test_invalid_data3(self, validator: BaseValidator, invalid_excel_data3: ExcelLoaderData):
         result = validator.validate(invalid_excel_data3)
 
         assert isinstance(result, list)

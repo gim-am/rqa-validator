@@ -150,9 +150,7 @@ class DataTypeCheck(BaseValidator):
             .data.filter(
                 pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
                 .str.to_lowercase()
-                .is_in(
-                    schema_process_values[self.process_value_map_name_numeric].values
-                )
+                .is_in(schema_process_values[self.process_value_map_name_numeric].values)
             )
             .select([data_loaded_columns[self.survey_name_column].data_column_name])
             .to_series()
@@ -164,9 +162,7 @@ class DataTypeCheck(BaseValidator):
             .data.filter(
                 pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
                 .str.to_lowercase()
-                .is_in(
-                    schema_process_values[self.process_value_map_name_temporal].values
-                )
+                .is_in(schema_process_values[self.process_value_map_name_temporal].values)
             )
             .select([data_loaded_columns[self.survey_name_column].data_column_name])
             .to_series()
@@ -197,8 +193,7 @@ class DataTypeCheck(BaseValidator):
                     check_df = (
                         data_loaded_sheets[sheet]
                         .data.select(
-                            [check_sheet_id_column.data_column_name]
-                            + incorrect_data_type_columns
+                            [check_sheet_id_column.data_column_name] + incorrect_data_type_columns
                         )
                         .unpivot(
                             index=check_sheet_id_column.data_column_name,
@@ -209,17 +204,17 @@ class DataTypeCheck(BaseValidator):
                     # find invalid values
                     # if the value cant be converted it will return null.
                     # this is used as a filter on the dataframe
-                    incorrect_values_df = check_df.filter(
-                        pl.col("value").is_not_null()
-                    ).filter(pl.col("value").cast(pl.Float64, strict=False).is_null())
+                    incorrect_values_df = check_df.filter(pl.col("value").is_not_null()).filter(
+                        pl.col("value").cast(pl.Float64, strict=False).is_null()
+                    )
 
                     if incorrect_values_df.height > 0:
                         results.append(
                             ValidationResult(
                                 rule=self.name,
-                                message=f"Non-numeric values were found in '{sheet}' "\
-                                      "when numeric values were expected."\
-                                          " Check the output for details.",
+                                message=f"Non-numeric values were found in '{sheet}' "
+                                "when numeric values were expected."
+                                " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
                                 details=incorrect_values_df.to_dict(),
@@ -244,8 +239,7 @@ class DataTypeCheck(BaseValidator):
                     check_df = (
                         data_loaded_sheets[sheet]
                         .data.select(
-                            [check_sheet_id_column.data_column_name]
-                            + incorrect_data_type_columns
+                            [check_sheet_id_column.data_column_name] + incorrect_data_type_columns
                         )
                         .unpivot(
                             index=check_sheet_id_column.data_column_name,
@@ -256,9 +250,7 @@ class DataTypeCheck(BaseValidator):
                     # find invalid values
                     # if the value cant be converted it will return null.
                     # this is used as a filter on the dataframe
-                    incorrect_values_df = check_df.filter(
-                        pl.col("value").is_not_null()
-                    ).filter(
+                    incorrect_values_df = check_df.filter(pl.col("value").is_not_null()).filter(
                         pl.col("value")
                         .str.to_datetime(strict=False)
                         # .cast(pl.Datetime, strict=False)
@@ -269,9 +261,9 @@ class DataTypeCheck(BaseValidator):
                         results.append(
                             ValidationResult(
                                 rule=self.name,
-                                message=f"Non-temporal values were found in '{sheet}'"\
-                                      " when temporal values were expected."\
-                                          " Check the output for details.",
+                                message=f"Non-temporal values were found in '{sheet}'"
+                                " when temporal values were expected."
+                                " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
                                 details=incorrect_values_df.to_dict(),

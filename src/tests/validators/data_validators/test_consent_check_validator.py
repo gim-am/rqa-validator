@@ -74,9 +74,7 @@ def valid_schema():
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes"]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
                         ],
                     ),
                 ],
@@ -116,9 +114,7 @@ def invalid_schema():
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes"]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
                         ],
                     ),
                 ],
@@ -158,9 +154,7 @@ def invalid_schema2():
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=[]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=[])
                         ],
                     ),
                 ],
@@ -200,9 +194,7 @@ def invalid_schema3():
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes"]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
                         ],
                     ),
                 ],
@@ -242,9 +234,7 @@ def invalid_schema4():
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes"]
-                            )
+                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
                         ],
                     ),
                 ],
@@ -277,9 +267,7 @@ def valid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
@@ -319,9 +307,7 @@ def invalid_excel_data():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
@@ -361,9 +347,7 @@ def invalid_excel_data2():
             data_sheet_name="clean_dataxx",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
@@ -403,9 +387,7 @@ def invalid_excel_data3():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_dataxx",
@@ -445,18 +427,14 @@ def invalid_excel_data4():
             data_sheet_name="clean_data",
             data=df_clean,
             data_columns=["uuid"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
             data_columns=["uuid", "consent"],
-            column_map=[
-                DataColumnMap(schema_column_name="uuid", data_column_name="uuid")
-            ],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]
 

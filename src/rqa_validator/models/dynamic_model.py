@@ -115,19 +115,13 @@ class DynamicDataset(BaseDataset):
         """
         results: list[ValidationResult] = []
         clean_sheets = [
-            item
-            for item, value in self.sheet_matching.items()
-            if value.classification == "clean"
+            item for item, value in self.sheet_matching.items() if value.classification == "clean"
         ]
         cleaning_log_sheets = [
-            item
-            for item, value in self.sheet_matching.items()
-            if value.log_type == "cleaning"
+            item for item, value in self.sheet_matching.items() if value.log_type == "cleaning"
         ]
         raw_sheets = [
-            item
-            for item, value in self.sheet_matching.items()
-            if value.classification == "raw"
+            item for item, value in self.sheet_matching.items() if value.classification == "raw"
         ]
 
         for sheet, details in self.sheet_matching.items():
@@ -158,9 +152,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked cleaning data sheet for the sheet"\
-                                  f"'{sheet}' were found so the 'CleaningLogToClean' and"\
-                                      "'CrossSheetIdCheck' rules could not be run.",
+                            message=f"No linked cleaning data sheet for the sheet"
+                            f"'{sheet}' were found so the 'CleaningLogToClean' and"
+                            "'CrossSheetIdCheck' rules could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -178,8 +172,8 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked raw sheet for the sheet '{sheet}' were"\
-                                  "found so the 'RawToCleanToLog' rule could not be run.",
+                            message=f"No linked raw sheet for the sheet '{sheet}' were"
+                            "found so the 'RawToCleanToLog' rule could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -212,9 +206,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked sheets for the raw data sheet '{sheet}'"\
-                                "were found so the 'CrossSheetRowSumCheck' rule could"\
-                                    "not be run.",
+                            message=f"No linked sheets for the raw data sheet '{sheet}'"
+                            "were found so the 'CrossSheetRowSumCheck' rule could"
+                            "not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -236,9 +230,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message="No linked clean sheet for the raw data sheet"\
-                                f"'{sheet}' was found so the 'CrossSheetIdCheck' rule"\
-                                      "could not be run.",
+                            message="No linked clean sheet for the raw data sheet"
+                            f"'{sheet}' was found so the 'CrossSheetIdCheck' rule"
+                            "could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -248,9 +242,7 @@ class DynamicDataset(BaseDataset):
                 ConsentCheck(
                     schema=self.schema,
                     raw_data_sheet=consent_sheet,
-                    clean_data_sheet=self.sheet_matching[
-                        consent_sheet
-                    ].linked_clean_sheet,
+                    clean_data_sheet=self.sheet_matching[consent_sheet].linked_clean_sheet,
                 )
             )
         else:
@@ -263,16 +255,12 @@ class DynamicDataset(BaseDataset):
             )
 
         if clean_sheets:  # check unique
-            self.validators.append(
-                DataTypeCheck(schema=self.schema, check_sheets=clean_sheets)
-            )
+            self.validators.append(DataTypeCheck(schema=self.schema, check_sheets=clean_sheets))
 
             self.validators.append(
                 SurveyChoicesCheck(schema=self.schema, check_sheets=clean_sheets)
             )
-            self.validators.append(
-                NaNDataCheck(schema=self.schema, check_sheets=clean_sheets)
-            )
+            self.validators.append(NaNDataCheck(schema=self.schema, check_sheets=clean_sheets))
         else:
             results.append(
                 ValidationResult(
@@ -324,9 +312,7 @@ class DynamicDataset(BaseDataset):
                 if details.id_column is not None:
                     self.schema.add_mandatory_column_to_sheet(
                         sheet,
-                        SchemaColumnMap(
-                            standard_name=details.id_column, is_unique=True
-                        ),
+                        SchemaColumnMap(standard_name=details.id_column, is_unique=True),
                     )
                 if details.parent_linking_column is not None:
                     self.schema.add_mandatory_column_to_sheet(
@@ -360,9 +346,7 @@ class DynamicDataset(BaseDataset):
                             sheet, SchemaColumnMap(standard_name=details.log_id_column)
                         )
 
-                    matches = match_list(
-                        settings.COMMON_ID_COLUMN_NAMES, details.data.columns
-                    )
+                    matches = match_list(settings.COMMON_ID_COLUMN_NAMES, details.data.columns)
                     matches = filter_list(matches, [details.log_id_column])
                     if len(matches) > 0:
                         for match in matches:
@@ -407,9 +391,7 @@ class DynamicDataset(BaseDataset):
                     )
                 new_sheet = self.schema.get_schema_loaded_sheet(sheet)
                 assert new_sheet is not None  # added above
-                result, column_map = match_excel_columns_to_schema(
-                    details.data.columns, new_sheet
-                )
+                result, column_map = match_excel_columns_to_schema(details.data.columns, new_sheet)
                 if result is not None:
                     results.extend(result)
 
@@ -456,23 +438,13 @@ class DynamicDataset(BaseDataset):
             # deletion logs are part of the DynamicDatasetSchema already
             sheet_name_lower = sheet.data_sheet_name.lower()
             if any(
-                term in sheet_name_lower
-                for term in settings.CLEANING_LOG_SHEET_SEARCH_TERMS
-            ) and any(
-                term in sheet_name_lower
-                for term in settings.CLEAN_DATA_SHEET_SEARCH_TERMS
-            ):
+                term in sheet_name_lower for term in settings.CLEANING_LOG_SHEET_SEARCH_TERMS
+            ) and any(term in sheet_name_lower for term in settings.CLEAN_DATA_SHEET_SEARCH_TERMS):
                 self.sheet_matching[sheet.data_sheet_name].log_type = "cleaning"
                 self.sheet_matching[sheet.data_sheet_name].classification = "log"
-            elif any(
-                term in sheet_name_lower
-                for term in settings.CLEAN_DATA_SHEET_SEARCH_TERMS
-            ):
+            elif any(term in sheet_name_lower for term in settings.CLEAN_DATA_SHEET_SEARCH_TERMS):
                 self.sheet_matching[sheet.data_sheet_name].classification = "clean"
-            elif any(
-                term in sheet_name_lower
-                for term in settings.RAW_DATA_SHEET_SEARCH_TERMS
-            ):
+            elif any(term in sheet_name_lower for term in settings.RAW_DATA_SHEET_SEARCH_TERMS):
                 self.sheet_matching[sheet.data_sheet_name].classification = "raw"
             else:
                 self.sheet_matching[sheet.data_sheet_name].classification = "unknown"
@@ -485,21 +457,16 @@ class DynamicDataset(BaseDataset):
                 unique_col = self.find_unique_column(sheet.data)
                 id_set = None
                 if unique_col is not None:
-                    id_set = set(
-                        sheet.data.select(unique_col).to_series().unique().to_list()
-                    )
+                    id_set = set(sheet.data.select(unique_col).to_series().unique().to_list())
                     self.sheet_matching[sheet.data_sheet_name].id_column_set = id_set
                     self.sheet_matching[sheet.data_sheet_name].id_column = unique_col
-                elif (
-                    self.sheet_matching[sheet.data_sheet_name].classification
-                    != "unknown"
-                ):
+                elif self.sheet_matching[sheet.data_sheet_name].classification != "unknown":
                     # only log this for sheets we are expecting an id for
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation",
-                            message="No unique ID column was found for sheet"\
-                                  f"'{sheet.data_sheet_name}'.",
+                            message="No unique ID column was found for sheet"
+                            f"'{sheet.data_sheet_name}'.",
                             severity=SeverityLevel.INFO,
                             sheet_name=sheet.data_sheet_name,
                         )
@@ -509,9 +476,7 @@ class DynamicDataset(BaseDataset):
             for k, v in self.sheet_matching.items()
             if v.classification == "log" and v.log_type == "cleaning"
         ]
-        data_sheets = [
-            k for k, v in self.sheet_matching.items() if v.classification != "log"
-        ]
+        data_sheets = [k for k, v in self.sheet_matching.items() if v.classification != "log"]
 
         # try to  link the cleaning logs to another sheet
         for log_name in cleaning_log_sheets:
@@ -555,10 +520,7 @@ class DynamicDataset(BaseDataset):
                     name_sim = SequenceMatcher(None, log_name, data_name).ratio()
 
                     log_set = set(
-                        log_sheet.data.select(linking_log_column)
-                        .to_series()
-                        .unique()
-                        .to_list()
+                        log_sheet.data.select(linking_log_column).to_series().unique().to_list()
                     )
                     intersection = log_set.intersection(data_sheet.id_column_set)
 
@@ -567,9 +529,7 @@ class DynamicDataset(BaseDataset):
                     else:
                         overlap = 0
 
-                    combined_score = (name_sim * name_scaler) + (
-                        overlap * overlap_scaler
-                    )
+                    combined_score = (name_sim * name_scaler) + (overlap * overlap_scaler)
 
                     if combined_score > best_score:
                         best_score = combined_score
@@ -582,16 +542,10 @@ class DynamicDataset(BaseDataset):
                     and self.sheet_matching[best_parent].classification == "clean"
                 ):
                     self.sheet_matching[best_parent].linked_cleaning_log = log_name
-                    self.sheet_matching[
-                        log_name
-                    ].log_id_column = best_linking_log_column
+                    self.sheet_matching[log_name].log_id_column = best_linking_log_column
 
-        raw_sheets = [
-            k for k, v in self.sheet_matching.items() if v.classification == "raw"
-        ]
-        clean_sheets = [
-            k for k, v in self.sheet_matching.items() if v.classification == "clean"
-        ]
+        raw_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "raw"]
+        clean_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "clean"]
 
         self.match_child_parent(raw_sheets, self.sheet_matching)
         self.match_child_parent(clean_sheets, self.sheet_matching)
@@ -614,15 +568,11 @@ class DynamicDataset(BaseDataset):
                 name_sim = SequenceMatcher(None, clean_name, raw_name).ratio()
 
                 # Score 2: ID overlap (Clean IDs should be subset of Raw IDs)
-                intersection = clean_prof.id_column_set.intersection(
-                    raw_prof.id_column_set
-                )
+                intersection = clean_prof.id_column_set.intersection(raw_prof.id_column_set)
                 id_overlap = len(intersection) / len(clean_prof.id_column_set)
 
                 # Combined score (weight name similarity higher)
-                combined_score = (name_sim * name_scaler) + (
-                    id_overlap * overlap_scaler
-                )
+                combined_score = (name_sim * name_scaler) + (id_overlap * overlap_scaler)
 
                 if combined_score > best_score:
                     best_score = combined_score
@@ -649,7 +599,7 @@ class DynamicDataset(BaseDataset):
             ValidationResult(
                 rule="DynamicDataset Creation",
                 message="Sheet matching results.",
-                severity=SeverityLevel.INFO,
+                severity=SeverityLevel.ADMIN_INFO,
                 details=pl.DataFrame(
                     [
                         {
@@ -717,10 +667,7 @@ class DynamicDataset(BaseDataset):
                     # see what the overlap of id values is
                     if linking_column is not None:
                         child_set = set(
-                            child_prof.data.select(linking_column)
-                            .to_series()
-                            .unique()
-                            .to_list()
+                            child_prof.data.select(linking_column).to_series().unique().to_list()
                         )
 
                         intersection = child_set.intersection(parent_prof.id_column_set)

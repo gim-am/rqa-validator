@@ -69,9 +69,9 @@ class PiiDataCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name + " literal comparison",
-                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"\
-                                  " pii column. Check to see if it should be removed:"\
-                                      f" {item}.",
+                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"
+                            " pii column. Check to see if it should be removed:"
+                            f" {item}.",
                             severity=SeverityLevel.WARNING,
                             sheet_name=sheet.data_sheet_name,
                             column_name=item,
@@ -82,9 +82,9 @@ class PiiDataCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name + " fuzzy match comparison",
-                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"\
-                                 " pii column. Check to the details to see if it"\
-                                    " should be removed.",
+                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"
+                            " pii column. Check to the details to see if it"
+                            " should be removed.",
                             severity=SeverityLevel.WARNING,
                             sheet_name=sheet.data_sheet_name,
                             column_name=item.standard_name,
@@ -100,9 +100,7 @@ class PiiDataCheck(BaseValidator):
                 id_column = DataColumnMap(
                     data_column_name="row_index", schema_column_name="row_index"
                 )
-                melted_df = filtered_df.with_row_index(
-                    id_column.data_column_name
-                ).unpivot(
+                melted_df = filtered_df.with_row_index(id_column.data_column_name).unpivot(
                     index=id_column.data_column_name,
                     variable_name="column_name",
                     value_name="value",
@@ -119,9 +117,7 @@ class PiiDataCheck(BaseValidator):
             # add expression columns
             melted_df = melted_df.with_columns(expressions)
             # build match conditions
-            match_conditions = [
-                pl.col(name=f"match_{t}").is_not_null() for t in patterns.keys()
-            ]
+            match_conditions = [pl.col(name=f"match_{t}").is_not_null() for t in patterns.keys()]
 
             # apply conditions and filter the data
             any_match_condition = pl.any_horizontal(match_conditions)
@@ -141,16 +137,14 @@ class PiiDataCheck(BaseValidator):
 
             final_df = final_df.with_columns(
                 pl.col("pii_type_raw").str.replace("match_", "").alias("pii_type")
-            ).select(
-                [id_column.data_column_name, "column_name", "pii_type", "matched_value"]
-            )
+            ).select([id_column.data_column_name, "column_name", "pii_type", "matched_value"])
 
             if final_df.height > 0:
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"The sheet '{sheet.data_sheet_name}' contains possible"\
-                              " pii data. Check the output for details.",
+                        message=f"The sheet '{sheet.data_sheet_name}' contains possible"
+                        " pii data. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
                         details=final_df.to_dict(),

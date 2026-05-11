@@ -32,9 +32,7 @@ def create_column_difference_expression(
             .otherwise(expr)
         )
 
-    def handle_nulls_and_empty(
-        expr_result: Expr, col1_normalized: Expr, col2_normalized: Expr
-    ):
+    def handle_nulls_and_empty(expr_result: Expr, col1_normalized: Expr, col2_normalized: Expr):
         """Handle null/empty string equivalence in comparison results.
 
         When expr_result is null (meaning at least one input was null/empty):

@@ -113,9 +113,7 @@ class SurveyChoicesCheck(BaseValidator):
             results.extend(result)
             return results
 
-        filtered_loaded_sheets = filter_loaded_sheets(
-            self.check_sheets, data_loaded_sheets
-        )
+        filtered_loaded_sheets = filter_loaded_sheets(self.check_sheets, data_loaded_sheets)
         result, data_id_columns = get_data_sheet_ids(
             schema=self.schema, data=filtered_loaded_sheets, rule=self.name
         )
@@ -130,13 +128,9 @@ class SurveyChoicesCheck(BaseValidator):
             .data.select(
                 [
                     pl.col(
-                        data_loaded_columns[
-                            self.choices_list_name_column
-                        ].data_column_name
+                        data_loaded_columns[self.choices_list_name_column].data_column_name
                     ).str.strip_chars(" "),
-                    pl.col(
-                        data_loaded_columns[self.choices_name_column].data_column_name
-                    )
+                    pl.col(data_loaded_columns[self.choices_name_column].data_column_name)
                     .str.to_lowercase()
                     .str.replace(r"_", "", n=-1)
                     .str.strip_chars(" "),
@@ -147,17 +141,11 @@ class SurveyChoicesCheck(BaseValidator):
                     data_loaded_columns[self.choices_list_name_column].data_column_name
                 ).is_not_null()
                 & (
-                    pl.col(
-                        data_loaded_columns[
-                            self.choices_list_name_column
-                        ].data_column_name
-                    )
+                    pl.col(data_loaded_columns[self.choices_list_name_column].data_column_name)
                     != ""
                 )
             )
-            .group_by(
-                data_loaded_columns[self.choices_list_name_column].data_column_name
-            )
+            .group_by(data_loaded_columns[self.choices_list_name_column].data_column_name)
             .agg(
                 v_list=pl.col(
                     data_loaded_columns[self.choices_name_column].data_column_name
@@ -174,9 +162,7 @@ class SurveyChoicesCheck(BaseValidator):
         )
 
         choices_dict = {
-            row[
-                data_loaded_columns[self.choices_list_name_column].data_column_name
-            ]: row["values"]
+            row[data_loaded_columns[self.choices_list_name_column].data_column_name]: row["values"]
             for row in choices_dict
         }
 
@@ -191,9 +177,9 @@ class SurveyChoicesCheck(BaseValidator):
                 ]
             )
             .filter(
-                pl.col(
-                    data_loaded_columns[self.survey_type_column].data_column_name
-                ).str.contains(column_selector)
+                pl.col(data_loaded_columns[self.survey_type_column].data_column_name).str.contains(
+                    column_selector
+                )
             )
             .with_columns(
                 pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
@@ -204,10 +190,7 @@ class SurveyChoicesCheck(BaseValidator):
                 .alias("choice_list_name")
             )
             .unnest("choice_list_name")
-            .filter(
-                pl.col("choice_list_name").is_not_null()
-                & (pl.col("choice_list_name") != "")
-            )
+            .filter(pl.col("choice_list_name").is_not_null() & (pl.col("choice_list_name") != ""))
         )
         # split out the question types
         survey_category_questions_select_one = (
@@ -220,9 +203,7 @@ class SurveyChoicesCheck(BaseValidator):
         )
 
         survey_category_questions_select_multiple = (
-            survey_category_questions_df.filter(
-                pl.col("type_only") == "select_multiple"
-            )
+            survey_category_questions_df.filter(pl.col("type_only") == "select_multiple")
             .select([data_loaded_columns[self.survey_name_column].data_column_name])
             .unique()
             .to_series()
@@ -255,9 +236,7 @@ class SurveyChoicesCheck(BaseValidator):
                 survey_category_questions_select_multiple,
                 data_loaded_sheets[sheet].data.columns,
             )
-            filtered_questions = (
-                filtered_questions_select_one + filtered_questions_select_multiple
-            )
+            filtered_questions = filtered_questions_select_one + filtered_questions_select_multiple
 
             difference_expressions = []
 
@@ -275,9 +254,7 @@ class SurveyChoicesCheck(BaseValidator):
             for question in filtered_questions_select_multiple:
                 col_has_difference = f"{question}_has_difference"
 
-                valid_choices: list[str] = choices_dict[
-                    survey_question_choices_dict[question]
-                ]
+                valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
 
                 difference_expression = (
                     pl.when(pl.col(question).is_not_null())
@@ -310,9 +287,7 @@ class SurveyChoicesCheck(BaseValidator):
 
             for question in filtered_questions_select_one:
                 col_has_difference = f"{question}_has_difference"
-                valid_choices: list[str] = choices_dict[
-                    survey_question_choices_dict[question]
-                ]
+                valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
 
                 difference_expression = (
                     pl.when(pl.col(question).is_not_null())
@@ -332,14 +307,9 @@ class SurveyChoicesCheck(BaseValidator):
                 difference_expressions.append(difference_expression)
 
             # Get the invalid values
-            comparison_df = data_loaded_sheets[sheet].data.with_columns(
-                difference_expressions
-            )
+            comparison_df = data_loaded_sheets[sheet].data.with_columns(difference_expressions)
             has_any_change = pl.any_horizontal(
-                [
-                    pl.col(f"{question}_has_difference")
-                    for question in filtered_questions
-                ]
+                [pl.col(f"{question}_has_difference") for question in filtered_questions]
             )
             changes_only = comparison_df.filter(has_any_change)
 
@@ -387,10 +357,10 @@ class SurveyChoicesCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} values found in"\
-                                    f" the {sheet} sheet that were not reflected in the"\
-                                    f" {self.survey_sheet} sheet. "\
-                                    "Check the output for details.",
+                            message=f"There were {difference_df.height} values found in"
+                            f" the {sheet} sheet that were not reflected in the"
+                            f" {self.survey_sheet} sheet. "
+                            "Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                             details=difference_df.to_dict(),

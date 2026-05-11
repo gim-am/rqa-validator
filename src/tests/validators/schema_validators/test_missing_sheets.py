@@ -44,9 +44,7 @@ def valid_schema():
                 standard_name="raw_data",
                 alternate_names=["raw_data"],
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             )
         ],
@@ -65,9 +63,7 @@ def valid_optional_schema():
                 alternate_names=["raw_data"],
                 required=False,
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             )
         ],
@@ -86,9 +82,7 @@ def valid_optional_missing_schema():
                 alternate_names=["raw_datax"],
                 required=False,
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             )
         ],
@@ -107,9 +101,7 @@ def valid_optional_sampling_schema():
                 alternate_names=["sampling_info"],
                 required=False,
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["uuid", "X_uuid"]
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["uuid", "X_uuid"])
                 ],
             )
         ],
