@@ -1,12 +1,11 @@
-import pytest
 import polars as pl
-
+import pytest
 
 from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
+from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.column_name_validator import (
     ColumnNameCheck,
 )
-from rqa_validator.validators.base import BaseValidator
 
 
 @pytest.fixture

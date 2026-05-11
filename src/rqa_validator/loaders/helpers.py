@@ -1,9 +1,8 @@
-
 from config import settings
 
 from ..common.list_matching import FuzzMatch, match_list_to_list
 from ..models.base import SchemaSheetMap
-from ..validators.base import ValidationResult, SeverityLevel
+from ..validators.base import SeverityLevel, ValidationResult
 from .base import DataColumnMap
 
 

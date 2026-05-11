@@ -1,31 +1,27 @@
 from dataclasses import dataclass
 
-from ..validators.data_validators import(
+from ..models.base_dataset import BaseDataset, BaseDatasetSchema, DefaultDatasetSchema
+from ..validators.base import BaseValidator
+from ..validators.data_validators import (
+    CleaningLogToClean,
+    ConsentCheck,
+    CrossSheetIdCheck,
+    CrossSheetRowSumCheck,
+    DataTypeCheck,
+    NaNDataCheck,
+    PiiDataCheck,
     RawToCleanToLog,
     SurveyChoicesCheck,
-    DataTypeCheck,
-    CrossSheetRowSumCheck,
-    PiiColumns,
     UniqueColumn,
-    ConsentCheck,
-    CleaningLogToClean,
-    CrossSheetIdCheck,
-    NaNCheck
 )
 from ..validators.schema_validators import (
-    UnexpectedSheets,
-    MissingSheets,
+    ColumnNameCheck,
     DuplicateSheetMatches,
     MandatoryColumns,
-    ColumnNameCheck
+    MissingSheetsCheck,
+    UnexpectedSheetsCheck,
 )
-
-from ..validators.base import BaseValidator
-from .base import SchemaSheetMap, SchemaColumnMap
-from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
-
-
-
+from .base import SchemaColumnMap, SchemaSheetMap
 
 
 @dataclass()
@@ -57,12 +53,12 @@ class JMMIDataset(BaseDataset):
         schema: BaseDatasetSchema, *args, **kwargs
     ) -> list[BaseValidator]:
         return [
-            MissingSheets(schema=schema),
-            UnexpectedSheets(),
+            MissingSheetsCheck(schema=schema),
+            UnexpectedSheetsCheck(),
             DuplicateSheetMatches(),
             MandatoryColumns(schema=schema),
             UniqueColumn(schema=schema),
-            PiiColumns(schema=schema),
+            PiiDataCheck(schema=schema),
             CrossSheetRowSumCheck(schema=schema),
             CrossSheetIdCheck(schema=schema),
             CrossSheetIdCheck(
@@ -70,7 +66,7 @@ class JMMIDataset(BaseDataset):
             ),
             CleaningLogToClean(schema=schema),
             RawToCleanToLog(schema=schema),
-            NaNCheck(schema=schema),
+            NaNDataCheck(schema=schema),
             ConsentCheck(schema=schema),
             ColumnNameCheck(),
             DataTypeCheck(schema=schema),

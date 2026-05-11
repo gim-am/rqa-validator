@@ -1,9 +1,6 @@
 from ...common.list_matching import duplicate_list_items
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
-
-
-
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
 class DuplicateSheetMatches(BaseValidator):

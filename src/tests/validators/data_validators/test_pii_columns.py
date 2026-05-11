@@ -1,18 +1,18 @@
-import pytest
 import polars as pl
+import pytest
 
 from rqa_validator.loaders.base import DataColumnMap
 from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
 from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.data_validators.pii_validator import PiiColumns
 from rqa_validator.validators.base import BaseValidator
+from rqa_validator.validators.data_validators.pii_validator import PiiDataCheck
 
 
 @pytest.fixture
 def validator(valid_schema):
     """Create a UniqueColumn validator instance"""
-    return PiiColumns(schema=valid_schema)
+    return PiiDataCheck(schema=valid_schema)
 
 
 @pytest.fixture

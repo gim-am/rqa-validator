@@ -1,36 +1,39 @@
-from dataclasses import field
 from difflib import SequenceMatcher
 
 import polars as pl
 
-from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
-from ..loaders.excel_loader import ExcelLoaderData
-from ..models.base import DynamicSheetMatching
+from config import settings
 
-from ..validators.data_validators import(
+from ..common.list_matching import filter_list, match_list
+from ..loaders.excel_loader import ExcelLoaderData
+from ..loaders.helpers import match_excel_columns_to_schema
+from ..models.base import (
+    DynamicSheetMatching,
+    ProcessValueMap,
+    SchemaColumnMap,
+    SchemaSheetMap,
+)
+from ..models.base_dataset import BaseDataset, DynamicDatasetSchema
+from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
+from ..validators.data_validators import (
+    CleaningLogToClean,
+    ConsentCheck,
+    CrossSheetIdCheck,
+    CrossSheetRowSumCheck,
+    DataTypeCheck,
+    NaNDataCheck,
+    PiiDataCheck,
     RawToCleanToLog,
     SurveyChoicesCheck,
-    DataTypeCheck,
-    CrossSheetRowSumCheck,
-    PiiColumns,
     UniqueColumn,
-    ConsentCheck,
-    CleaningLogToClean,
-    CrossSheetIdCheck,
-    NaNCheck
 )
 from ..validators.schema_validators import (
-    UnexpectedSheets,
-    MissingSheets,
+    ColumnNameCheck,
     DuplicateSheetMatches,
     MandatoryColumns,
-    ColumnNameCheck
+    MissingSheetsCheck,
+    UnexpectedSheetsCheck,
 )
-from ..loaders.helpers import match_excel_columns_to_schema
-from ..models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
-from ..common.list_matching import filter_list, match_list
-from ..models.base_dataset import BaseDataset, DynamicDatasetSchema
-from config import settings
 
 
 class DynamicDataset(BaseDataset):
@@ -61,7 +64,7 @@ class DynamicDataset(BaseDataset):
         self.data = data
         self.schema = DynamicDatasetSchema()
         self.sheet_matching: dict[str, DynamicSheetMatching] = {}
-        self.validators: list[BaseValidator] = field(default_factory=list)
+        self.validators: list[BaseValidator] = []
 
     def get_schema(self, *args, **kwargs) -> DynamicDatasetSchema:
         return self.schema
@@ -83,12 +86,12 @@ class DynamicDataset(BaseDataset):
 
         # this must come after build_schema
         self.validators = [
-            MissingSheets(schema=self.schema),
-            UnexpectedSheets(),
+            MissingSheetsCheck(schema=self.schema),
+            UnexpectedSheetsCheck(),
             DuplicateSheetMatches(),
             MandatoryColumns(schema=self.schema),
             UniqueColumn(schema=self.schema),
-            PiiColumns(schema=self.schema),
+            PiiDataCheck(schema=self.schema),
             ColumnNameCheck(),
         ]
 
@@ -257,7 +260,7 @@ class DynamicDataset(BaseDataset):
                 SurveyChoicesCheck(schema=self.schema, check_sheets=clean_sheets)
             )
             self.validators.append(
-                NaNCheck(schema=self.schema, check_sheets=clean_sheets)
+                NaNDataCheck(schema=self.schema, check_sheets=clean_sheets)
             )
         else:
             results.append(

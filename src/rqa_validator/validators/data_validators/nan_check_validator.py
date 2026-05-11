@@ -1,18 +1,15 @@
-from config import settings
-from ...common.list_matching import filter_list
-from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
-from ...loaders.excel_loader import ExcelLoaderData
-from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
-
-
 import polars as pl
 
+from config import settings
+
+from ...common.list_matching import filter_list
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
+from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
 
 
-
-
-class NaNCheck(BaseValidator):
+class NaNDataCheck(BaseValidator):
     """Checks columns for invalid numeric values like NaN and -999.
     Invalid values are stored in the config file.
 
@@ -31,7 +28,7 @@ class NaNCheck(BaseValidator):
 
     @property
     def name(self) -> str:
-        return "NaNCheck"
+        return "NaNDataCheck"
 
     def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks columns for invalid numeric values like NaN and -999.

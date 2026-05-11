@@ -1,27 +1,27 @@
-import pytest
 import polars as pl
+import pytest
 
-from rqa_validator.models.base import SchemaSheetMap, SchemaColumnMap
 from rqa_validator.loaders.excel_loader import (
     DataColumnMap,
     DataSheetMap,
     ExcelLoaderData,
 )
+from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.data_validators.nan_check_validator import NaNCheck
 from rqa_validator.validators.base import BaseValidator
+from rqa_validator.validators.data_validators.nan_check_validator import NaNDataCheck
 
 
 @pytest.fixture
 def valid_schema_validator(valid_schema):
     """Create a UniqueColumn validator instance"""
-    return NaNCheck(schema=valid_schema)
+    return NaNDataCheck(schema=valid_schema)
 
 
 @pytest.fixture
 def invalid_schema_validator(invalid_schema):
     """Create a UniqueColumn validator instance"""
-    return NaNCheck(schema=invalid_schema)
+    return NaNDataCheck(schema=invalid_schema)
 
 
 @pytest.fixture

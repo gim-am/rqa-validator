@@ -1,10 +1,11 @@
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any
-from thefuzz import fuzz
-from thefuzz import process
-from collections import Counter
+
+from thefuzz import fuzz, process
 
 from config import settings
+
 from ..loaders.base import DataColumnMap, DataSheetMap
 
 

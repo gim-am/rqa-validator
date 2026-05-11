@@ -1,13 +1,9 @@
+import polars as pl
+
 from ...common.file_export import df_to_csv
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
-
-
-import polars as pl
-
-
-
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
 class UniqueColumn(BaseValidator):

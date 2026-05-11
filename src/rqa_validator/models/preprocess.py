@@ -1,9 +1,9 @@
 from typing import Any
-from ..validators.base import ValidationResult, SeverityLevel
-from .base import SchemaSheetMap, SchemaColumnMap
-from ..models.base_dataset import BaseDatasetSchema
 
 from ..common.list_matching import duplicate_list_items
+from ..models.base_dataset import BaseDatasetSchema
+from ..validators.base import SeverityLevel, ValidationResult
+from .base import SchemaColumnMap, SchemaSheetMap
 
 
 def validate_schema(schema: BaseDatasetSchema) -> list[ValidationResult]:

@@ -1,16 +1,13 @@
 from ...common.list_matching import filter_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
-
-
-
-class MissingSheets(BaseValidator):
+class MissingSheetsCheck(BaseValidator):
     @property
     def name(self) -> str:
-        return "MissingSheets"
+        return "MissingSheetsCheck"
 
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema

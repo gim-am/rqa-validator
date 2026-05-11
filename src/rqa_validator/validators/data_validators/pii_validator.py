@@ -1,20 +1,17 @@
+import polars as pl
+
 from config import settings
-from ...validators.helpers import get_data_sheet_id
-from ...models.base_dataset import BaseDatasetSchema
+
 from ...common.list_matching import filter_list, match_list_to_list
 from ...loaders.base import DataColumnMap
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ...validators.config import get_pii_columns
+from ...validators.helpers import get_data_sheet_id
 
 
-import polars as pl
-
-
-
-
-
-class PiiColumns(BaseValidator):
+class PiiDataCheck(BaseValidator):
     """Checks all the sheets for possible PII Data"""
 
     def __init__(self, schema: BaseDatasetSchema):
@@ -22,7 +19,7 @@ class PiiColumns(BaseValidator):
 
     @property
     def name(self) -> str:
-        return "PiiColumns"
+        return "PiiDataCheck"
 
     def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """This performs two sets of checks

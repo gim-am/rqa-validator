@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import polars as pl
 
-from ..common.list_matching import is_in_list, add_to_list, unique_list
+from ..common.list_matching import add_to_list, is_in_list, unique_list
 
 
 @dataclass

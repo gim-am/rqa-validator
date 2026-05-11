@@ -1,37 +1,37 @@
-import pytest
 import polars as pl
+import pytest
 
-from rqa_validator.models.base import SchemaSheetMap, SchemaColumnMap
 from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
+from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
-from rqa_validator.validators.schema_validators.missing_sheets_validator import (
-    MissingSheets,
-)
 from rqa_validator.validators.base import BaseValidator
+from rqa_validator.validators.schema_validators.missing_sheets_validator import (
+    MissingSheetsCheck,
+)
 
 
 @pytest.fixture
 def valid_schema_validator(valid_schema):
     """Create a UniqueColumn validator instance"""
-    return MissingSheets(schema=valid_schema)
+    return MissingSheetsCheck(schema=valid_schema)
 
 
 @pytest.fixture
 def valid_optional_schema_validator(valid_optional_schema):
     """Create a UniqueColumn validator instance"""
-    return MissingSheets(schema=valid_optional_schema)
+    return MissingSheetsCheck(schema=valid_optional_schema)
 
 
 @pytest.fixture
 def valid_optional_missing_schema_validator(valid_optional_missing_schema):
     """Create a UniqueColumn validator instance"""
-    return MissingSheets(schema=valid_optional_missing_schema)
+    return MissingSheetsCheck(schema=valid_optional_missing_schema)
 
 
 @pytest.fixture
 def valid_optional_sampling_schema_validator(valid_optional_sampling_schema):
     """Create a UniqueColumn validator instance"""
-    return MissingSheets(schema=valid_optional_sampling_schema)
+    return MissingSheetsCheck(schema=valid_optional_sampling_schema)
 
 
 @pytest.fixture

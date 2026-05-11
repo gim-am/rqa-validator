@@ -1,13 +1,12 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import fastexcel
 import polars as pl
-from pathlib import Path
 
-
-from .base import DataSheetMap, DataColumnMap
-from ..validators.base import ValidationResult, SeverityLevel
 from ..models.base_dataset import BaseDatasetSchema
+from ..validators.base import SeverityLevel, ValidationResult
+from .base import DataColumnMap, DataSheetMap
 from .helpers import match_excel_columns_to_schema, match_excel_sheet_to_schema
 
 
@@ -56,7 +55,7 @@ class ExcelLoaderData:
             if sheet.schema_sheet_name == sheet_name:
                 return sheet
         return None
-    
+
     def remove_loaded_sheet(self, sheet_name: str):
         for idx, sheet in enumerate(self.loaded_sheets):
             if sheet.schema_sheet_name == sheet_name:

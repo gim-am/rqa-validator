@@ -1,17 +1,14 @@
-
 import polars as pl
 
-from ...common.list_matching import match_list, filter_loaded_sheets
-
+from ...common.list_matching import filter_loaded_sheets, match_list
+from ...loaders.excel_loader import ExcelLoaderData
+from ...models.base_dataset import BaseDatasetSchema
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ...validators.helpers import (
     get_data_loaded_columns,
     get_data_loaded_sheets,
     get_data_sheet_ids,
 )
-
-from ...loaders.excel_loader import ExcelLoaderData
-from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 class SurveyChoicesCheck(BaseValidator):

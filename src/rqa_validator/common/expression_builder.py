@@ -1,5 +1,5 @@
 import polars as pl
-from polars import Expr, DataType
+from polars import DataType, Expr
 
 
 def create_column_difference_expression(

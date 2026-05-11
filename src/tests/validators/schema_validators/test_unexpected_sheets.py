@@ -1,17 +1,17 @@
-import pytest
 import polars as pl
+import pytest
 
 from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
-from rqa_validator.validators.schema_validators.unexpected_sheets_validator import (
-    UnexpectedSheets,
-)
 from rqa_validator.validators.base import BaseValidator
+from rqa_validator.validators.schema_validators.unexpected_sheets_validator import (
+    UnexpectedSheetsCheck,
+)
 
 
 @pytest.fixture
 def valid_schema_validator():
     """Create a UniqueColumn validator instance"""
-    return UnexpectedSheets()
+    return UnexpectedSheetsCheck()
 
 
 @pytest.fixture

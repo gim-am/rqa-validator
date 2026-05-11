@@ -1,5 +1,5 @@
 from .column_name_validator import ColumnNameCheck
 from .duplicate_sheet_match_validator import DuplicateSheetMatches
 from .mandatory_column_validator import MandatoryColumns
-from .missing_sheets_validator import MissingSheets
-from .unexpected_sheets_validator import UnexpectedSheets
+from .missing_sheets_validator import MissingSheetsCheck
+from .unexpected_sheets_validator import UnexpectedSheetsCheck

@@ -1,15 +1,14 @@
 from pathlib import Path
 from typing import Any
 
-from ..models.dynamic_model import DynamicDataset
-
-from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
-from ..models.preprocess import lowercase_schema_mappings, validate_schema
+from config import settings
 
 from ..loaders.excel_loader import ExcelLoader
+from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
+from ..models.dynamic_model import DynamicDataset
 from ..models.jmmi import JMMIDataset
-from ..validators.base import BaseValidator, ValidationResult, SeverityLevel
-from config import settings
+from ..models.preprocess import lowercase_schema_mappings, validate_schema
+from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
 class ValidationPipeline:
@@ -122,7 +121,7 @@ class ValidationPipeline:
                             rule=validator.name,
                             message=f"Validator {validator.name} passed.",
                             severity=SeverityLevel.PASSED,
-                            details = self._get_validator_params(validator)
+                            details=self._get_validator_params(validator),
                         )
                     )
             except Exception as e:
@@ -131,7 +130,7 @@ class ValidationPipeline:
                         rule=validator.name,
                         message=f"Validator {validator.name} encountered an error: {str(e)}",
                         severity=SeverityLevel.ADMIN_ERROR,
-                        details = self._get_validator_params(validator)
+                        details=self._get_validator_params(validator),
                     )
                 )
                 settings.logger.log_exception(e)
@@ -175,7 +174,11 @@ class ValidationPipeline:
             "column_name": result.column_name,
             "details": result.details,
         }
+
     def _get_validator_params(self, validator: BaseValidator) -> dict[str, Any]:
         """Get validator paramaters for logs but exclude schema."""
-        return  {k: v for k, v in vars(validator).items() if not isinstance(v, BaseDatasetSchema)}
-
+        return {
+            k: v
+            for k, v in vars(validator).items()
+            if not isinstance(v, BaseDatasetSchema)
+        }

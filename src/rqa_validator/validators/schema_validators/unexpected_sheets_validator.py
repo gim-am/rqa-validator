@@ -1,14 +1,11 @@
 from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
-
-
-
-class UnexpectedSheets(BaseValidator):
+class UnexpectedSheetsCheck(BaseValidator):
     @property
     def name(self) -> str:
-        return "UnexpectedSheets"
+        return "UnexpectedSheetsCheck"
 
     def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if there are any unexpected sheets

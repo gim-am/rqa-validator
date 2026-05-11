@@ -1,9 +1,7 @@
-from ...loaders.excel_loader import ExcelLoaderData
-from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
-
-
 import re
 
+from ...loaders.excel_loader import ExcelLoaderData
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
 class ColumnNameCheck(BaseValidator):
