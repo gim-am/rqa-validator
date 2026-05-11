@@ -27,7 +27,7 @@ class UniqueColumn(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: list[ValidationResult] = []
-        output_filename = "duplicate_uuids"
+        # output_filename = "duplicate_uuids"
 
         duplicated_ids_df: pl.DataFrame = pl.DataFrame(
             [
