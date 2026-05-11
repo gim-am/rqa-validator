@@ -36,9 +36,9 @@ class ColumnNameCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"The sheet {sheet.data_sheet_name} has column names\
-                                that appear to be labels instead of variables.\
-                                Check the output for details.",
+                        message=f"The sheet '{sheet.data_sheet_name}' has column names"\
+                                " that appear to be labels instead of variables."\
+                                " Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
                         details={sheet.data_sheet_name: matches},

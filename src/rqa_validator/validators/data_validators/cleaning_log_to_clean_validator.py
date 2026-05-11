@@ -258,14 +258,10 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{
-                        multiple_change_df.select(
+                    message=f"{multiple_change_df.select(
                             clean_log_id_columns.data_column_name
-                        ).n_unique()
-                    } Ids had multiple changes for the same question. \
-                            These were not validated. Check the output file {
-                        multiple_changes_filename
-                    } for details.",
+                        ).n_unique()} Ids had multiple changes for the same question. "\
+                            "These were not validated. Check the output for details.",
                     severity=SeverityLevel.WARNING,
                     details=multiple_change_df.to_dict(),
                 )
@@ -289,11 +285,11 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{same_value_df.height} row/s had\
-                         {data_loaded_columns[self.cleaning_log_old_value_column].data_column_name}\
-                              equal \
-                        {data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}.\
-                            Check the output for details.",
+                    message=f"{same_value_df.height} row/s had" \
+                         f"'{data_loaded_columns[self.cleaning_log_old_value_column].data_column_name}'"\
+                              " equal "\
+                        f"'{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}'."\
+                            " Check the output for details.",
                     severity=SeverityLevel.WARNING,
                     details=same_value_df.to_dict(),
                 )
@@ -338,11 +334,11 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There are questions listed in \
-                        {data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name}\
-                        that were not found in \
-                        {data_loaded_sheets[self.clean_data_sheet].data_sheet_name}.\
-                        See output for details.",
+                    message="There are questions listed in "\
+                        f"'{data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name}'"\
+                        " that were not found in "\
+                        f"'{data_loaded_sheets[self.clean_data_sheet].data_sheet_name}'."\
+                        " See output for details.",
                     severity=SeverityLevel.WARNING,
                     details={"missing_questions": missing_quesitons},
                 )
@@ -520,14 +516,14 @@ class CleaningLogToClean(BaseValidator):
 
             # if there are differences found log them
             if difference_df.height > 0:
-                df_to_csv(data=difference_df, filename=validation_results_filename)
+                # df_to_csv(data=difference_df, filename=validation_results_filename)
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_df.height} differences found\
-                                in the {self.cleaning_log_sheet} sheet that were not\
-                                reflected in the {self.clean_data_sheet} sheet.\
-                                Check the {validation_results_filename} file.",
+                        message=f"There were {difference_df.height} differences found"\
+                                f" in the '{self.cleaning_log_sheet}' sheet that were not"\
+                                f" reflected in the '{self.clean_data_sheet}' sheet."\
+                                f" Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_df.to_dict(),

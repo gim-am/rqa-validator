@@ -3,7 +3,8 @@ from typing import Any
 
 from config import settings
 
-from ..loaders.excel_loader import ExcelLoader
+from ..loaders.base import DataSheetMap
+from ..loaders.excel_loader import ExcelLoader, ExcelLoaderData
 from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
 from ..models.dynamic_model import DynamicDataset
 from ..models.jmmi import JMMIDataset
@@ -44,8 +45,6 @@ class ValidationPipeline:
         Returns:
             Dict[str, Any]: JSON results.
 
-            TODO
-            add logs for schema. and mappings?
         """
         all_results: list[ValidationResult] = []
         set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR])
@@ -63,6 +62,7 @@ class ValidationPipeline:
                     rule="SchemaValidation",
                     message=f"Schema validation encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
+                    details=vars(self.schema),
                 )
             )
             settings.logger.log_exception(e)
@@ -83,17 +83,27 @@ class ValidationPipeline:
                 all_results.append(
                     ValidationResult(
                         rule="ExcelFileLoading",
-                        message=f"No matching sheets found in excel file {filepath}.",
+                        message=f"No matching sheets found in excel file '{filepath}'.",
                         severity=SeverityLevel.ADMIN_ERROR,
                     )
                 )
                 return self._compile_results(all_results)
+            
+            all_results.append(
+                ValidationResult(
+                    rule="ExcelFileLoading",
+                    message="Data mapping after data load.",
+                    severity=SeverityLevel.ADMIN_INFO,
+                    details=self._excel_loader_to_dict(data),
+                )
+            )
+
         except Exception as e:
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
-                    message=f"Loading of the excel file {filepath} encountered\
-                          an error: {str(e)}",
+                    message=f"Loading of the excel file '{filepath}' encountered" \
+                          f"an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
                 )
             )
@@ -110,6 +120,16 @@ class ValidationPipeline:
             self.schema = dataset.get_schema()
             data = dataset.data
 
+        all_results.append(
+            ValidationResult(
+                rule="Schema Details",
+                message=f"Schema for dataset '{self.dataset_type}' "\
+                        f"and file '{filepath}'",
+                severity=SeverityLevel.ADMIN_INFO,
+                details=vars(self.schema),
+            )
+        )
+
         # run each of the validators for the dataset.
         for validator in self.validators:
             try:
@@ -120,7 +140,7 @@ class ValidationPipeline:
                     all_results.append(
                         ValidationResult(
                             rule=validator.name,
-                            message=f"Validator {validator.name} passed.",
+                            message=f"Validator '{validator.name}' passed.",
                             severity=SeverityLevel.PASSED,
                             details=self._get_validator_params(validator),
                         )
@@ -129,7 +149,7 @@ class ValidationPipeline:
                 all_results.append(
                     ValidationResult(
                         rule=validator.name,
-                        message=f"Validator {validator.name} encountered\
+                        message=f"Validator '{validator.name}' encountered\
                               an error: {str(e)}",
                         severity=SeverityLevel.ADMIN_ERROR,
                         details=self._get_validator_params(validator),
@@ -145,6 +165,7 @@ class ValidationPipeline:
         admin_errors = [r for r in results if r.severity == SeverityLevel.ADMIN_ERROR]
         warnings = [r for r in results if r.severity == SeverityLevel.WARNING]
         info = [r for r in results if r.severity == SeverityLevel.INFO]
+        admin_info = [r for r in results if r.severity == SeverityLevel.ADMIN_INFO]
         passed = [r for r in results if r.severity == SeverityLevel.PASSED]
 
         return {
@@ -155,11 +176,13 @@ class ValidationPipeline:
                 "errors": len(errors),
                 "warnings": len(warnings),
                 "info": len(info),
+                "admin_info": len(admin_info),
             },
             "admin_errors": [self._result_to_dict(r) for r in admin_errors],
             "errors": [self._result_to_dict(r) for r in errors],
             "warnings": [self._result_to_dict(r) for r in warnings],
             "info": [self._result_to_dict(r) for r in info],
+            "admin_info": [self._result_to_dict(r) for r in admin_info],
             "passed": [self._result_to_dict(r) for r in passed],
             "metadata": {
                 "dataset_type": self.dataset_type,
@@ -183,4 +206,24 @@ class ValidationPipeline:
             k: v
             for k, v in vars(validator).items()
             if not isinstance(v, BaseDatasetSchema)
+        }
+
+    def _excel_loader_to_dict(self, excel_loader: ExcelLoaderData) -> dict:
+        """Convert ExcelLoaderData to dict, excluding data and column fields."""
+
+        def data_sheet_map_to_dict(data_sheet: DataSheetMap) -> dict:
+            return {
+                "schema_sheet_name": data_sheet.schema_sheet_name,
+                "data_sheet_name": data_sheet.data_sheet_name,
+                "column_map": data_sheet.column_map,
+            }
+
+        return {
+            "loaded_sheets": [
+                data_sheet_map_to_dict(sheet) for sheet in excel_loader.loaded_sheets
+            ],
+            "unloaded_sheets": [
+                data_sheet_map_to_dict(sheet) for sheet in excel_loader.unloaded_sheets
+            ],
+            "unexpected_sheets": excel_loader.unexpected_sheets,
         }

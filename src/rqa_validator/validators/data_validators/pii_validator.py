@@ -69,9 +69,9 @@ class PiiDataCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name + " literal comparison",
-                            message=f"The sheet {sheet.data_sheet_name} has a possible\
-                                  pii column. Check to see if it should be removed:\
-                                      {item}.",
+                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"\
+                                  " pii column. Check to see if it should be removed:"\
+                                      f" {item}.",
                             severity=SeverityLevel.WARNING,
                             sheet_name=sheet.data_sheet_name,
                             column_name=item,
@@ -82,9 +82,9 @@ class PiiDataCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name + " fuzzy match comparison",
-                            message=f"The sheet {sheet.data_sheet_name} has a possible\
-                                  pii column. Check to the details to see if it\
-                                     should be removed.",
+                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"\
+                                 " pii column. Check to the details to see if it"\
+                                    " should be removed.",
                             severity=SeverityLevel.WARNING,
                             sheet_name=sheet.data_sheet_name,
                             column_name=item.standard_name,
@@ -149,8 +149,8 @@ class PiiDataCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"The sheet {sheet.data_sheet_name} contains possible\
-                              pii data. Check the output for details.",
+                        message=f"The sheet '{sheet.data_sheet_name}' contains possible"\
+                              " pii data. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
                         details=final_df.to_dict(),

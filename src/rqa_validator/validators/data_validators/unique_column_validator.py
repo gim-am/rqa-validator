@@ -76,12 +76,12 @@ class UniqueColumn(BaseValidator):
                             results.append(
                                 ValidationResult(
                                     rule=self.name,
-                                    message=f"For column \
-                                        {mapped_column.data_column_name} in sheet \
-                                        {loaded_sheet_info.data_sheet_name}\
-                                        {unique_duplicated_row_count} non unique values\
-                                        were found. This column should contain\
-                                        unique values. Check the output for details.",
+                                    message="For column "\
+                                        f" '{mapped_column.data_column_name}' in sheet" \
+                                        f" '{loaded_sheet_info.data_sheet_name}'"\
+                                        f" {unique_duplicated_row_count} non unique values"\
+                                        " were found. This column should contain"\
+                                        " unique values. Check the output for details.",
                                     severity=SeverityLevel.ERROR,
                                     sheet_name=loaded_sheet_info.schema_sheet_name,
                                     details=unique_duplicated_rows_df.to_dict(),

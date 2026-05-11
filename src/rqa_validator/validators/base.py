@@ -10,6 +10,7 @@ class SeverityLevel(Enum):
     ERROR = "error"
     ADMIN_ERROR = "admin_error"
     PASSED = "passed"
+    ADMIN_INFO = "admin_info"
 
 
 @dataclass

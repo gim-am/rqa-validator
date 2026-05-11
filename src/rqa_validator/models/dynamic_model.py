@@ -158,9 +158,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked cleaning data sheet for the sheet\
-                                  {sheet} were found so the CleaningLogToClean and\
-                                      CrossSheetIdCheck rules could not be run.",
+                            message=f"No linked cleaning data sheet for the sheet"\
+                                  f"'{sheet}' were found so the 'CleaningLogToClean' and"\
+                                      "'CrossSheetIdCheck' rules could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -178,8 +178,8 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked raw sheet for the sheet {sheet} were\
-                                  found so the RawToCleanToLog rule could not be run.",
+                            message=f"No linked raw sheet for the sheet '{sheet}' were"\
+                                  "found so the 'RawToCleanToLog' rule could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -212,9 +212,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked sheets for the raw data sheet {sheet}\
-                                were found so the CrossSheetRowSumCheck rule could\
-                                    not be run.",
+                            message=f"No linked sheets for the raw data sheet '{sheet}'"\
+                                "were found so the 'CrossSheetRowSumCheck' rule could"\
+                                    "not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -236,9 +236,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked clean sheet for the raw data sheet\
-                                  {sheet} was found so the CrossSheetIdCheck rule\
-                                      could not be run.",
+                            message="No linked clean sheet for the raw data sheet"\
+                                f"'{sheet}' was found so the 'CrossSheetIdCheck' rule"\
+                                      "could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -257,7 +257,7 @@ class DynamicDataset(BaseDataset):
             results.append(
                 ValidationResult(
                     rule="DynamicDataset Creation build_validators",
-                    message="No possible sheet for consent was found.",
+                    message="No possible sheet for 'consent' column was found.",
                     severity=SeverityLevel.WARNING,
                 )
             )
@@ -277,7 +277,7 @@ class DynamicDataset(BaseDataset):
             results.append(
                 ValidationResult(
                     rule="DynamicDataset Creation build_validators",
-                    message="No possible sheets for clean_data were found.",
+                    message="No possible sheets for 'clean_data' were found.",
                     severity=SeverityLevel.ERROR,
                 )
             )
@@ -286,7 +286,7 @@ class DynamicDataset(BaseDataset):
             results.append(
                 ValidationResult(
                     rule="DynamicDataset Creation build_validators",
-                    message="No possible sheets for raw_data were found.",
+                    message="No possible sheets for 'raw_data' were found.",
                     severity=SeverityLevel.ERROR,
                 )
             )
@@ -294,7 +294,7 @@ class DynamicDataset(BaseDataset):
             results.append(
                 ValidationResult(
                     rule="DynamicDataset Creation build_validators",
-                    message="No possible sheets for cleaning_log were found.",
+                    message="No possible sheets for 'cleaning_log' were found.",
                     severity=SeverityLevel.ERROR,
                 )
             )
@@ -498,8 +498,8 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation",
-                            message=f"No unique ID column was found for sheet\
-                                  {sheet.data_sheet_name}.",
+                            message="No unique ID column was found for sheet"\
+                                  f"'{sheet.data_sheet_name}'.",
                             severity=SeverityLevel.INFO,
                             sheet_name=sheet.data_sheet_name,
                         )

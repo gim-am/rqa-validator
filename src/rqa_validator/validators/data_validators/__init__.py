@@ -8,4 +8,3 @@ from .pii_validator import PiiDataCheck  # noqa: F401
 from .raw_clean_cleaning_log_validator import RawToCleanToLog  # noqa: F401
 from .survey_choices_validator import SurveyChoicesCheck  # noqa: F401
 from .unique_column_validator import UniqueColumn  # noqa: F401
-

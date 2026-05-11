@@ -14,7 +14,7 @@ def main():
         choices=["jmmi", "other"],
         help="Type of dataset to validate",
     )
-    # parser.add_argument("--output", 
+    # parser.add_argument("--output",
     #                   type=Path, default=Path("validation_results.json"),
     #                    help="Output path for JSON results")
 
@@ -27,11 +27,13 @@ def main():
     print(f"Errors: {results['summary']['errors']}")
     print(f"Warnings: {results['summary']['warnings']}")
     print(f"info: {results['summary']['info']}")
+    print(f"admin_info: {results['summary']['admin_info']}")
     print(f"passed: {results['summary']['passed']}")
     print(results["admin_errors"])
     print(results["errors"])
     print(results["warnings"])
     print(results["info"])
+    print(results["admin_info"])
 
 
 if __name__ == "__main__":

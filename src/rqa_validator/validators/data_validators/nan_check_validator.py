@@ -147,12 +147,11 @@ class NaNDataCheck(BaseValidator):
                 output_difference_df = pl.concat([output_difference_df, output_df])
 
         if output_difference_df.height > 0:
-            # df_to_csv(data=difference_df, filename=validation_results_filename)
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There were {output_difference_df.height} possible invalid\
-                          values found. Check the output results for details.",
+                    message=f"There were {output_difference_df.height} possible invalid"\
+                          " values found. Check the output for details.",
                     severity=SeverityLevel.ERROR,
                     details=output_difference_df.to_dict(),
                 )

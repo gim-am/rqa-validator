@@ -61,7 +61,7 @@ class MissingSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"A sheet for {sheet} was expexted but was not found.",
+                    message=f"A sheet for '{sheet}' was expexted but was not found.",
                     sheet_name=sheet,
                     severity=SeverityLevel.ERROR,
                 )
@@ -72,8 +72,8 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for {sheet} is expected when weights are\
-                              added to the clean data. Add this sheet if required.",
+                        message=f"A sheet for '{sheet}' is expected when weights are"\
+                              " added to the clean data. Add this sheet if required.",
                         sheet_name=sheet,
                         severity=SeverityLevel.WARNING,
                     )
@@ -82,8 +82,8 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for {sheet} is optional. Check if this sheet\
-                              is required or not for this dataset.",
+                        message=f"A sheet for '{sheet}' is optional. Check if this sheet"\
+                              " is required or not for this dataset.",
                         sheet_name=sheet,
                         severity=SeverityLevel.WARNING,
                     )

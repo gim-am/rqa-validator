@@ -384,14 +384,13 @@ class SurveyChoicesCheck(BaseValidator):
                 )
 
                 if difference_df.height > 0:
-                    # df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} values found in\
-                                    the {sheet} sheet that were not reflected in the \
-                                    {self.survey_sheet} sheet. \
-                                    Check the output for details.",
+                            message=f"There were {difference_df.height} values found in"\
+                                    f" the {sheet} sheet that were not reflected in the"\
+                                    f" {self.survey_sheet} sheet. "\
+                                    "Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                             details=difference_df.to_dict(),

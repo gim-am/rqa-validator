@@ -31,9 +31,9 @@ class DuplicateSheetMatches(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"Multiple excel sheets, {sheet_names}, were mapped\
-                                to the same schema sheet {item}. There should be at\
-                                 most a 1-1 mapping for each sheet.",
+                        message=f"Multiple excel sheets, '{sheet_names}', were mapped"\
+                                f" to the same schema sheet {item}. There should be at"\
+                                 " most a 1-1 mapping for each sheet.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=item,
                     )

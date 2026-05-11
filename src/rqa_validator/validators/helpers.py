@@ -27,7 +27,7 @@ def get_data_loaded_sheet(
     if loaded_sheet is None:
         result = ValidationResult(
             rule=rule,
-            message=f"An excel sheet for {sheet_name} is expected.",
+            message=f"An excel sheet for '{sheet_name}' is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
@@ -84,7 +84,7 @@ def get_schema_loaded_sheet(
     if not schema_sheet:
         result = ValidationResult(
             rule=rule,
-            message=f"A schema sheet for {sheet_name} is expected.",
+            message=f"A schema sheet for '{sheet_name}' is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
@@ -141,7 +141,7 @@ def get_data_loaded_column(
     if column is None:
         result = ValidationResult(
             rule=rule,
-            message=f"A column for {column_name} is expected.",
+            message=f"A column for '{column_name}' is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
         )
@@ -200,8 +200,8 @@ def get_schema_loaded_column(
         # should not actually happen as its already mapped above.
         result = ValidationResult(
             rule=rule,
-            message=f"A column for {column} in schema sheet \
-                {loaded_sheet.standard_name} is expected.",
+            message=f"A column for '{column}' in schema sheet "\
+                f" '{loaded_sheet.standard_name}' is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.standard_name,
             column_name=column,
@@ -263,16 +263,16 @@ def get_data_sheet_id(
     if not ids:
         result = ValidationResult(
             rule=rule,
-            message=f"A unique id column for {loaded_sheet.data_sheet_name} is\
-                     expected but none were found.",
+            message=f"A unique id column for '{loaded_sheet.data_sheet_name}' is"\
+                     " expected but none were found.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
         )
     elif len(ids) != expected:
         result = ValidationResult(
             rule=rule,
-            message=f"A single unique column for schema sheet {sheet_name} and matching\
-                     excel sheet {loaded_sheet.data_sheet_name} was expected.",
+            message=f"A single unique column for schema sheet '{sheet_name}' and matching"\
+                     f" excel sheet '{loaded_sheet.data_sheet_name}' was expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
@@ -339,8 +339,8 @@ def get_schema_process_value(
     if process_values is None or len(process_values.values) == 0:
         result = ValidationResult(
             rule=rule,
-            message=f"process_values were expected for column \
-                {schema_column.standard_name} for process {process_value_map_name}.",
+            message="process_values were expected for column "\
+                f" '{schema_column.standard_name}' for process '{process_value_map_name}'.",
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
             column_name=schema_column.standard_name,
@@ -412,8 +412,8 @@ def get_matching_id_columns(
     if len(matching_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 linkable ID column for sheets {source_sheet} and \
-                    {target_sheet} but {len(matching_columns)} were found.",
+            message=f"Expected 1 linkable ID column for sheets '{source_sheet}' and "\
+                    f" '{target_sheet}' but {len(matching_columns)} were found.",
             severity=SeverityLevel.ERROR,
         )
 
@@ -452,9 +452,9 @@ def get_matching_id_columns_alt(
     if len(source_columns) != 1 or len(target_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 linkable ID column for sheets {source_sheet} and \
-                {target_sheet} but {source_sheet} had {len(source_columns)} and \
-                {target_sheet} had {len(target_columns)}.",
+            message=f"Expected 1 linkable ID column for sheets '{source_sheet}' and"\
+                f" '{target_sheet}' but '{source_sheet}' had {len(source_columns)} and"\
+                f" '{target_sheet}' had {len(target_columns)}.",
             severity=SeverityLevel.ERROR,
         )
     if result is None:
@@ -482,8 +482,8 @@ def get_schema_id_column(
     if len(matching_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 ID column for sheet {source.standard_name} but \
-                {len(matching_columns)} were found.",
+            message=f"Expected 1 ID column for sheet '{source.standard_name}' but" \
+                f" {len(matching_columns)} were found.",
             severity=SeverityLevel.ERROR,
         )
     if result is None:

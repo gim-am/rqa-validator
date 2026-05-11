@@ -51,10 +51,10 @@ def match_excel_columns_to_schema(
                 results.append(
                     ValidationResult(
                         rule="Match excel column to schema",
-                        message=f"The schema sheet {schema_sheet.standard_name} column\
-                              {column.standard_name} had {len(literal_matches)} matches\
-                                  to columns. There should be only 1. \
-                                  Check the schema.",
+                        message=f"The schema sheet '{schema_sheet.standard_name}' column"\
+                              f" '{column.standard_name}' had {len(literal_matches)}"\
+                                  " matches to columns. There should be only 1." \
+                                  "Check the schema.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=schema_sheet.standard_name,
                         column_name=column.standard_name,
@@ -74,9 +74,9 @@ def match_excel_columns_to_schema(
                 results.append(
                     ValidationResult(
                         rule="Match excel column to schema",
-                        message=f"The schema sheet {schema_sheet.standard_name}\
-                                column {column.standard_name} was fuzzy matched with\
-                                an excel column. See output for details.",
+                        message=f"The schema sheet '{schema_sheet.standard_name}'"\
+                                f" column '{column.standard_name}' was fuzzy matched"\
+                                " withan excel column. See output for details.",
                         severity=SeverityLevel.INFO,
                         sheet_name=schema_sheet.standard_name,
                         column_name=column.standard_name,
@@ -87,11 +87,11 @@ def match_excel_columns_to_schema(
                 results.append(
                     ValidationResult(
                         rule="Match excel column to schema",
-                        message=f"The schema sheet {schema_sheet.standard_name}\
-                                column {column.standard_name} was fuzzy matched\
-                                with multiple excel columns so was not matched as\
-                                this would cause validation errors.\
-                                See output for details.",
+                        message=f"The schema sheet '{schema_sheet.standard_name}'"\
+                                f" column '{column.standard_name}' was fuzzy matched"\
+                                " with multiple excel columns so was not matched as"\
+                                " this would cause validation errors."\
+                                " See output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=schema_sheet.standard_name,
                         column_name=column.standard_name,
@@ -144,8 +144,8 @@ def match_excel_sheet_to_schema(
             results.append(
                 ValidationResult(
                     rule="Match excel sheeet to schema",
-                    message=f"Excel sheet {excel_sheet_name} was fuzzy matched with\
-                          schema sheet {fuzzy_matched_values_schema[0].standard_name}.",
+                    message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"\
+                          f" schema sheet {fuzzy_matched_values_schema[0].standard_name}.",
                     severity=SeverityLevel.INFO,
                     sheet_name=excel_sheet_name,
                     details={excel_sheet_name: fuzzy_matched_values_schema},
@@ -157,10 +157,10 @@ def match_excel_sheet_to_schema(
             results.append(
                 ValidationResult(
                     rule="Match excel sheeet to schema",
-                    message=f"Excel sheet {excel_sheet_name} was fuzzy matched with\
-                            multiple schema sheets so was not matched. This will lead\
-                            to validation errors about excel sheets not being found.\
-                            See output for details.",
+                    message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"\
+                            " multiple schema sheets so was not matched. This will lead"\
+                            " to validation errors about excel sheets not being found."\
+                            " See output for details.",
                     severity=SeverityLevel.INFO,
                     sheet_name=excel_sheet_name,
                     details={excel_sheet_name: fuzzy_matched_values_schema},
