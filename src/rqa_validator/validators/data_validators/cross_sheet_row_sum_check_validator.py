@@ -7,7 +7,7 @@ from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 from dataclasses import dataclass
-from typing import List
+
 
 
 class CrossSheetRowSumCheck(BaseValidator):
@@ -15,7 +15,7 @@ class CrossSheetRowSumCheck(BaseValidator):
         self,
         schema: BaseDatasetSchema,
         master_sheet: str = "raw_data",
-        child_sheets: List[str] = ["clean_data", "deletion_log"],
+        child_sheets: list[str] = ["clean_data", "deletion_log"],
         master_deletion_log: str | None = None,
     ):
         """
@@ -37,7 +37,7 @@ class CrossSheetRowSumCheck(BaseValidator):
     def name(self) -> str:
         return "CrossSheetRowSumCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if master_sheet rows equals the sum of child sheet rows rows.
 
         Args:
@@ -46,7 +46,7 @@ class CrossSheetRowSumCheck(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         master_data_count: int = 0
         deleted_data_count: int | None = None
 
@@ -55,7 +55,7 @@ class CrossSheetRowSumCheck(BaseValidator):
             sheet_name: str
             row_count: int
 
-        child_counts: List[ChildCounts] = []
+        child_counts: list[ChildCounts] = []
 
         sheets_to_load = [self.master_sheet, *self.child_sheets]
         if self.master_deletion_log is not None:

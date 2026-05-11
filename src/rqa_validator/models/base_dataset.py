@@ -1,4 +1,4 @@
-from typing import List
+
 import itertools
 from ..models.base import SchemaColumnMap, SchemaSheetMap, ProcessValueMap
 
@@ -9,11 +9,11 @@ from dataclasses import dataclass, field
 
 @dataclass
 class BaseDatasetSchema:
-    dataset_type: str = str()
+    dataset_type: str = ""
     # sheets that have to be loaded and used for further validation
-    schema_loaded_sheets: List[SchemaSheetMap] = field(default_factory=list)
+    schema_loaded_sheets: list[SchemaSheetMap] = field(default_factory=list)
     # sheets that should exist but dont need to be loaded
-    schema_unloaded_sheets: List[SchemaSheetMap] = field(default_factory=list)
+    schema_unloaded_sheets: list[SchemaSheetMap] = field(default_factory=list)
 
     def get_schema_loaded_sheet(self, sheet_name: str) -> SchemaSheetMap | None:
         """Gets the details and data for a loaded sheet if it exists.
@@ -29,15 +29,15 @@ class BaseDatasetSchema:
                 return sheet
         return None
 
-    def get_loaded_sheets_standard_names(self) -> List[str]:
+    def get_loaded_sheets_standard_names(self) -> list[str]:
         """Gets all the standard names for all the loaded sheets."""
         return [item.standard_name for item in self.schema_loaded_sheets]
 
-    def get_unloaded_sheets_standard_names(self) -> List[str]:
+    def get_unloaded_sheets_standard_names(self) -> list[str]:
         """Gets all the standard names for all the unloaded sheets."""
         return [item.standard_name for item in self.schema_unloaded_sheets]
 
-    def get_all_sheet_names(self) -> List[str]:
+    def get_all_sheet_names(self) -> list[str]:
         """Gets all sheet names, including alternate names
 
         Returns:
@@ -50,7 +50,7 @@ class BaseDatasetSchema:
 
         return list(itertools.chain.from_iterable(sheet_names))
 
-    def get_sheet_column_standard_names(self, sheet_name: str) -> List[str] | None:
+    def get_sheet_column_standard_names(self, sheet_name: str) -> list[str] | None:
         """gets all the column standard names for a sheet."""
         sheet = self.get_schema_loaded_sheet(sheet_name)
         if sheet is not None:
@@ -135,7 +135,7 @@ class BaseDatasetSchema:
 
 @dataclass
 class DefaultDatasetSchema(BaseDatasetSchema):
-    schema_loaded_sheets: List[SchemaSheetMap] = field(
+    schema_loaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
             SchemaSheetMap(
                 standard_name="raw_data",
@@ -232,7 +232,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
             ),
         ]
     )
-    schema_unloaded_sheets: List[SchemaSheetMap] = field(
+    schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
             SchemaSheetMap(
                 standard_name="read_me", alternate_names=["read.me", "read me"]
@@ -256,7 +256,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
 
 @dataclass
 class DynamicDatasetSchema(BaseDatasetSchema):
-    schema_loaded_sheets: List[SchemaSheetMap] = field(
+    schema_loaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
             SchemaSheetMap(
                 standard_name="deletion_log",
@@ -296,7 +296,7 @@ class DynamicDatasetSchema(BaseDatasetSchema):
             ),
         ]
     )
-    schema_unloaded_sheets: List[SchemaSheetMap] = field(
+    schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
             SchemaSheetMap(
                 standard_name="read_me", alternate_names=["read.me", "read me"]
@@ -324,7 +324,7 @@ class BaseDataset(ABC):
         pass
 
     @abstractmethod
-    def get_validators() -> List[BaseValidator]:
+    def get_validators() -> list[BaseValidator]:
         pass
 
     # TODO: add list of base validators here and use this in child

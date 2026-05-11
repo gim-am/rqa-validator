@@ -1,38 +1,31 @@
 from dataclasses import dataclass
 
-from ..validators.data_validators.raw_clean_cleaning_log_validator import (
+from ..validators.data_validators import(
     RawToCleanToLog,
-)
-
-from ..validators.data_validators.survey_choices_validator import SurveyChoicesCheck
-
-from ..validators.data_validators.column_data_type_validator import DataTypeCheck
-from ..validators.data_validators.cross_sheet_row_sum_check_validator import (
+    SurveyChoicesCheck,
+    DataTypeCheck,
     CrossSheetRowSumCheck,
-)
-from ..validators.schema_validators.unexpected_sheets_validator import UnexpectedSheets
-from ..validators.schema_validators.missing_sheets_validator import MissingSheets
-from ..validators.schema_validators.duplicate_sheet_match_validator import (
-    DuplicateSheetMatches,
-)
-from ..validators.schema_validators.mandatory_column_validator import MandatoryColumns
-from ..validators.data_validators.pii_validator import PiiColumns
-from ..validators.data_validators.unique_column_validator import UniqueColumn
-from ..validators.data_validators.consent_check_validator import ConsentCheck
-from ..validators.data_validators.cleaning_log_to_clean_validator import (
+    PiiColumns,
+    UniqueColumn,
+    ConsentCheck,
     CleaningLogToClean,
-)
-from ..validators.data_validators.cross_sheet_id_check_validator import (
     CrossSheetIdCheck,
+    NaNCheck
 )
-from ..validators.schema_validators.column_name_validator import ColumnNameCheck
-from ..validators.data_validators.nan_check_validator import NaNCheck
+from ..validators.schema_validators import (
+    UnexpectedSheets,
+    MissingSheets,
+    DuplicateSheetMatches,
+    MandatoryColumns,
+    ColumnNameCheck
+)
+
 from ..validators.base import BaseValidator
 from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema, BaseDataset, DefaultDatasetSchema
 
 
-from typing import List
+
 
 
 @dataclass()
@@ -62,7 +55,7 @@ class JMMIDataset(BaseDataset):
     @staticmethod
     def get_validators(
         schema: BaseDatasetSchema, *args, **kwargs
-    ) -> List[BaseValidator]:
+    ) -> list[BaseValidator]:
         return [
             MissingSheets(schema=schema),
             UnexpectedSheets(),

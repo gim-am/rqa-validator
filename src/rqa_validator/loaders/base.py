@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+
 import polars as pl
 
 
@@ -15,8 +15,8 @@ class DataSheetMap:
     data_sheet_name: str
     data: pl.DataFrame = field(default_factory=pl.DataFrame)
     # this operation is ran numerous times so might as well store it once here
-    data_columns: List[str] = field(default_factory=list)
-    column_map: List[DataColumnMap] = field(default_factory=list)
+    data_columns: list[str] = field(default_factory=list)
+    column_map: list[DataColumnMap] = field(default_factory=list)
 
     def get_column_map(self, search_column: str) -> DataColumnMap | None:
         """Searches if a schema column name was mapped during data load.
@@ -36,5 +36,5 @@ class DataSheetMap:
     def add_column_map(self, column_map: DataColumnMap):
         self.column_map.append(column_map)
 
-    def set_column_map(self, column_maps: List[DataColumnMap]):
+    def set_column_map(self, column_maps: list[DataColumnMap]):
         self.column_map = column_maps

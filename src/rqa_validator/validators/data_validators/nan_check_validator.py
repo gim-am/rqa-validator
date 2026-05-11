@@ -9,7 +9,7 @@ from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 import polars as pl
 
 
-from typing import List
+
 
 
 class NaNCheck(BaseValidator):
@@ -19,7 +19,7 @@ class NaNCheck(BaseValidator):
     """
 
     def __init__(
-        self, schema: BaseDatasetSchema, check_sheets: List[str] = ["clean_data"]
+        self, schema: BaseDatasetSchema, check_sheets: list[str] = ["clean_data"]
     ) -> None:
         """
         Args:
@@ -33,7 +33,7 @@ class NaNCheck(BaseValidator):
     def name(self) -> str:
         return "NaNCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks columns for invalid numeric values like NaN and -999.
 
         Args:
@@ -42,7 +42,7 @@ class NaNCheck(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         output_difference_df = pl.DataFrame(
             [

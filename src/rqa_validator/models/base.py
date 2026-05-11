@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+
 import polars as pl
 
 from ..common.list_matching import is_in_list, add_to_list, unique_list
@@ -14,7 +14,7 @@ class DynamicSheetMatching:
     log_type: str | None = None
     parent_sheet: str | None = None
     parent_linking_column: str | None = None
-    children: List[str] = field(default_factory=list)
+    children: list[str] = field(default_factory=list)
     linked_cleaning_log: str | None = None
     linked_raw_sheet: str | None = None
     linked_clean_sheet: str | None = None
@@ -26,17 +26,17 @@ class ProcessValueMap:
     """Values expexted in a column required for a validation process"""
 
     process_name: str
-    values: List = field(default_factory=list)
+    values: list = field(default_factory=list)
 
 
 @dataclass
 class SchemaColumnMap:
     standard_name: str
-    alternate_names: List[str] = field(default_factory=list)
+    alternate_names: list[str] = field(default_factory=list)
     is_unique: bool = False
-    process_values: List[ProcessValueMap] = field(default_factory=list)
+    process_values: list[ProcessValueMap] = field(default_factory=list)
 
-    def combine(self) -> List[str]:
+    def combine(self) -> list[str]:
         """returns a unique list of column names and alternate names"""
         return add_to_list(self.standard_name, self.alternate_names)
 
@@ -49,8 +49,8 @@ class SchemaColumnMap:
 @dataclass
 class SchemaSheetMap:
     standard_name: str
-    alternate_names: List[str] = field(default_factory=list)
-    mandatory_columns: List[SchemaColumnMap] = field(default_factory=list)
+    alternate_names: list[str] = field(default_factory=list)
+    mandatory_columns: list[SchemaColumnMap] = field(default_factory=list)
     parent_sheet: str | None = None
     parent_linking_column: str | None = None
 
@@ -66,7 +66,7 @@ class SchemaSheetMap:
         """Gets the standard names for all mandatory columns."""
         return [item.standard_name for item in self.mandatory_columns]
 
-    def get_unique_columns(self) -> List[SchemaColumnMap]:
+    def get_unique_columns(self) -> list[SchemaColumnMap]:
         """Gets all the columns markes as unique"""
         return [column for column in self.mandatory_columns if column.is_unique]
 
@@ -74,7 +74,7 @@ class SchemaSheetMap:
         """checks if a sheet name is part of the schema (including alternate names)"""
         return is_in_list(sheet_name, self.combine_sheet_names())
 
-    def combine_column_names(self, return_unique_list: bool = True) -> List[str]:
+    def combine_column_names(self, return_unique_list: bool = True) -> list[str]:
         """Creates a unique list of mandatory and unique column name options
 
         Args:
@@ -84,7 +84,7 @@ class SchemaSheetMap:
         Returns:
             List[str]: returns a list of column names and alternate names for a sheet
         """
-        column_list: List[str] = []
+        column_list: list[str] = []
         for column in self.mandatory_columns:
             column_list.extend(column.combine())
 
@@ -94,7 +94,7 @@ class SchemaSheetMap:
         else:
             return column_list
 
-    def combine_sheet_names(self) -> List[str]:
+    def combine_sheet_names(self) -> list[str]:
         """combines standard_name and alternate_names into one list checking
         standard_name is not in alternate_names list
 

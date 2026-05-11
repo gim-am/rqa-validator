@@ -2,7 +2,7 @@ from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
-from typing import List
+
 
 
 class UnexpectedSheets(BaseValidator):
@@ -10,7 +10,7 @@ class UnexpectedSheets(BaseValidator):
     def name(self) -> str:
         return "UnexpectedSheets"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if there are any unexpected sheets
         across a dataset.
 
@@ -21,7 +21,7 @@ class UnexpectedSheets(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
 
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         for sheet in data.unexpected_sheets:
             results.append(

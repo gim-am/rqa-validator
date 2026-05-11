@@ -1,4 +1,4 @@
-from typing import List
+
 
 from ..common.list_matching import match_sheet_columns, match_sheet_columns_ids
 
@@ -43,8 +43,8 @@ def get_data_loaded_sheet(
 
 
 def get_data_loaded_sheets(
-    data: ExcelLoaderData, sheet_names: List[str], rule: str
-) -> tuple[List[ValidationResult], dict[str, DataSheetMap]]:
+    data: ExcelLoaderData, sheet_names: list[str], rule: str
+) -> tuple[list[ValidationResult], dict[str, DataSheetMap]]:
     """Gets a list of data loaded sheets if they exist.
 
     Args:
@@ -55,7 +55,7 @@ def get_data_loaded_sheets(
     Returns:
         tuple[List[ValidationResult], dict[str, SheetMap]]:  list of validation errors if any, dictionary of sheet names and loaded sheets if found
     """
-    results: List[ValidationResult] = []
+    results: list[ValidationResult] = []
     loaded_sheets: dict[str, DataSheetMap] = {}
 
     for sheet in sheet_names:
@@ -98,8 +98,8 @@ def get_schema_loaded_sheet(
 
 
 def get_schema_loaded_sheets(
-    schema: BaseDatasetSchema, sheet_names: List[str], rule: str
-) -> tuple[List[ValidationResult], dict[str, SchemaSheetMap]]:
+    schema: BaseDatasetSchema, sheet_names: list[str], rule: str
+) -> tuple[list[ValidationResult], dict[str, SchemaSheetMap]]:
     """Gets a list of schema loaded sheets if it exists.
 
     Args:
@@ -110,7 +110,7 @@ def get_schema_loaded_sheets(
     Returns:
         tuple[List[ValidationResult], dict[str, SheetMapping]]: list of validation errors if any,  dictionary of sheet names and loaded sheets if found
     """
-    results: List[ValidationResult] = []
+    results: list[ValidationResult] = []
     loaded_sheets: dict[str, SchemaSheetMap] = {}
 
     for sheet in sheet_names:
@@ -154,7 +154,7 @@ def get_data_loaded_column(
 
 def get_data_loaded_columns(
     data: dict[str, DataSheetMap], rule: str
-) -> tuple[List[ValidationResult], dict[str, DataColumnMap]]:
+) -> tuple[list[ValidationResult], dict[str, DataColumnMap]]:
     """Gets a list of data loaded columns if found.
 
     Args:
@@ -165,7 +165,7 @@ def get_data_loaded_columns(
         tuple[List[ValidationResult], dict[str, ColumnMap]]: list of validation errors if any, column name and loaded column if found
 
     """
-    results: List[ValidationResult] = []
+    results: list[ValidationResult] = []
     loaded_columns: dict[str, DataColumnMap] = {}
 
     for column, loaded_sheet in data.items():
@@ -211,7 +211,7 @@ def get_schema_loaded_column(
 
 def get_schema_loaded_columns(
     data: dict[str, SchemaSheetMap], rule: str
-) -> tuple[List[ValidationResult], dict[str, SchemaColumnMap]]:
+) -> tuple[list[ValidationResult], dict[str, SchemaColumnMap]]:
     """Gets a list of schema columns if they exists
 
     Args:
@@ -222,7 +222,7 @@ def get_schema_loaded_columns(
         tuple[List[ValidationResult], dict[str, ColumnMapping]]: list of validation errors if any, column and schema column map
     """
 
-    results: List[ValidationResult] = []
+    results: list[ValidationResult] = []
     loaded_columns: dict[str, SchemaColumnMap] = {}
 
     for column, sheet in data.items():
@@ -242,7 +242,7 @@ def get_data_sheet_id(
     loaded_sheet: DataSheetMap,
     rule: str,
     expected: int = 1,
-) -> tuple[ValidationResult | None, List[DataColumnMap]]:
+) -> tuple[ValidationResult | None, list[DataColumnMap]]:
     """Gets unique columns for a scheema sheet and loaded sheet.
 
     Args:
@@ -280,7 +280,7 @@ def get_data_sheet_ids(
     data: dict[str, DataSheetMap],
     rule: str,
     expected: int = 1,
-) -> tuple[List[ValidationResult], dict[str, List[DataColumnMap]]]:
+) -> tuple[list[ValidationResult], dict[str, list[DataColumnMap]]]:
     """Gets unique columns for a list of scheema sheets and loaded sheets.
 
     Args:
@@ -292,8 +292,8 @@ def get_data_sheet_ids(
     Returns:
         tuple[List[ValidationResult], dict[str, List[ColumnMap]]]: _description_
     """
-    results: List[ValidationResult] = []
-    loaded_columns: dict[str, List[DataColumnMap]] = {}
+    results: list[ValidationResult] = []
+    loaded_columns: dict[str, list[DataColumnMap]] = {}
 
     for sheet, loaded_sheet in data.items():
         result, loaded_column = get_data_sheet_id(
@@ -347,7 +347,7 @@ def get_schema_process_value(
 
 def get_schema_process_values(
     data: dict[str, dict[str, SchemaColumnMap]], rule: str
-) -> tuple[List[ValidationResult], dict[str, ProcessValueMap]]:
+) -> tuple[list[ValidationResult], dict[str, ProcessValueMap]]:
     """Gets a list of schema process values if found.
 
 
@@ -358,7 +358,7 @@ def get_schema_process_values(
     Returns:
         tuple[List[ValidationResult], dict[str, ProcessValueMap]]: validation errors if any, process value name, process values if found
     """
-    results: List[ValidationResult] = []
+    results: list[ValidationResult] = []
     process_values: dict[str, ProcessValueMap] = {}
 
     for sheet, item in data.items():
@@ -377,9 +377,9 @@ def get_schema_process_values(
 
 
 def get_matching_id_columns(
-    source: List[DataColumnMap],
+    source: list[DataColumnMap],
     source_sheet: str,
-    target: List[DataColumnMap],
+    target: list[DataColumnMap],
     target_sheet: str,
     rule: str,
 ) -> tuple[ValidationResult | None, list[tuple]]:
@@ -414,9 +414,9 @@ def get_matching_id_columns(
 
 
 def get_matching_id_columns_alt(
-    source: List[DataColumnMap],
+    source: list[DataColumnMap],
     source_sheet: str,
-    target: List[DataColumnMap],
+    target: list[DataColumnMap],
     target_sheet: str,
     rule: str,
 ) -> tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
@@ -452,7 +452,7 @@ def get_matching_id_columns_alt(
 
 def get_schema_id_column(
     source: SchemaSheetMap, rule: str
-) -> tuple[ValidationResult | None, List[SchemaColumnMap]]:
+) -> tuple[ValidationResult | None, list[SchemaColumnMap]]:
     """Gets unique columns for a schema sheet
 
     Args:

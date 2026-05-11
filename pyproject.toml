@@ -23,3 +23,5 @@ dev = [
 exclude = [
 "*.ipynb"
 ]
+[tool.ruff.lint]
+select = ["UP"]

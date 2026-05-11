@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 from ..validators.base import ValidationResult, SeverityLevel
 from .base import SchemaSheetMap, SchemaColumnMap
 from ..models.base_dataset import BaseDatasetSchema
@@ -6,7 +6,7 @@ from ..models.base_dataset import BaseDatasetSchema
 from ..common.list_matching import duplicate_list_items
 
 
-def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
+def validate_schema(schema: BaseDatasetSchema) -> list[ValidationResult]:
     """Checks that a sheet is listed only once in the schema.
 
     Checks that a column is listed only once per sheet. This check
@@ -19,12 +19,12 @@ def validate_schema(schema: BaseDatasetSchema) -> List[ValidationResult]:
     Returns:
         List[ValidationResult]: validation errors
     """
-    sheet_names: List[str] = []
-    results: List[ValidationResult] = []
+    sheet_names: list[str] = []
+    results: list[ValidationResult] = []
 
     for sheet in schema.schema_loaded_sheets:
         sheet_names.extend(sheet.combine_sheet_names())
-        column_names: List[str] = sheet.combine_column_names(return_unique_list=False)
+        column_names: list[str] = sheet.combine_column_names(return_unique_list=False)
 
         # check duplicate columns per sheet
         duplicate_column_names = duplicate_list_items(column_names)
@@ -63,7 +63,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         schema (BaseDatasetSchema): schema to process
     """
 
-    def expand_list(str_list: List[Any]):
+    def expand_list(str_list: list[Any]):
         existing_items = set(str_list)
 
         for item in str_list:
@@ -84,12 +84,12 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
                 if base_name not in existing_items:
                     str_list.append(base_name)
 
-    def lowercase_list_strs(str_list: List[Any]) -> None:
+    def lowercase_list_strs(str_list: list[Any]) -> None:
         str_list[:] = [
             item.lower() if isinstance(item, str) else item for item in str_list
         ]
 
-    def process_list(str_list: List[Any]):
+    def process_list(str_list: list[Any]):
         lowercase_list_strs(str_list)
         expand_list(str_list)
 

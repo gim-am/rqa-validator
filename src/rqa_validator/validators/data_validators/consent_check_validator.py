@@ -15,7 +15,7 @@ from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 import polars as pl
 
 
-from typing import List
+
 
 
 class ConsentCheck(BaseValidator):
@@ -46,7 +46,7 @@ class ConsentCheck(BaseValidator):
     def name(self) -> str:
         return "ConsentCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks that records in raw_data that did not provide consent are
         not present in clean_data.
 
@@ -56,7 +56,7 @@ class ConsentCheck(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         result, data_loaded_sheets = get_data_loaded_sheets(
             data=data,

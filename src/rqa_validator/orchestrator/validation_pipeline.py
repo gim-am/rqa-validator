@@ -1,14 +1,14 @@
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 from ..models.dynamic_model import DynamicDataset
 
-from ..models.base_dataset import DynamicDatasetSchema
+from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
 from ..models.preprocess import lowercase_schema_mappings, validate_schema
 
 from ..loaders.excel_loader import ExcelLoader
 from ..models.jmmi import JMMIDataset
-from ..validators.base import ValidationResult, SeverityLevel
+from ..validators.base import BaseValidator, ValidationResult, SeverityLevel
 from config import settings
 
 
@@ -35,7 +35,7 @@ class ValidationPipeline:
         # to make comparison easier later
         lowercase_schema_mappings(self.schema)
 
-    def run(self, filepath: Path) -> Dict[str, Any]:
+    def run(self, filepath: Path) -> dict[str, Any]:
         """Orchestrator for the dataset validation pipeline.
 
         Args:
@@ -44,8 +44,11 @@ class ValidationPipeline:
 
         Returns:
             Dict[str, Any]: JSON results.
+
+            TODO
+            add logs for schema. and mappings?
         """
-        all_results: List[ValidationResult] = []
+        all_results: list[ValidationResult] = []
         set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR])
         # pre-validate the schema. checks for duplicate sheet/column
         # names etc
@@ -119,6 +122,7 @@ class ValidationPipeline:
                             rule=validator.name,
                             message=f"Validator {validator.name} passed.",
                             severity=SeverityLevel.PASSED,
+                            details = self._get_validator_params(validator)
                         )
                     )
             except Exception as e:
@@ -127,13 +131,14 @@ class ValidationPipeline:
                         rule=validator.name,
                         message=f"Validator {validator.name} encountered an error: {str(e)}",
                         severity=SeverityLevel.ADMIN_ERROR,
+                        details = self._get_validator_params(validator)
                     )
                 )
                 settings.logger.log_exception(e)
 
         return self._compile_results(all_results)
 
-    def _compile_results(self, results: List[ValidationResult]) -> Dict[str, Any]:
+    def _compile_results(self, results: list[ValidationResult]) -> dict[str, Any]:
         """Compile validation results into structured output."""
         errors = [r for r in results if r.severity == SeverityLevel.ERROR]
         admin_errors = [r for r in results if r.severity == SeverityLevel.ADMIN_ERROR]
@@ -160,7 +165,7 @@ class ValidationPipeline:
             },
         }
 
-    def _result_to_dict(self, result: ValidationResult) -> Dict[str, Any]:
+    def _result_to_dict(self, result: ValidationResult) -> dict[str, Any]:
         """Convert ValidationResult to dictionary for JSON export."""
         return {
             "rule": result.rule,
@@ -170,3 +175,7 @@ class ValidationPipeline:
             "column_name": result.column_name,
             "details": result.details,
         }
+    def _get_validator_params(self, validator: BaseValidator) -> dict[str, Any]:
+        """Get validator paramaters for logs but exclude schema."""
+        return  {k: v for k, v in vars(validator).items() if not isinstance(v, BaseDatasetSchema)}
+

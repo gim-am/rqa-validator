@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from pathlib import Path
 
 import polars as pl
@@ -21,7 +21,7 @@ def df_to_csv(
     """
     timestamp = ""
     if add_timestamp:
-        timestamp = (datetime.now(timezone.utc)).strftime("%Y%m%d-%H%M%S")
+        timestamp = (datetime.now(UTC)).strftime("%Y%m%d-%H%M%S")
 
     output = str((directory / filename).with_suffix("")) + timestamp + ".csv"
 

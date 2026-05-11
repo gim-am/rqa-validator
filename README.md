@@ -203,14 +203,6 @@ These rules are currently based on the minimum standars checklist (1.2)
 - Mandatory columns: checks if mandatory columns are not present in a sheet
 - Column names - Checks column names are variables instead of labels
 
-
-
-**Data Rules**
-- Cleaning log: checks that all updates listed in the cleaning log sheet are reflected in the clean_data sheet
-
-
-
-
     
 ## TODO: 
 - clean validation results based on requirements 

@@ -1,4 +1,4 @@
-from typing import List
+
 from config import settings
 
 from ..common.list_matching import FuzzMatch, match_list_to_list
@@ -8,8 +8,8 @@ from .base import DataColumnMap
 
 
 def match_excel_columns_to_schema(
-    excel_columns: List, schema_sheet: SchemaSheetMap
-) -> tuple[List[ValidationResult], List[DataColumnMap]]:
+    excel_columns: list, schema_sheet: SchemaSheetMap
+) -> tuple[list[ValidationResult], list[DataColumnMap]]:
     """trys to match an excel column to a schema column.
 
         First, a literal match is attempted. If one is found this
@@ -27,8 +27,8 @@ def match_excel_columns_to_schema(
     Returns:
         tuple[List[ValidationResult], List[DataColumnMap]]: _description_
     """
-    results: List[ValidationResult] = []
-    matches: List[DataColumnMap] = []
+    results: list[ValidationResult] = []
+    matches: list[DataColumnMap] = []
 
     for column in schema_sheet.mandatory_columns:
         literal_matches, fuzzy_matched_values = match_list_to_list(
@@ -94,8 +94,8 @@ def match_excel_columns_to_schema(
 
 
 def match_excel_sheet_to_schema(
-    excel_sheet_name: str, schema_sheets: List[SchemaSheetMap]
-) -> tuple[str, List[ValidationResult]]:
+    excel_sheet_name: str, schema_sheets: list[SchemaSheetMap]
+) -> tuple[str, list[ValidationResult]]:
     """Trys to match an excel sheet name to a schema sheet name.
 
         First, a literal match is attempted. If one is found this
@@ -113,8 +113,8 @@ def match_excel_sheet_to_schema(
         tuple[str, List[ValidationResult]]: the schema sheet standard name
         if matched, a list of any validation warnings if relevant.
     """
-    results: List[ValidationResult] = []
-    fuzzy_matched_values_schema: List[FuzzMatch] = []
+    results: list[ValidationResult] = []
+    fuzzy_matched_values_schema: list[FuzzMatch] = []
 
     for sheet_config in schema_sheets:
         literal_matches, fuzzy_matched_values = match_list_to_list(
@@ -155,4 +155,4 @@ def match_excel_sheet_to_schema(
                 )
             )
 
-    return str(), results
+    return "", results

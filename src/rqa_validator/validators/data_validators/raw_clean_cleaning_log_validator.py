@@ -18,7 +18,7 @@ from ..helpers import (
 import polars as pl
 
 
-from typing import List
+
 
 
 class RawToCleanToLog(BaseValidator):
@@ -69,7 +69,7 @@ class RawToCleanToLog(BaseValidator):
     def name(self) -> str:
         return "RawToCleanToLog"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """This process compares the differences between the clean and raw data sheets
         and then checks that all these differences are reflected in the cleaning log if provided
 
@@ -83,7 +83,7 @@ class RawToCleanToLog(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         # multiple_changes_filename = 'cleaning_log_validation_multiple_changes'
         # validation_results_filename = 'cleaning_log_validation_results'

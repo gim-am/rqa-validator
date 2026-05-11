@@ -5,7 +5,7 @@ from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult
 
 
-from typing import List
+
 
 
 class MandatoryColumns(BaseValidator):
@@ -16,7 +16,7 @@ class MandatoryColumns(BaseValidator):
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if any expected mandatory columns are missing
         across relevant sheets.
 
@@ -28,7 +28,7 @@ class MandatoryColumns(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         result, data_loaded_sheets = get_data_loaded_sheets(
             data=data,

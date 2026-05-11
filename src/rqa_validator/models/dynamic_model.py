@@ -1,43 +1,36 @@
 from dataclasses import field
 from difflib import SequenceMatcher
-from typing import List
+
 import polars as pl
 
 from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base import DynamicSheetMatching
 
-from ..validators.data_validators.raw_clean_cleaning_log_validator import (
+from ..validators.data_validators import(
     RawToCleanToLog,
+    SurveyChoicesCheck,
+    DataTypeCheck,
+    CrossSheetRowSumCheck,
+    PiiColumns,
+    UniqueColumn,
+    ConsentCheck,
+    CleaningLogToClean,
+    CrossSheetIdCheck,
+    NaNCheck
+)
+from ..validators.schema_validators import (
+    UnexpectedSheets,
+    MissingSheets,
+    DuplicateSheetMatches,
+    MandatoryColumns,
+    ColumnNameCheck
 )
 from ..loaders.helpers import match_excel_columns_to_schema
-from ..validators.data_validators.survey_choices_validator import SurveyChoicesCheck
 from ..models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
 from ..common.list_matching import filter_list, match_list
 from ..models.base_dataset import BaseDataset, DynamicDatasetSchema
 from config import settings
-
-from ..validators.data_validators.column_data_type_validator import DataTypeCheck
-from ..validators.data_validators.cross_sheet_row_sum_check_validator import (
-    CrossSheetRowSumCheck,
-)
-from ..validators.schema_validators.unexpected_sheets_validator import UnexpectedSheets
-from ..validators.schema_validators.missing_sheets_validator import MissingSheets
-from ..validators.schema_validators.duplicate_sheet_match_validator import (
-    DuplicateSheetMatches,
-)
-from ..validators.schema_validators.mandatory_column_validator import MandatoryColumns
-from ..validators.data_validators.pii_validator import PiiColumns
-from ..validators.data_validators.unique_column_validator import UniqueColumn
-from ..validators.data_validators.consent_check_validator import ConsentCheck
-from ..validators.data_validators.cleaning_log_to_clean_validator import (
-    CleaningLogToClean,
-)
-from ..validators.data_validators.cross_sheet_id_check_validator import (
-    CrossSheetIdCheck,
-)
-from ..validators.schema_validators.column_name_validator import ColumnNameCheck
-from ..validators.data_validators.nan_check_validator import NaNCheck
 
 
 class DynamicDataset(BaseDataset):
@@ -68,17 +61,17 @@ class DynamicDataset(BaseDataset):
         self.data = data
         self.schema = DynamicDatasetSchema()
         self.sheet_matching: dict[str, DynamicSheetMatching] = {}
-        self.validators: List[BaseValidator] = field(default_factory=list)
+        self.validators: list[BaseValidator] = field(default_factory=list)
 
     def get_schema(self, *args, **kwargs) -> DynamicDatasetSchema:
         return self.schema
 
-    def get_validators(self, *args, **kwargs) -> List[BaseValidator]:
+    def get_validators(self, *args, **kwargs) -> list[BaseValidator]:
         return self.validators
 
-    def process_data(self) -> List[ValidationResult]:
+    def process_data(self) -> list[ValidationResult]:
         """Runs all the steps."""
-        all_results: List[ValidationResult] = []
+        all_results: list[ValidationResult] = []
 
         results = self.match_data()
         if results:
@@ -106,14 +99,14 @@ class DynamicDataset(BaseDataset):
 
         return all_results
 
-    def build_validators(self, consent_sheet: str | None) -> List[ValidationResult]:
+    def build_validators(self, consent_sheet: str | None) -> list[ValidationResult]:
         """builds a list of validators matched to use the dynamically created schema.
 
         Current assumptions:
         - there is only ever one deletion log and it only lists deleted records for the parent object
 
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         clean_sheets = [
             item
             for item, value in self.sheet_matching.items()
@@ -294,10 +287,10 @@ class DynamicDataset(BaseDataset):
 
         return results
 
-    def build_schema(self) -> tuple[List[ValidationResult], str | None]:
+    def build_schema(self) -> tuple[list[ValidationResult], str | None]:
         """Builds a schema based on the matched dataset data."""
         consent_sheet = None
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         for sheet, details in self.sheet_matching.items():
             if details.classification in ["log", "clean", "raw"]:
                 new_sheet = self.schema.add_loaded_sheet(
@@ -355,7 +348,7 @@ class DynamicDataset(BaseDataset):
                     matches = match_list(
                         settings.COMMON_ID_COLUMN_NAMES, details.data.columns
                     )
-                    matches = filter_list(matches, ["details.log_id_column"])
+                    matches = filter_list(matches, [details.log_id_column])
                     if len(matches) > 0:
                         for match in matches:
                             self.schema.add_mandatory_column_to_sheet(
@@ -409,7 +402,7 @@ class DynamicDataset(BaseDataset):
                     self.data.set_column_map_for_loaded_sheet(sheet, column_map)
         return results, consent_sheet
 
-    def match_data(self) -> List[ValidationResult]:
+    def match_data(self) -> list[ValidationResult]:
         """Attempts to identify and match sheets and columns required to build a
         schema and for validation rules.
 
@@ -422,7 +415,7 @@ class DynamicDataset(BaseDataset):
 
 
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         expected_names = self.schema.get_all_sheet_names()
         min_matching_score: float = 0.8
@@ -630,6 +623,10 @@ class DynamicDataset(BaseDataset):
 
         if unknown_sheets:
             self.data.unexpected_sheets = unknown_sheets
+            for sheet in unknown_sheets:
+                # dont perform additional validation of these sheets
+                # they will have their own validation warning in unexpected sheets validator
+                self.data.remove_loaded_sheet(sheet)
 
         results.append(
             ValidationResult(
@@ -660,7 +657,7 @@ class DynamicDataset(BaseDataset):
         return results
 
     def match_child_parent(
-        self, sheets: List[str], matched_sheets: dict[str, DynamicSheetMatching]
+        self, sheets: list[str], matched_sheets: dict[str, DynamicSheetMatching]
     ):
         """Attempt to match child parent sheets based on finding possible
         foreign keys between the sheets.

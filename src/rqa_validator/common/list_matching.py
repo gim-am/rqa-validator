@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 from thefuzz import fuzz
 from thefuzz import process
 from collections import Counter
@@ -11,16 +11,16 @@ from ..loaders.base import DataColumnMap, DataSheetMap
 @dataclass
 class FuzzMatch:
     standard_name: str
-    matches: Dict = field(default_factory=dict)
+    matches: dict = field(default_factory=dict)
 
 
 def match_list_to_list(
-    source: List[str],
-    target: List[str],
+    source: list[str],
+    target: list[str],
     fuzzy_match: bool,
     fuzzy_match_limit: int = 2,
     lower_values: bool = True,
-) -> tuple[list[str], List[FuzzMatch]]:
+) -> tuple[list[str], list[FuzzMatch]]:
     """Checks if items in a source list are found in a target list.
         Optionally performs fuzzy matching on columns in the source
         list if there was no literal match found with items in the target
@@ -44,7 +44,7 @@ def match_list_to_list(
         l_target = target
 
     literal_matches = match_list(l_source, l_target)
-    fuzzy_matched_values: List[FuzzMatch] = []
+    fuzzy_matched_values: list[FuzzMatch] = []
 
     if fuzzy_match:
         # only do fuzzy match for a column if there was no literal match
@@ -70,18 +70,18 @@ def match_list_to_list(
     return literal_matches, fuzzy_matched_values
 
 
-def match_list(source: List, target: List) -> list:
+def match_list(source: list, target: list) -> list:
     """Returns items in source that are in target"""
     set_target = set(target)
     return [item for item in source if item in set_target]
 
 
-def unique_list(source: List) -> list[Any]:
+def unique_list(source: list) -> list[Any]:
     """returns a list of unique items"""
     return list(set(source))
 
 
-def filter_list(source: List, target: List) -> list:
+def filter_list(source: list, target: list) -> list:
     """Returns items in source that are not in target"""
     set_target = set(target)
     return [item for item in source if item not in set_target]
@@ -89,9 +89,9 @@ def filter_list(source: List, target: List) -> list:
 
 def filter_list_with_tolerance(
     source: str,
-    target: List[str],
+    target: list[str],
     tolerance_ratio: float = settings.FUZZY_MATCH_STRING_LENGTH_RATIO,
-) -> List[str]:
+) -> list[str]:
     """Filters a list based on a comparison between the string length
     of source and items in a target list using a tolerance factor.
 
@@ -111,7 +111,7 @@ def filter_list_with_tolerance(
     return [item for item in target if _check_length_tolerance(source, item)]
 
 
-def duplicate_list_items(source: List) -> list[Any]:
+def duplicate_list_items(source: list) -> list[Any]:
     """returns a list of items that appear in a list multiple times.
 
     Args:
@@ -124,9 +124,9 @@ def duplicate_list_items(source: List) -> list[Any]:
     return [item for item in set(source) if item_counts[item] > 1]
 
 
-def combine_lists(source: List | None, target: List | None, unique_list: bool = True):
+def combine_lists(source: list | None, target: list | None, unique_list: bool = True):
     """Combines two lists returning a unique list"""
-    combined_list: List = []
+    combined_list: list = []
 
     if source is not None:
         combined_list.extend(source)
@@ -140,9 +140,9 @@ def combine_lists(source: List | None, target: List | None, unique_list: bool = 
         return combined_list
 
 
-def add_to_list(item: str | None, target: List | None) -> list:
+def add_to_list(item: str | None, target: list | None) -> list:
     """Adds item and list. returns a unique list."""
-    combined_list: List = []
+    combined_list: list = []
 
     if item is not None:
         combined_list.append(item)
@@ -153,14 +153,14 @@ def add_to_list(item: str | None, target: List | None) -> list:
     return list(set(combined_list))
 
 
-def is_in_list(item: str, target: List) -> bool:
+def is_in_list(item: str, target: list) -> bool:
     """Checks if an item is in a list"""
     return item in target
 
 
 def match_sheet_columns(
-    source: List[DataColumnMap], target: List[DataColumnMap]
-) -> List[tuple[DataColumnMap, DataColumnMap]]:
+    source: list[DataColumnMap], target: list[DataColumnMap]
+) -> list[tuple[DataColumnMap, DataColumnMap]]:
     """matches columns between two column maps where they have the same schema name.
 
     Args:
@@ -176,7 +176,7 @@ def match_sheet_columns(
 
     target_names = {col.schema_column_name: col for col in target}
 
-    matches: List[tuple[DataColumnMap, DataColumnMap]] = []
+    matches: list[tuple[DataColumnMap, DataColumnMap]] = []
     for s_item in source:
         if s_item.schema_column_name in target_names:
             t_item = target_names[s_item.schema_column_name]
@@ -186,7 +186,7 @@ def match_sheet_columns(
 
 
 def match_sheet_columns_ids(
-    source: List[DataColumnMap], target: List[DataColumnMap]
+    source: list[DataColumnMap], target: list[DataColumnMap]
 ) -> tuple[list[DataColumnMap], list[DataColumnMap]]:
     """A very simple way to try and find id columns that match between two column lists. Attempts to find columns
        that are the same as commonly used id column names. If one match is found for both using this assumes that
@@ -225,8 +225,8 @@ def match_sheet_columns_ids(
 
 
 def filter_loaded_sheets(
-    sheets: List[str], loaded_sheets: dict[str, DataSheetMap]
-) -> Dict[str, DataSheetMap]:
+    sheets: list[str], loaded_sheets: dict[str, DataSheetMap]
+) -> dict[str, DataSheetMap]:
     """Filters a DataSheetMap dict by the sheets
 
     Args:

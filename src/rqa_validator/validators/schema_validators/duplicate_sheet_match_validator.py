@@ -3,7 +3,7 @@ from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
-from typing import List
+
 
 
 class DuplicateSheetMatches(BaseValidator):
@@ -11,7 +11,7 @@ class DuplicateSheetMatches(BaseValidator):
     def name(self) -> str:
         return "DuplicateSheetMatches"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if a schema sheet was matched to multiple excel sheets.
 
         Args:
@@ -20,7 +20,7 @@ class DuplicateSheetMatches(BaseValidator):
         Returns:
             List[ValidationResult]: list of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         provided_sheets = data.get_loaded_sheet_mapped_names()
         provided_sheets.extend(data.get_unloaded_sheet_mapped_names())

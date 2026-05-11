@@ -7,7 +7,7 @@ from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 import polars as pl
 
 
-from typing import List
+
 
 
 class UniqueColumn(BaseValidator):
@@ -18,7 +18,7 @@ class UniqueColumn(BaseValidator):
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if any expected unique columns contain any
         non unique values across relevant sheets.
 
@@ -30,7 +30,7 @@ class UniqueColumn(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         output_filename = "duplicate_uuids"
 
         duplicated_ids_df: pl.DataFrame = pl.DataFrame(

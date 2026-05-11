@@ -1,4 +1,4 @@
-from typing import List
+
 import polars as pl
 
 from ...validators.helpers import (
@@ -25,7 +25,7 @@ class DataTypeCheck(BaseValidator):
         survey_sheet: str = "kobo_survey",
         survey_type_column: str = "type",
         survey_name_column: str = "name",
-        check_sheets: List = ["clean_data"],
+        check_sheets: list = ["clean_data"],
     ) -> None:
         """
 
@@ -48,7 +48,7 @@ class DataTypeCheck(BaseValidator):
     def name(self) -> str:
         return "DataTypeCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks that columns and column values are the correct datatype
         based on the kobo survey.
 
@@ -69,7 +69,7 @@ class DataTypeCheck(BaseValidator):
         Returns:
             List[ValidationResult]: list of validation errors
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         # pre-validation
 
         result, data_loaded_sheets = get_data_loaded_sheets(

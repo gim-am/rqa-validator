@@ -1,4 +1,4 @@
-from typing import List
+
 import polars as pl
 
 from ...common.list_matching import match_list, filter_loaded_sheets
@@ -28,7 +28,7 @@ class SurveyChoicesCheck(BaseValidator):
         choices_sheet: str = "kobo_choices",
         choices_name_column: str = "name",
         choices_list_name_column: str = "list_name",
-        check_sheets: List = ["clean_data"],
+        check_sheets: list = ["clean_data"],
         select_multiple_value_separator: str = " ",
     ) -> None:
         """
@@ -59,7 +59,7 @@ class SurveyChoicesCheck(BaseValidator):
     def name(self) -> str:
         return "SurveyChoicesCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks that clean_data values are valid when they come from
         kobo select_one or select_multiple quesitons.
 
@@ -79,7 +79,7 @@ class SurveyChoicesCheck(BaseValidator):
             Returns:
                 List[ValidationResult]: list of validation errors
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         # kobo quesiton types to find
         column_selector = r"select_one|select_multiple"
         # pre-validation
@@ -242,11 +242,11 @@ class SurveyChoicesCheck(BaseValidator):
 
         for sheet in self.check_sheets:
             # only check the questions that are present on the sheet
-            filtered_questions_select_one: List[str] = match_list(
+            filtered_questions_select_one: list[str] = match_list(
                 survey_category_questions_select_one,
                 data_loaded_sheets[sheet].data.columns,
             )
-            filtered_questions_select_multiple: List[str] = match_list(
+            filtered_questions_select_multiple: list[str] = match_list(
                 survey_category_questions_select_multiple,
                 data_loaded_sheets[sheet].data.columns,
             )
@@ -270,7 +270,7 @@ class SurveyChoicesCheck(BaseValidator):
             for question in filtered_questions_select_multiple:
                 col_has_difference = f"{question}_has_difference"
 
-                valid_choices: List[str] = choices_dict[
+                valid_choices: list[str] = choices_dict[
                     survey_question_choices_dict[question]
                 ]
 
@@ -305,7 +305,7 @@ class SurveyChoicesCheck(BaseValidator):
 
             for question in filtered_questions_select_one:
                 col_has_difference = f"{question}_has_difference"
-                valid_choices: List[str] = choices_dict[
+                valid_choices: list[str] = choices_dict[
                     survey_question_choices_dict[question]
                 ]
 

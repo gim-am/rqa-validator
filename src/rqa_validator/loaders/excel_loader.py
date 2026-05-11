@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import fastexcel
 import polars as pl
 from pathlib import Path
-from typing import List
+
 
 from .base import DataSheetMap, DataColumnMap
 from ..validators.base import ValidationResult, SeverityLevel
@@ -13,21 +13,21 @@ from .helpers import match_excel_columns_to_schema, match_excel_sheet_to_schema
 
 @dataclass
 class ExcelLoaderData:
-    loaded_sheets: List[DataSheetMap] = field(default_factory=list)
-    unloaded_sheets: List[DataSheetMap] = field(default_factory=list)
-    unexpected_sheets: List = field(default_factory=list)
+    loaded_sheets: list[DataSheetMap] = field(default_factory=list)
+    unloaded_sheets: list[DataSheetMap] = field(default_factory=list)
+    unexpected_sheets: list = field(default_factory=list)
 
     def add_column_map_to_loaded_sheet(self, sheet: str, column_map: DataColumnMap):
         loaded_sheet = self.get_loaded_sheet(sheet)
         if loaded_sheet is not None:
             loaded_sheet.add_column_map(column_map)
 
-    def set_column_map_for_loaded_sheet(self, sheet, column_maps: List[DataColumnMap]):
+    def set_column_map_for_loaded_sheet(self, sheet, column_maps: list[DataColumnMap]):
         loaded_sheet = self.get_loaded_sheet(sheet)
         if loaded_sheet is not None:
             loaded_sheet.set_column_map(column_maps)
 
-    def get_loaded_sheet_mapped_names(self) -> List[str]:
+    def get_loaded_sheet_mapped_names(self) -> list[str]:
         """Gets all the standard names for the loaded excel sheets
 
         Returns:
@@ -35,7 +35,7 @@ class ExcelLoaderData:
         """
         return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
 
-    def get_unloaded_sheet_mapped_names(self) -> List[str]:
+    def get_unloaded_sheet_mapped_names(self) -> list[str]:
         """Gets all the standard names for the loaded excel sheets
 
         Returns:
@@ -56,8 +56,13 @@ class ExcelLoaderData:
             if sheet.schema_sheet_name == sheet_name:
                 return sheet
         return None
+    
+    def remove_loaded_sheet(self, sheet_name: str):
+        for idx, sheet in enumerate(self.loaded_sheets):
+            if sheet.schema_sheet_name == sheet_name:
+                self.loaded_sheets.pop(idx)
 
-    def get_sheet_matches(self, sheet_name: str) -> List[DataSheetMap]:
+    def get_sheet_matches(self, sheet_name: str) -> list[DataSheetMap]:
         """Gets all the sheets matched with a given schema_name.
 
         Args:
@@ -66,7 +71,7 @@ class ExcelLoaderData:
         Returns:
             List[SheetMap] | None: Loaded sheet details if found
         """
-        sheets: List[DataSheetMap] = []
+        sheets: list[DataSheetMap] = []
         for sheet in self.loaded_sheets:
             if sheet.schema_sheet_name == sheet_name:
                 sheets.append(sheet)
@@ -84,7 +89,7 @@ class ExcelLoader:
 
     def load(
         self, filepath: Path, load_all_sheets: bool = False
-    ) -> tuple[ExcelLoaderData, List[ValidationResult]]:
+    ) -> tuple[ExcelLoaderData, list[ValidationResult]]:
         """Loads an excel file, does some checking and sorting of the sheets.
 
         Args:
@@ -96,7 +101,7 @@ class ExcelLoader:
             list of validation warnings
 
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         # get a list of excel sheet names
         excel_file = fastexcel.read_excel(filepath)
         all_sheets = excel_file.sheet_names

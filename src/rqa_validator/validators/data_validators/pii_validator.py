@@ -11,7 +11,7 @@ from ...validators.config import get_pii_columns
 import polars as pl
 
 
-from typing import List
+
 
 
 class PiiColumns(BaseValidator):
@@ -24,7 +24,7 @@ class PiiColumns(BaseValidator):
     def name(self) -> str:
         return "PiiColumns"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """This performs two sets of checks
 
         First: checks to see if any pii columns are present across relevant sheets.
@@ -43,7 +43,7 @@ class PiiColumns(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         pii_columns = get_pii_columns()
 
         patterns = {

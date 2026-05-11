@@ -3,7 +3,7 @@ from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
 import re
-from typing import List
+
 
 
 class ColumnNameCheck(BaseValidator):
@@ -13,7 +13,7 @@ class ColumnNameCheck(BaseValidator):
     def name(self) -> str:
         return "ColumnNameCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Check column names are variables instead of labels.
 
         This is done through regex matching that checks if there
@@ -29,7 +29,7 @@ class ColumnNameCheck(BaseValidator):
         Returns:
             List[ValidationResult]: list of validation errors
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
         pattern = re.compile(r"[^a-zA-Z_.\d:]")
 
         for sheet in data.loaded_sheets:

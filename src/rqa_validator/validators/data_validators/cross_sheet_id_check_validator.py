@@ -12,7 +12,7 @@ from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 import polars as pl
-from typing import List
+
 
 
 class CrossSheetIdCheck(BaseValidator):
@@ -20,7 +20,7 @@ class CrossSheetIdCheck(BaseValidator):
         self,
         schema: BaseDatasetSchema,
         master_sheet: str = "raw_data",
-        child_sheets: List[str] = ["clean_data", "deletion_log", "cleaning_log"],
+        child_sheets: list[str] = ["clean_data", "deletion_log", "cleaning_log"],
         is_in: bool = True,
     ):
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
@@ -40,7 +40,7 @@ class CrossSheetIdCheck(BaseValidator):
     def name(self) -> str:
         return "CrossSheetIdCheck"
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
 
             this process assumes that:
@@ -53,7 +53,7 @@ class CrossSheetIdCheck(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         if self.is_in:
             join_type = "anti"

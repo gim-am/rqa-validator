@@ -4,7 +4,7 @@ from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
-from typing import List
+
 
 
 class MissingSheets(BaseValidator):
@@ -15,7 +15,7 @@ class MissingSheets(BaseValidator):
     def __init__(self, schema: BaseDatasetSchema):
         self.schema = schema
 
-    def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
+    def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """Checks to see if any expected sheets are missing
         across a dataset.
 
@@ -25,7 +25,7 @@ class MissingSheets(BaseValidator):
         Returns:
             List[ValidationResult]: List of validation errors.
         """
-        results: List[ValidationResult] = []
+        results: list[ValidationResult] = []
 
         expected_sheets = [
             sheet.standard_name
