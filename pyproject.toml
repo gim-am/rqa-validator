@@ -23,6 +23,7 @@ dev = [
 exclude = [
 "*.ipynb"
 ]
+line-length = 100
 [tool.ruff.lint]
 select = ["UP", "E", "F", "I"]
 
