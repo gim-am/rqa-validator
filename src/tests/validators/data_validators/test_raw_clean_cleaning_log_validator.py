@@ -322,7 +322,7 @@ def valid_schema_no_cleaning_log():
                     )
                 ],
             ),
-                  ],
+        ],
         schema_unloaded_sheets=[],
     )
 

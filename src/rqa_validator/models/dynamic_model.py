@@ -55,7 +55,7 @@ class DynamicDataset(BaseDataset):
     If sheets and columns are named according to the minimum standards checklist
     then this process should have a reasonable chance of succeeding. The less
     the minimum standards checklist is followed, the more likely this process and
-    the subsequent validation rules are to produce errors related to not 
+    the subsequent validation rules are to produce errors related to not
     finding required sheets or columns.
 
     Limitations:

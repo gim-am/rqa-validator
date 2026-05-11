@@ -135,7 +135,7 @@ class CrossSheetIdCheck(BaseValidator):
                 master_id_columns = child_matching_columns[0]
 
             # filter id column. should only actually filter anything if the sheet
-            # is a cleaning log sheet as it contains ids from multiple 
+            # is a cleaning log sheet as it contains ids from multiple
             # clean data sheets (loops)
             missing_ids = (
                 child_loaded_sheet.data.select(child_data_id_columns.data_column_name)

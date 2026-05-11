@@ -31,11 +31,11 @@ def match_list_to_list(
         source (List[str]): list of items to search for
         targets (List[str]): list of items to search against
         fuzzy_match (bool): if fuzzy matching should be performed
-        fuzzy_match_limit (int, optional): Max number of fuzzy matches to return. 
+        fuzzy_match_limit (int, optional): Max number of fuzzy matches to return.
             Defaults to 2.
 
     Returns:
-        tuple[list[str], List[FuzzMatch]: a list of literal matches, 
+        tuple[list[str], List[FuzzMatch]: a list of literal matches,
                                             a list of fuzzy matches.
     """
 
@@ -192,8 +192,8 @@ def match_sheet_columns_ids(
     source: list[DataColumnMap], target: list[DataColumnMap]
 ) -> tuple[list[DataColumnMap], list[DataColumnMap]]:
     """A very simple way to try and find id columns that match between two column lists.
-      Attempts to find columns that are the same as commonly used id column names. 
-      If one match is found for both using this assumes that the two datasets are 
+      Attempts to find columns that are the same as commonly used id column names.
+      If one match is found for both using this assumes that the two datasets are
       linkable through these columns
 
        This process should be used as a last resort after attempting to directly

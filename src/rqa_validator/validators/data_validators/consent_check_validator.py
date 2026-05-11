@@ -29,7 +29,7 @@ class ConsentCheck(BaseValidator):
             schema (BaseDatasetSchema): dataset schema
             raw_data_sheet (str, optional): schema raw_data sheet name.
                 Defaults to 'raw_data'.
-            clean_data_sheet (str, optional): shema clean_data sheet name. 
+            clean_data_sheet (str, optional): shema clean_data sheet name.
                 Defaults to 'clean_data'.
             schema_consent_column (str, optional): column in raw_data that gives
                 consent value. Defaults to 'consent'.

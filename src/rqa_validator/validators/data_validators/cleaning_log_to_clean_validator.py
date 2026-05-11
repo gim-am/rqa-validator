@@ -45,17 +45,17 @@ class CleaningLogToClean(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema for the dataset
-            clean_data_sheet (str, optional): name of the clean data sheet. 
+            clean_data_sheet (str, optional): name of the clean data sheet.
                 Defaults to 'clean_data'.
-            cleaning_log_sheet (str, optional): name of the cleaning log sheet. 
+            cleaning_log_sheet (str, optional): name of the cleaning log sheet.
                 Defaults to 'cleaning_log'.
-            cleaning_log_new_value_column (str, optional): name of the cleaning log 
+            cleaning_log_new_value_column (str, optional): name of the cleaning log
                 new value column. Defaults to 'new_value'.
-            cleaning_log_old_value_column (str, optional): name of the cleaning log 
+            cleaning_log_old_value_column (str, optional): name of the cleaning log
                 old value column. Defaults to 'old_value'.
-            cleaning_log_question_column (str, optional): name of the cleaning log 
+            cleaning_log_question_column (str, optional): name of the cleaning log
                 quesitons column. Defaults to 'question'.
-            cleaning_log_change_type_column (str, optional): name of the cleaning log 
+            cleaning_log_change_type_column (str, optional): name of the cleaning log
                 change_type column. Defaults to 'change_type'
         """
         self.schema = schema
@@ -65,7 +65,7 @@ class CleaningLogToClean(BaseValidator):
         self.cleaning_log_old_value_column = cleaning_log_old_value_column
         self.cleaning_log_question_column = cleaning_log_question_column
         self.cleaning_log_change_type_column = cleaning_log_change_type_column
-        # the ProcessValueMap that contains the list of possible values needed in 
+        # the ProcessValueMap that contains the list of possible values needed in
         # cleaning_log_change_type_column
         self.process_value_map_name = "cleaning_log_validation"
 
@@ -383,8 +383,11 @@ class CleaningLogToClean(BaseValidator):
         # the question prefix comes from the column name in the pivot operation
         unique_modified_rows_df = unique_modified_rows_df.rename(
             {
-                f"{data_loaded_columns[self.cleaning_log_new_value_column]\
-                   .data_column_name}_{q}": f"{q}_val"
+                f"{
+                    data_loaded_columns[
+                        self.cleaning_log_new_value_column
+                    ].data_column_name
+                }_{q}": f"{q}_val"
                 for q in questions
             }
         ).rename({f"is_update_{q}": f"{q}_has_update" for q in questions})
@@ -446,7 +449,7 @@ class CleaningLogToClean(BaseValidator):
         # record the changes
         # The unpivot process transforms the data from a wide format into a long format.
         #  By running this separately on the new values, old values, and change flags,
-        #  we create three aligned vertical lists that can be joined together using 
+        #  we create three aligned vertical lists that can be joined together using
         # the uuid and question name. This allows us to filter for changes and compare
         # old vs. new values in a single operation.
         if not changes_only.is_empty():

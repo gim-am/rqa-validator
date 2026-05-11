@@ -23,7 +23,7 @@ class CrossSheetRowSumCheck(BaseValidator):
             child_sheets (List, optional): Sheet/s to make sure that ids are in
                 master_sheet. Dont pass deletion log here if processing loops.
                 Defaults to ['clean_data', 'deletion_log'].
-            master_deletion_log (str, optional): if loops are being processed, 
+            master_deletion_log (str, optional): if loops are being processed,
                 specify the deletion log here to make sure the correct deletion count
                  is used. Dont pass it as a child sheet in this case.
         """
@@ -69,7 +69,7 @@ class CrossSheetRowSumCheck(BaseValidator):
 
         # if this is a child sheet then just using the deletion log count will
         #  be inaccurate as  one deletion record could link to several child records.
-        # join the deletion log to the childs parent id column to get a count of the 
+        # join the deletion log to the childs parent id column to get a count of the
         # number of child records deleted.
         master_schema_sheet = self.schema.get_schema_loaded_sheet(self.master_sheet)
         if master_schema_sheet is not None:

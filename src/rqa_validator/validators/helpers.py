@@ -189,7 +189,7 @@ def get_schema_loaded_column(
         rule (str): validation rule
 
     Returns:
-        tuple[ValidationResult | None, ColumnMapping | None]: validation errors if any, 
+        tuple[ValidationResult | None, ColumnMapping | None]: validation errors if any,
           loaded column
     """
     result = None
@@ -401,7 +401,7 @@ def get_matching_id_columns(
         rule (str): validation rule
 
     Returns:
-        tuple[ValidationResult | None, list[ColumnMap]]: validation errors if any, 
+        tuple[ValidationResult | None, list[ColumnMap]]: validation errors if any,
             list of matched columns if found
     """
 
@@ -430,7 +430,7 @@ def get_matching_id_columns_alt(
     target_sheet: str,
     rule: str,
 ) -> tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
-    """Attempts to find two id like columns that could be used to try 
+    """Attempts to find two id like columns that could be used to try
         and link two sheets.
 
         Only is this if other more direct methods have been tried
@@ -443,7 +443,7 @@ def get_matching_id_columns_alt(
         rule (str): validation rule
 
     Returns:
-        tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]: 
+        tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
             validation results, matching id columns from source and target
     """
     result = None
@@ -474,7 +474,7 @@ def get_schema_id_column(
         rule (str): validation rule
 
     Returns:
-        tuple[ValidationResult | None, List[SchemaColumnMap]]: validation results, 
+        tuple[ValidationResult | None, List[SchemaColumnMap]]: validation results,
             unique columns if found
     """
     result = None
@@ -490,5 +490,3 @@ def get_schema_id_column(
         assert matching_columns is not None
 
     return result, matching_columns
-
-

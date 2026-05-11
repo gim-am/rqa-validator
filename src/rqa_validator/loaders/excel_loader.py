@@ -93,7 +93,7 @@ class ExcelLoader:
 
         Args:
             filepath (Path): Filepath of excel file. Might change for api call.
-            load_all_sheets (bool): loaded all unmapped sheets. used for dynamic 
+            load_all_sheets (bool): loaded all unmapped sheets. used for dynamic
                 schema generation. Defaults to 'False'
         Returns:
             tuple[ExcelLoaderData,  List[ValidationResult]]:
@@ -118,20 +118,20 @@ class ExcelLoader:
                 excel_sheet_name, self.schema.schema_unloaded_sheets
             )
 
-            # pre schema validation will throw error if any sheets have matching names 
-            # or alternate names as well as if any columns within a sheet are 
-            # duplicated (via names or alternate names) so there should not be 
+            # pre schema validation will throw error if any sheets have matching names
+            # or alternate names as well as if any columns within a sheet are
+            # duplicated (via names or alternate names) so there should not be
             # both l_mapped_name and u_mapped_name for literal matches options
             # 1: l_mapped_name, not l_results > literal match on loaded sheets
             # 2: u_mapped_name, not u_results > literal match on unloaded sheets
-            # 3: l_mapped_name, l_results, not u_mapped_name > 
+            # 3: l_mapped_name, l_results, not u_mapped_name >
             #   fuzzy match on loaded sheets
             # 4: u_mapped_name, u_results > fuzzy match on unloaded sheets
             # 5: l_mapped_name and u_mapped_name > error fuzzy matching
-            # 6: not l_mapped_name, not u_mapped_name, (u_results or l_results) > 
+            # 6: not l_mapped_name, not u_mapped_name, (u_results or l_results) >
             #   error fuzzy matching
             # 7: unexpected sheet > no matching
-            # load_all_sheets: loads all sheets not loaded for steps 1-6. 
+            # load_all_sheets: loads all sheets not loaded for steps 1-6.
             #   used for dynamic schema generation
 
             # 5

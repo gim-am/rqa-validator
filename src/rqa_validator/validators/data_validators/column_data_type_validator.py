@@ -30,13 +30,13 @@ class DataTypeCheck(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema
-            survey_sheet (str, optional): name of the kobo survey sheet in excel. 
+            survey_sheet (str, optional): name of the kobo survey sheet in excel.
                 Defaults to 'kobo_survey'.
             survey_type_column (str, optional): name of the type column in the
                 kobo survey sheet. Defaults to 'type'.
             survey_name_column (str, optional): name of the name column in the
                 kobo survey sheet. Defaults to 'name'.
-            check_sheets (List, optional): schema sheet names to check. 
+            check_sheets (List, optional): schema sheet names to check.
                 Defaults to ['clean_data'].
         """
         self.survey_sheet = survey_sheet

@@ -102,7 +102,7 @@ class NaNDataCheck(BaseValidator):
             nan_only_df = nan_df.filter(has_nan)
 
             # create df of only invalid data
-            # transform data from a wide format to a long format and join to flags. 
+            # transform data from a wide format to a long format and join to flags.
             # this allows for filtering nan values in a single operation
             if not nan_only_df.is_empty():
                 id_col = sheet_ids[sheet][0].data_column_name

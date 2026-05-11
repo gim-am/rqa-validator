@@ -7,7 +7,7 @@ def create_column_difference_expression(
 ) -> Expr:
     """Builds an expression that compares the values between two dataframe columns.
 
-        If either of the columns is a numeric data type then a numeric comparison 
+        If either of the columns is a numeric data type then a numeric comparison
         is made by converting both values to floats
 
         If either of the columns is a temporal data type then a temporal comparison

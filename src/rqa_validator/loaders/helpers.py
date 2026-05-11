@@ -53,8 +53,9 @@ def match_excel_columns_to_schema(
                         rule="Match excel column to schema",
                         message=f"The schema sheet {schema_sheet.standard_name} column\
                               {column.standard_name} had {len(literal_matches)} matches\
-                                  to columns. There should be only 1. Check the schema."
-                        ,severity=SeverityLevel.ERROR,
+                                  to columns. There should be only 1. \
+                                  Check the schema.",
+                        severity=SeverityLevel.ERROR,
                         sheet_name=schema_sheet.standard_name,
                         column_name=column.standard_name,
                         details={"Literal Match Columns": literal_matches},

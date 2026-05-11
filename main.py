@@ -14,7 +14,8 @@ def main():
         choices=["jmmi", "other"],
         help="Type of dataset to validate",
     )
-    # parser.add_argument("--output", type=Path, default=Path("validation_results.json"),
+    # parser.add_argument("--output", 
+    #                   type=Path, default=Path("validation_results.json"),
     #                    help="Output path for JSON results")
 
     args = parser.parse_args()
