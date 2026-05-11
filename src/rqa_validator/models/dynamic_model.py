@@ -101,10 +101,6 @@ class DynamicDataset(BaseDataset):
         Current assumptions:
         - there is only ever one deletion log and it only lists deleted records for the parent object
 
-        TODO
-        current limitations:
-        - does not support parent-child sheets having a combined cleaning log
-
         """
         results: List[ValidationResult] = []
         clean_sheets = [item for item, value in self.sheet_matching.items() if value.classification == 'clean']
