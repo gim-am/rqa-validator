@@ -21,7 +21,8 @@ class CleaningLogToClean(BaseValidator):
     """This process validates the data in the cleaning log
 
     After making sure that the required sheets and columns have been loaded and matched
-    the process validates that all the items in a cleaning log are reflected in the clean data.
+    the process validates that all the items in a cleaning log are reflected in
+      the clean data.
 
     The output includes:
     - items in cleaning log that have multiple updates for the same question
@@ -44,12 +45,18 @@ class CleaningLogToClean(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema for the dataset
-            clean_data_sheet (str, optional): name of the clean data sheet. Defaults to 'clean_data'.
-            cleaning_log_sheet (str, optional): name of the cleaning log sheet. Defaults to 'cleaning_log'.
-            cleaning_log_new_value_column (str, optional): name of the cleaning log new value column. Defaults to 'new_value'.
-            cleaning_log_old_value_column (str, optional): name of the cleaning log old value column. Defaults to 'old_value'.
-            cleaning_log_question_column (str, optional): name of the cleaning log quesitons column. Defaults to 'question'.
-            cleaning_log_change_type_column (str, optional): name of the cleaning log change_type column. Defaults to 'change_type'
+            clean_data_sheet (str, optional): name of the clean data sheet. 
+                Defaults to 'clean_data'.
+            cleaning_log_sheet (str, optional): name of the cleaning log sheet. 
+                Defaults to 'cleaning_log'.
+            cleaning_log_new_value_column (str, optional): name of the cleaning log 
+                new value column. Defaults to 'new_value'.
+            cleaning_log_old_value_column (str, optional): name of the cleaning log 
+                old value column. Defaults to 'old_value'.
+            cleaning_log_question_column (str, optional): name of the cleaning log 
+                quesitons column. Defaults to 'question'.
+            cleaning_log_change_type_column (str, optional): name of the cleaning log 
+                change_type column. Defaults to 'change_type'
         """
         self.schema = schema
         self.clean_data_sheet = clean_data_sheet
@@ -58,7 +65,8 @@ class CleaningLogToClean(BaseValidator):
         self.cleaning_log_old_value_column = cleaning_log_old_value_column
         self.cleaning_log_question_column = cleaning_log_question_column
         self.cleaning_log_change_type_column = cleaning_log_change_type_column
-        # the ProcessValueMap that contains the list of possible values needed in cleaning_log_change_type_column
+        # the ProcessValueMap that contains the list of possible values needed in 
+        # cleaning_log_change_type_column
         self.process_value_map_name = "cleaning_log_validation"
 
     @property
@@ -68,8 +76,9 @@ class CleaningLogToClean(BaseValidator):
     def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """This process validates the data in the cleaning log
 
-        After making sure that the required sheets and columns have been loaded and matched
-        the process validates that all the items in a cleaning log are reflected in the clean data.
+        After making sure that the required sheets and columns have been loaded
+        and matched the process validates that all the items in a cleaning log
+        are reflected in the clean data.
 
 
         The output includes:
@@ -159,7 +168,6 @@ class CleaningLogToClean(BaseValidator):
                 self.cleaning_log_change_type_column: data_loaded_sheets[
                     self.cleaning_log_sheet
                 ],
-                #   clean_log_id_columns.schema_column_name: data_loaded_sheets[self.cleaning_log_sheet],
             },
             rule=self.name,
         )
@@ -281,14 +289,18 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{same_value_df.height} row/s had {data_loaded_columns[self.cleaning_log_old_value_column].data_column_name} equal {data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}. Check the output file {multiple_changes_filename} for details.",
+                    message=f"{same_value_df.height} row/s had\
+                         {data_loaded_columns[self.cleaning_log_old_value_column].data_column_name}\
+                              equal \
+                        {data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}.\
+                            Check the output for details.",
                     severity=SeverityLevel.WARNING,
                     details=same_value_df.to_dict(),
                 )
             )
 
-        # remove records with multiple chages as there is no way to determine which should
-        # be the most recent
+        # remove records with multiple chages as there is no way to determine
+        #  which should be the most recent
         # also remove other columns as they are no longer necessary
         unique_modified_rows_df = (
             modified_rows_df.filter(~multiple_change_mask)
@@ -326,7 +338,11 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There are questions listed in {data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name} that were not found in {data_loaded_sheets[self.clean_data_sheet].data_sheet_name}. See output for details.",
+                    message=f"There are questions listed in \
+                        {data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name}\
+                        that were not found in \
+                        {data_loaded_sheets[self.clean_data_sheet].data_sheet_name}.\
+                        See output for details.",
                     severity=SeverityLevel.WARNING,
                     details={"missing_questions": missing_quesitons},
                 )
@@ -367,7 +383,8 @@ class CleaningLogToClean(BaseValidator):
         # the question prefix comes from the column name in the pivot operation
         unique_modified_rows_df = unique_modified_rows_df.rename(
             {
-                f"{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}_{q}": f"{q}_val"
+                f"{data_loaded_columns[self.cleaning_log_new_value_column]\
+                   .data_column_name}_{q}": f"{q}_val"
                 for q in questions
             }
         ).rename({f"is_update_{q}": f"{q}_has_update" for q in questions})
@@ -428,8 +445,9 @@ class CleaningLogToClean(BaseValidator):
 
         # record the changes
         # The unpivot process transforms the data from a wide format into a long format.
-        #  By running this separately on the new values, old values, and change flags, we create three aligned vertical
-        # lists that can be joined together using the uuid and question name. This allows us to filter for changes and compare
+        #  By running this separately on the new values, old values, and change flags,
+        #  we create three aligned vertical lists that can be joined together using 
+        # the uuid and question name. This allows us to filter for changes and compare
         # old vs. new values in a single operation.
         if not changes_only.is_empty():
             # unpivot new values
@@ -503,7 +521,10 @@ class CleaningLogToClean(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_df.height} differences found in the {self.cleaning_log_sheet} sheet that were not reflected in the {self.clean_data_sheet} sheet. Check the {validation_results_filename} file.",
+                        message=f"There were {difference_df.height} differences found\
+                                in the {self.cleaning_log_sheet} sheet that were not\
+                                reflected in the {self.clean_data_sheet} sheet.\
+                                Check the {validation_results_filename} file.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_df.to_dict(),

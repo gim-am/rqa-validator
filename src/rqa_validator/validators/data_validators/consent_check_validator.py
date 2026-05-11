@@ -27,9 +27,12 @@ class ConsentCheck(BaseValidator):
         """
         Args:
             schema (BaseDatasetSchema): dataset schema
-            raw_data_sheet (str, optional): schema raw_data sheet name. Defaults to 'raw_data'.
-            clean_data_sheet (str, optional): shema clean_data sheet name. Defaults to 'clean_data'.
-            schema_consent_column (str, optional): column in raw_data that gives consent value. Defaults to 'consent'.
+            raw_data_sheet (str, optional): schema raw_data sheet name.
+                Defaults to 'raw_data'.
+            clean_data_sheet (str, optional): shema clean_data sheet name. 
+                Defaults to 'clean_data'.
+            schema_consent_column (str, optional): column in raw_data that gives
+                consent value. Defaults to 'consent'.
         """
         self.raw_data_sheet = raw_data_sheet
         self.clean_data_sheet = clean_data_sheet
@@ -149,7 +152,10 @@ class ConsentCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {clean_data_filter_df.height} row/s in {data_loaded_sheets[self.clean_data_sheet].data_sheet_name} that did not provide consent. Check the output results for details.",
+                        message=f"There were {clean_data_filter_df.height} row/s in\
+                             {data_loaded_sheets[self.clean_data_sheet].data_sheet_name}\
+                              that did not provide consent. \
+                                Check the output results for details.",
                         severity=SeverityLevel.ERROR,
                         details=clean_data_filter_df.select(
                             [clean_data_id_column.data_column_name]

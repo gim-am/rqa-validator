@@ -78,8 +78,10 @@ class SchemaSheetMap:
         """Creates a unique list of mandatory and unique column name options
 
         Args:
-            include_unique_columns (bool, optional): Include unique columns in the results. Defaults to True.
-            return_unique_list (bool, optional): return a list of unique values. Defaults to True.
+            include_unique_columns (bool, optional): Include unique columns in
+              the results. Defaults to True.
+            return_unique_list (bool, optional): return a list of unique values.
+              Defaults to True.
 
         Returns:
             List[str]: returns a list of column names and alternate names for a sheet

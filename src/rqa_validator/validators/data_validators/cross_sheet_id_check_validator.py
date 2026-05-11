@@ -25,9 +25,12 @@ class CrossSheetIdCheck(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema
-           master_sheet (str, optional): Sheet to make sure that child ids are in. Defaults to 'raw_data'.
-            child_sheets (List, optional): Sheet/s to make sure that ids are in master_sheet. Defaults to ['clean_data', 'deletion_log', 'cleaning_log'].
-            is_in (bool, optional): determins if the child ids should (true) or should not (false) be in the matser sheet
+            master_sheet (str, optional): Sheet to make sure that child ids are in.
+                Defaults to 'raw_data'.
+            child_sheets (List, optional): Sheet/s to make sure that ids are in
+                master_sheet. Defaults to ['clean_data', 'deletion_log', 'cleaning_log']
+            is_in (bool, optional): determins if the child ids should (true) or
+                should not (false) be in the matser sheet
         """
         self.master_sheet = master_sheet
         self.child_sheets = child_sheets
@@ -98,7 +101,8 @@ class CrossSheetIdCheck(BaseValidator):
             )
 
             if not child_matching_columns:
-                # some sheets will have a non unique uuid column so try to match based on name
+                # some sheets will have a non unique uuid column
+                # so try to match based on name
 
                 result, child_matching_columns = get_matching_id_columns(
                     child_loaded_sheet.column_map,
@@ -130,8 +134,9 @@ class CrossSheetIdCheck(BaseValidator):
                 child_data_id_columns = child_matching_columns[0]
                 master_id_columns = child_matching_columns[0]
 
-            # filter id column. should only actually filter anything if the sheet is a cleaning log sheet
-            # at it contains ids from multiple clean data sheets (loops)
+            # filter id column. should only actually filter anything if the sheet
+            # is a cleaning log sheet as it contains ids from multiple 
+            # clean data sheets (loops)
             missing_ids = (
                 child_loaded_sheet.data.select(child_data_id_columns.data_column_name)
                 .filter(
@@ -163,7 +168,12 @@ class CrossSheetIdCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"Id values for sheet {child_loaded_sheet.data_sheet_name} and column {child_data_id_columns.data_column_name} were not found in sheet {data_loaded_sheets[self.master_sheet].data_sheet_name} column {master_matching_columns.data_column_name}. Check output for details. ",
+                        message=f"Id values for sheet \
+                            {child_loaded_sheet.data_sheet_name} and column \
+                            {child_data_id_columns.data_column_name} were not found in\
+                          sheet {data_loaded_sheets[self.master_sheet].data_sheet_name}\
+                             column {master_matching_columns.data_column_name}.\
+                            Check output for details. ",
                         severity=SeverityLevel.ERROR,
                         sheet_name=child_loaded_sheet.data_sheet_name,
                         column_name=child_data_id_columns.data_column_name,

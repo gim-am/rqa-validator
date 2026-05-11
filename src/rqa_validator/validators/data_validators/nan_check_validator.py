@@ -21,7 +21,8 @@ class NaNDataCheck(BaseValidator):
         """
         Args:
             schema (BaseDatasetSchema): schema for the dataset
-            sheets (List[str], optional): list of sheets to be checked. Defaults to ['clean_data'].
+            sheets (List[str], optional): list of sheets to be checked.
+                Defaults to ['clean_data'].
         """
         self.check_sheets = check_sheets
         self.schema = schema
@@ -101,8 +102,8 @@ class NaNDataCheck(BaseValidator):
             nan_only_df = nan_df.filter(has_nan)
 
             # create df of only invalid data
-            # transform data from a wide format to a long format and join to flags. this allows for
-            # filtering nan values in a single operation
+            # transform data from a wide format to a long format and join to flags. 
+            # this allows for filtering nan values in a single operation
             if not nan_only_df.is_empty():
                 id_col = sheet_ids[sheet][0].data_column_name
 
@@ -150,7 +151,8 @@ class NaNDataCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There were {output_difference_df.height} possible invalid values found. Check the output results for details.",
+                    message=f"There were {output_difference_df.height} possible invalid\
+                          values found. Check the output results for details.",
                     severity=SeverityLevel.ERROR,
                     details=output_difference_df.to_dict(),
                 )

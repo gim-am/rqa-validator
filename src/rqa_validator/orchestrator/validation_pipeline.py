@@ -92,7 +92,8 @@ class ValidationPipeline:
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
-                    message=f"Loading of the excel file {filepath} encountered an error: {str(e)}",
+                    message=f"Loading of the excel file {filepath} encountered\
+                          an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
                 )
             )
@@ -128,7 +129,8 @@ class ValidationPipeline:
                 all_results.append(
                     ValidationResult(
                         rule=validator.name,
-                        message=f"Validator {validator.name} encountered an error: {str(e)}",
+                        message=f"Validator {validator.name} encountered\
+                              an error: {str(e)}",
                         severity=SeverityLevel.ADMIN_ERROR,
                         details=self._get_validator_params(validator),
                     )

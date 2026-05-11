@@ -42,18 +42,21 @@ class DynamicDataset(BaseDataset):
     - build a dataset schema
     - initialise the required validators
 
-    This process focuses on sheets related to loops and non standardised datasets. Specifically:
+    This process focuses on sheets related to loops and non standardised datasets.
+      Specifically:
     - possible parent/child clean_data sheets
     - possible parent/child raw_data sheets
     - possible parent/child cleaning_log sheets
     - other non standardised datasets
 
-    Some sheets/columns that are always expected are still specified in DynamicDatasetSchema.
+    Some sheets/columns that are always expected are still specified
+      in DynamicDatasetSchema.
 
-    If sheets and columns are named according to the minimum standards checklist then this process should have a
-    reasonable chance of succeeding. The less the minimum standards checklist is followed, the more likely
-    this process and the subsequent validation rules are to produce errors related to not finding required sheets
-    or columns.
+    If sheets and columns are named according to the minimum standards checklist
+    then this process should have a reasonable chance of succeeding. The less
+    the minimum standards checklist is followed, the more likely this process and
+    the subsequent validation rules are to produce errors related to not 
+    finding required sheets or columns.
 
     Limitations:
     - loops within loops are currently not supported.
@@ -106,7 +109,8 @@ class DynamicDataset(BaseDataset):
         """builds a list of validators matched to use the dynamically created schema.
 
         Current assumptions:
-        - there is only ever one deletion log and it only lists deleted records for the parent object
+        - there is only ever one deletion log and it only lists deleted
+          records for the parent object
 
         """
         results: list[ValidationResult] = []
@@ -154,7 +158,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked cleaning data sheet for the sheet {sheet} were found so the CleaningLogToClean and CrossSheetIdCheck rules could not be run.",
+                            message=f"No linked cleaning data sheet for the sheet\
+                                  {sheet} were found so the CleaningLogToClean and\
+                                      CrossSheetIdCheck rules could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -172,7 +178,8 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked raw sheet for the sheet {sheet} were found so the RawToCleanToLog rule could not be run.",
+                            message=f"No linked raw sheet for the sheet {sheet} were\
+                                  found so the RawToCleanToLog rule could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -205,7 +212,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked sheets for the raw data sheet {sheet} were found so the CrossSheetRowSumCheck rule could not be run.",
+                            message=f"No linked sheets for the raw data sheet {sheet}\
+                                were found so the CrossSheetRowSumCheck rule could\
+                                    not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -227,7 +236,9 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked clean sheet for the raw data sheet {sheet} was found so the CrossSheetIdCheck rule could not be run.",
+                            message=f"No linked clean sheet for the raw data sheet\
+                                  {sheet} was found so the CrossSheetIdCheck rule\
+                                      could not be run.",
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -340,9 +351,10 @@ class DynamicDataset(BaseDataset):
                         )
                 if details.log_type == "cleaning":
                     # parts of this may seem repetitive
-                    # if there are multiple clean data sheets (from loops) and they dont have their own
-                    # cleaning log then its possible there will be multiple id columns in cleaning data
-                    # this aims to make sure that all likely id columns are in the schema
+                    # if there are multiple clean data sheets (from loops) and they
+                    #  dont have their own cleaning log then its possible there will
+                    #  be multiple id columns in cleaning data. this aims to make
+                    #  sure that all likely id columns are in the schema
                     if details.log_id_column is not None:
                         self.schema.add_mandatory_column_to_sheet(
                             sheet, SchemaColumnMap(standard_name=details.log_id_column)
@@ -486,7 +498,8 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation",
-                            message=f"No unique ID column was found for sheet {sheet.data_sheet_name}.",
+                            message=f"No unique ID column was found for sheet\
+                                  {sheet.data_sheet_name}.",
                             severity=SeverityLevel.INFO,
                             sheet_name=sheet.data_sheet_name,
                         )
@@ -628,7 +641,8 @@ class DynamicDataset(BaseDataset):
             self.data.unexpected_sheets = unknown_sheets
             for sheet in unknown_sheets:
                 # dont perform additional validation of these sheets
-                # they will have their own validation warning in unexpected sheets validator
+                # they will have their own validation warning in
+                # unexpected sheets validator
                 self.data.remove_loaded_sheet(sheet)
 
         results.append(
@@ -741,7 +755,8 @@ class DynamicDataset(BaseDataset):
             if unique_count == total_count:
                 unique_cols.append(col_name)
 
-        # some other columns, often from kobo, will show as unique but these are not wanted
+        # some other columns, often from kobo, will show as unique
+        # but these are not wanted
         unique_cols = filter_list(unique_cols, settings.IGNORE_COLUMNS_FOR_VALIDATION)
         if len(unique_cols) == 1:
             return unique_cols[0]

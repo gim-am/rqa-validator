@@ -18,11 +18,14 @@ class CrossSheetRowSumCheck(BaseValidator):
         Checks to see if master_sheet rows equals the sum of child sheet rows
 
         Args:
-            master_sheet (str, optional): Sheet to make sure that child ids are in. Defaults to 'raw_data'.
-            child_sheets (List, optional): Sheet/s to make sure that ids are in master_sheet. Dont pass deletion log here if processing loops.
+            master_sheet (str, optional): Sheet to make sure that child ids are in.
+                Defaults to 'raw_data'.
+            child_sheets (List, optional): Sheet/s to make sure that ids are in
+                master_sheet. Dont pass deletion log here if processing loops.
                 Defaults to ['clean_data', 'deletion_log'].
-            master_deletion_log (str, optional): if loops are being processed, specify the deletion log here to make sure the correct
-                deletion count is used. Dont pass it as a child sheet in this case.
+            master_deletion_log (str, optional): if loops are being processed, 
+                specify the deletion log here to make sure the correct deletion count
+                 is used. Dont pass it as a child sheet in this case.
         """
         self.schema = schema
         self.master_sheet = master_sheet
@@ -64,10 +67,10 @@ class CrossSheetRowSumCheck(BaseValidator):
             results.extend(result)
             return results
 
-        # if this is a child sheet then just using the deletion log count will be inaccurate as
-        # one deletion record could link to several child records.
-        # join the deletion log to the childs parent id column to get a count of the number
-        # of child records deleted.
+        # if this is a child sheet then just using the deletion log count will
+        #  be inaccurate as  one deletion record could link to several child records.
+        # join the deletion log to the childs parent id column to get a count of the 
+        # number of child records deleted.
         master_schema_sheet = self.schema.get_schema_loaded_sheet(self.master_sheet)
         if master_schema_sheet is not None:
             if (
@@ -122,7 +125,9 @@ class CrossSheetRowSumCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"Sum of row counts for sheets {child_message} does not equal {self.master_sheet} rows ({master_data_count}). The difference is {missing_rows}.",
+                    message=f"Sum of row counts for sheets {child_message} does not\
+                          equal {self.master_sheet} rows ({master_data_count}). \
+                            The difference is {missing_rows}.",
                     severity=SeverityLevel.ERROR,
                 )
             )

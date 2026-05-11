@@ -17,7 +17,8 @@ def df_to_csv(
     Args:
         data (pl.DataFrame): data to be saved
         filename (str): name of the file. Does not need to include .csv extension.
-        directory (Path, optional): directory to save the file. Defaults to settings.VALIDATION_LOG_DIRECTORY.
+        directory (Path, optional): directory to save the file. 
+            Defaults to settings.VALIDATION_LOG_DIRECTORY.
         add_timestamp (bool, optional): add a timestamp to the filename
     """
     timestamp = ""

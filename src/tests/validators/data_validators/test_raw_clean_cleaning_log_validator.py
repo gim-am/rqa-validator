@@ -322,20 +322,7 @@ def valid_schema_no_cleaning_log():
                     )
                 ],
             ),
-            # ,SchemaSheetMap(standard_name= "cleaning_log",
-            # alternate_names =["cleaning_log"],
-            # mandatory_columns= [SchemaColumnMap(standard_name="uuid",
-            #                                    alternate_names=["uuid", "X_uuid"]
-            #                                    ),
-            #                     SchemaColumnMap(standard_name="new_value"),
-            #                     SchemaColumnMap(standard_name="old_value"),
-            #                     SchemaColumnMap(standard_name="question"),
-            #                     SchemaColumnMap(standard_name="change_type",
-            #                                   alternate_names=["changed"],
-            #                                   process_values=[ProcessValueMap(process_name='cleaning_log_validation',
-            #                                                                   values=['yes', 'change_response'])])],
-            # )
-        ],
+                  ],
         schema_unloaded_sheets=[],
     )
 

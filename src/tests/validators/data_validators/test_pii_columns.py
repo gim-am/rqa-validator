@@ -169,6 +169,7 @@ class TestPiiColumns:
 
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
         assert len(result[0].details["row_index"]) == 2
 
     def test_invalid_data3(
@@ -178,4 +179,5 @@ class TestPiiColumns:
 
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
         assert len(result[0].details["uuid"]) == 2

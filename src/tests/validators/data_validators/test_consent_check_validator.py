@@ -479,6 +479,7 @@ class TestConsentCheck:
 
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0].details is not None
         assert len(result[0].details["uuid"]) == 2
 
     def test_invalid_data2(

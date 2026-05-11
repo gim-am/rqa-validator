@@ -32,14 +32,22 @@ class SurveyChoicesCheck(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema
-            survey_sheet (str, optional): name of the kobo survey sheet in excel. Defaults to 'kobo_survey'.
-            survey_type_column (str, optional): name of the type column in the kobo survey sheet. Defaults to 'type'.
-            survey_name_column (str, optional): name of the name column in the kobo survey sheet. Defaults to 'name'.
-            choices_sheet (str, optional): name of the kobo choices sheet in excel. Defaults to 'kobo_choices'.
-            choices_name_column (str, optional): name of the name column in the kobo choices sheet. Defaults to 'name'.
-            choices_list_name_column (str, optional): name of the list_name column in the kobo choices sheet. Defaults to 'list_name'.
-            check_sheets (List, optional): schema sheet names to check. Defaults to ['clean_data'].
-            select_multiple_value_separator (str, optional): select_multiple value separator. Defaults to ' '.
+            survey_sheet (str, optional): name of the kobo survey sheet in excel. 
+                Defaults to 'kobo_survey'.
+            survey_type_column (str, optional): name of the type column in the 
+                kobo survey sheet. Defaults to 'type'.
+            survey_name_column (str, optional): name of the name column in the 
+                kobo survey sheet. Defaults to 'name'.
+            choices_sheet (str, optional): name of the kobo choices sheet in excel. 
+                Defaults to 'kobo_choices'.
+            choices_name_column (str, optional): name of the name column in the 
+                kobo choices sheet. Defaults to 'name'.
+            choices_list_name_column (str, optional): name of the list_name column in 
+                the kobo choices sheet. Defaults to 'list_name'.
+            check_sheets (List, optional): schema sheet names to check. 
+                Defaults to ['clean_data'].
+            select_multiple_value_separator (str, optional): select_multiple value 
+                separator. Defaults to ' '.
         """
         self.schema = schema
         self.survey_sheet = survey_sheet
@@ -64,8 +72,8 @@ class SurveyChoicesCheck(BaseValidator):
                 -performs prevalidation to make sure expected sheets, columns etc
                     are present
                 - performs some transformations on the kobo questions and choices
-                - for each check_sheet, gets the relevant questions, builds an expression
-                    to check for valid values and records invalid values.
+                - for each check_sheet, gets the relevant questions, builds an 
+                    expression to check for valid values and records invalid values.
                 - the process to build an expression is slightly different for
                     select_one and select_multiple as they have to handle
                     spaces in values differntly. see comments in the code for details.
@@ -337,8 +345,8 @@ class SurveyChoicesCheck(BaseValidator):
 
             check_sheet_id_column = data_id_columns[sheet][0]
             # report the invalid values if any
-            # transform data from a wide format to a long format and join to flags. this allows for
-            # filtering invalid values in a single operation
+            # transform data from a wide format to a long format and join to flags. 
+            # this allows for filtering invalid values in a single operation
             if not changes_only.is_empty():
                 values_df = changes_only.unpivot(
                     index=[check_sheet_id_column.data_column_name],
@@ -376,11 +384,14 @@ class SurveyChoicesCheck(BaseValidator):
                 )
 
                 if difference_df.height > 0:
-                    # df_to_csv(data=difference_df, filename=validation_results_filename)
+                   # df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} values found in the {sheet} sheet that were not reflected in the {self.survey_sheet} sheet. Check the output for details.",
+                            message=f"There were {difference_df.height} values found in\
+                                    the {sheet} sheet that were not reflected in the \
+                                    {self.survey_sheet} sheet. \
+                                    Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                             details=difference_df.to_dict(),

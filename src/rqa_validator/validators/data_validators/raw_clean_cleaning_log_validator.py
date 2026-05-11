@@ -19,11 +19,13 @@ from ..helpers import (
 
 class RawToCleanToLog(BaseValidator):
     """This process compares the differences between the clean and raw data sheets
-    and then checks that all these differences are reflected in the cleaning log if provided
+    and then checks that all these differences are reflected in the cleaning log
+    if provided
 
     The output includes:
     - items where there is a difference between raw_data/clean_data and the cleaning log
-    - if no cleaning log is provided then an error is returned if there are differences between raw and clean
+    - if no cleaning log is provided then an error is returned if there are differences 
+        between raw and clean
 
     """
 
@@ -42,13 +44,20 @@ class RawToCleanToLog(BaseValidator):
 
         Args:
             schema (BaseDatasetSchema): dataset schema for the dataset
-            clean_data_sheet (str, optional): name of the clean data sheet. Defaults to 'clean_data'.
-            raw_data_sheet (str, optional): name of the raw data sheet. Defaults to 'raw_data'.
-            cleaning_log_sheet (str, optional): name of the cleaning log sheet. Defaults to 'cleaning_log'.
-            cleaning_log_new_value_column (str, optional): name of the cleaning log new value column. Defaults to 'new_value'.
-            cleaning_log_old_value_column (str, optional): name of the cleaning log old value column. Defaults to 'old_value'.
-            cleaning_log_question_column (str, optional): name of the cleaning log quesitons column. Defaults to 'question'.
-            cleaning_log_change_type_column (str, optional): name of the cleaning log change_type column. Defaults to 'change_type'
+            clean_data_sheet (str, optional): name of the clean data sheet. 
+                Defaults to 'clean_data'.
+            raw_data_sheet (str, optional): name of the raw data sheet. 
+                Defaults to 'raw_data'.
+            cleaning_log_sheet (str, optional): name of the cleaning log sheet. 
+                Defaults to 'cleaning_log'.
+            cleaning_log_new_value_column (str, optional): name of the cleaning log 
+                new value column. Defaults to 'new_value'.
+            cleaning_log_old_value_column (str, optional): name of the cleaning log 
+                old value column. Defaults to 'old_value'.
+            cleaning_log_question_column (str, optional): name of the cleaning log 
+                quesitons column. Defaults to 'question'.
+            cleaning_log_change_type_column (str, optional): name of the cleaning log 
+                change_type column. Defaults to 'change_type'
         """
         self.schema = schema
         self.clean_data_sheet = clean_data_sheet
@@ -58,7 +67,8 @@ class RawToCleanToLog(BaseValidator):
         self.cleaning_log_old_value_column = cleaning_log_old_value_column
         self.cleaning_log_question_column = cleaning_log_question_column
         self.cleaning_log_change_type_column = cleaning_log_change_type_column
-        # the ProcessValueMap that contains the list of possible values needed in cleaning_log_change_type_column
+        # the ProcessValueMap that contains the list of possible values needed in
+        #  cleaning_log_change_type_column
         self.process_value_map_name = "cleaning_log_validation"
 
     @property
@@ -67,11 +77,14 @@ class RawToCleanToLog(BaseValidator):
 
     def validate(self, data: ExcelLoaderData) -> list[ValidationResult]:
         """This process compares the differences between the clean and raw data sheets
-        and then checks that all these differences are reflected in the cleaning log if provided
+        and then checks that all these differences are reflected in the cleaning log if 
+        provided
 
         The output includes:
-        - items where there is a difference between raw_data/clean_data and the cleaning log
-        - if no cleaning log is provided then an error is returned if there are differences between raw and clean
+        - items where there is a difference between raw_data/clean_data and the 
+            cleaning log
+        - if no cleaning log is provided then an error is returned if there are 
+            differences between raw and clean
 
         Args:
             data (ExcelLoaderData): data to be validated
@@ -169,7 +182,6 @@ class RawToCleanToLog(BaseValidator):
                     self.cleaning_log_change_type_column: data_loaded_sheets[
                         self.cleaning_log_sheet
                     ],
-                    #   clean_log_id_columns.schema_column_name: data_loaded_sheets[self.cleaning_log_sheet],
                 },
                 rule=self.name,
             )
@@ -191,7 +203,8 @@ class RawToCleanToLog(BaseValidator):
                 self.cleaning_log_sheet
             ].get_column(self.cleaning_log_change_type_column)
             if schema_change_type_column is None:
-                # this should already have been validated when checking mandatory columns
+                # this should already have been validated when checking 
+                # mandatory columns
                 return results
 
             result, schema_change_type_values = get_schema_process_value(
@@ -288,8 +301,9 @@ class RawToCleanToLog(BaseValidator):
         changes_only = comparison_df.filter(has_any_change)
 
         # The unpivot process transforms the data from a wide format into a long format.
-        #  By running this separately on the new values, old values, and change flags, we create three aligned vertical
-        # lists that can be joined together using the uuid and question name. This allows us to filter for changes and compare
+        #  By running this separately on the new values, old values, and change flags, 
+        #  we create three aligned vertical lists that can be joined together using 
+        #  the uuid and question name. This allows us to filter for changes and compare
         # old vs. new values in a single operation.
 
         if not changes_only.is_empty():
@@ -372,11 +386,14 @@ class RawToCleanToLog(BaseValidator):
                 )
 
                 if difference_df.height > 0:
-                    # df_to_csv(data=difference_df, filename=validation_results_filename)
+                    #df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} differences found in the {self.clean_data_sheet} sheet that were not reflected in the {self.cleaning_log_sheet} sheet. Check the output for details.",
+                            message=f"There were {difference_df.height} differences \
+                                    found in the {self.clean_data_sheet} sheet that \
+                                    were not reflected in the {self.cleaning_log_sheet}\
+                                    sheet. Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=self.cleaning_log_sheet,
                             details=difference_df.to_dict(),
@@ -386,7 +403,10 @@ class RawToCleanToLog(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_raw_to_clean_df.height} differences found between the {self.clean_data_sheet} sheet and the {self.raw_data_sheet} but no cleaning log was found. Check the output for details.",
+                        message=f"There were {difference_raw_to_clean_df.height} \
+                                differences found between the {self.clean_data_sheet} \
+                                sheet and the {self.raw_data_sheet} but no cleaning \
+                                log was found. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_raw_to_clean_df.to_dict(),

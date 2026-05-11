@@ -93,7 +93,8 @@ class ExcelLoader:
 
         Args:
             filepath (Path): Filepath of excel file. Might change for api call.
-            load_all_sheets (bool): loaded all unmapped sheets. used for dynamic schema generation. Defaults to 'False'
+            load_all_sheets (bool): loaded all unmapped sheets. used for dynamic 
+                schema generation. Defaults to 'False'
         Returns:
             tuple[ExcelLoaderData,  List[ValidationResult]]:
             class that contains the loaded data, sheets etc,
@@ -117,25 +118,30 @@ class ExcelLoader:
                 excel_sheet_name, self.schema.schema_unloaded_sheets
             )
 
-            # pre schema validation will throw error if any sheets have matching names or alternate names
-            # as well as if any columns within a sheet are duplicated (via names or alternate names)
-            # so there should not be both l_mapped_name and u_mapped_name for literal matches
-            # options
+            # pre schema validation will throw error if any sheets have matching names 
+            # or alternate names as well as if any columns within a sheet are 
+            # duplicated (via names or alternate names) so there should not be 
+            # both l_mapped_name and u_mapped_name for literal matches options
             # 1: l_mapped_name, not l_results > literal match on loaded sheets
             # 2: u_mapped_name, not u_results > literal match on unloaded sheets
-            # 3: l_mapped_name, l_results, not u_mapped_name > fuzzy match on loaded sheets
+            # 3: l_mapped_name, l_results, not u_mapped_name > 
+            #   fuzzy match on loaded sheets
             # 4: u_mapped_name, u_results > fuzzy match on unloaded sheets
             # 5: l_mapped_name and u_mapped_name > error fuzzy matching
-            # 6: not l_mapped_name, not u_mapped_name, (u_results or l_results) > error fuzzy matching
+            # 6: not l_mapped_name, not u_mapped_name, (u_results or l_results) > 
+            #   error fuzzy matching
             # 7: unexpected sheet > no matching
-            # load_all_sheets: loads all sheets not loaded for steps 1-6. used for dynamic schema generation
+            # load_all_sheets: loads all sheets not loaded for steps 1-6. 
+            #   used for dynamic schema generation
 
             # 5
             if l_mapped_name and l_results and u_mapped_name and u_results:
                 results.append(
                     ValidationResult(
                         rule="Match excel sheeet to schema",
-                        message=f"Excel sheet {excel_sheet_name} was fuzzy matched with multiple schema sheets. This will lead to validation errors about excel sheets not being found.",
+                        message=f"Excel sheet {excel_sheet_name} was fuzzy matched with\
+                            multiple schema sheets. This will lead to validation errors\
+                                about excel sheets not being found.",
                         severity=SeverityLevel.INFO,
                         sheet_name=excel_sheet_name,
                     )
