@@ -9,10 +9,10 @@ from typing import List
 class DuplicateSheetMatches(BaseValidator):
     @property
     def name(self) -> str:
-        return 'DuplicateSheetMatches'
+        return "DuplicateSheetMatches"
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
-        """Checks to see if a schema sheet was matched to multiple excel sheets. 
+        """Checks to see if a schema sheet was matched to multiple excel sheets.
 
         Args:
             data (ExcelLoaderData): excel data
@@ -31,11 +31,13 @@ class DuplicateSheetMatches(BaseValidator):
             for item in duplicates:
                 matched_sheets = data.get_sheet_matches(item)
                 sheet_names = [name.data_sheet_name for name in matched_sheets]
-                results.append(ValidationResult(
-                    rule = self.name,
-                    message = f'Multiple excel sheets, {sheet_names}, were mapped to the same schema sheet {item}. There should be at most a 1-1 mapping for each sheet.'
-                    ,severity = SeverityLevel.ERROR
-                    ,sheet_name=item
-                ))
+                results.append(
+                    ValidationResult(
+                        rule=self.name,
+                        message=f"Multiple excel sheets, {sheet_names}, were mapped to the same schema sheet {item}. There should be at most a 1-1 mapping for each sheet.",
+                        severity=SeverityLevel.ERROR,
+                        sheet_name=item,
+                    )
+                )
 
         return results

@@ -1,28 +1,32 @@
 from typing import List
 import polars as pl
 
-from ...validators.helpers import (get_data_loaded_columns, 
-                                   get_data_loaded_sheets, get_data_sheet_ids, 
-                                   get_schema_loaded_columns, 
-                                   get_schema_loaded_sheets, 
-                                   get_schema_process_values)
+from ...validators.helpers import (
+    get_data_loaded_columns,
+    get_data_loaded_sheets,
+    get_data_sheet_ids,
+    get_schema_loaded_columns,
+    get_schema_loaded_sheets,
+    get_schema_process_values,
+)
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, ValidationResult, SeverityLevel
 
 
-
-
 class DataTypeCheck(BaseValidator):
     """Checks that columns and column values are the correct datatype
-        based on the kobo survey.
+    based on the kobo survey.
     """
-    def __init__(self,
-                 schema: BaseDatasetSchema,
-                 survey_sheet: str = 'kobo_survey',
-                 survey_type_column: str = 'type',
-                 survey_name_column: str = 'name',
-                 check_sheets: List = ['clean_data']) -> None:
+
+    def __init__(
+        self,
+        schema: BaseDatasetSchema,
+        survey_sheet: str = "kobo_survey",
+        survey_type_column: str = "type",
+        survey_name_column: str = "name",
+        check_sheets: List = ["clean_data"],
+    ) -> None:
         """
 
         Args:
@@ -37,13 +41,13 @@ class DataTypeCheck(BaseValidator):
         self.survey_type_column = survey_type_column
         self.survey_name_column = survey_name_column
         self.schema = schema
-        self.process_value_map_name_numeric = 'data_type_numeric_check'
-        self.process_value_map_name_temporal = 'data_type_temporal_check'
+        self.process_value_map_name_numeric = "data_type_numeric_check"
+        self.process_value_map_name_temporal = "data_type_temporal_check"
 
     @property
     def name(self) -> str:
-        return 'DataTypeCheck'
-    
+        return "DataTypeCheck"
+
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks that columns and column values are the correct datatype
         based on the kobo survey.
@@ -68,140 +72,203 @@ class DataTypeCheck(BaseValidator):
         results: List[ValidationResult] = []
         # pre-validation
 
-        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
-                                                       sheet_names=[self.survey_sheet,
-                                                                    *self.check_sheets],
-                                                        rule=self.name)
-
-        if result:
-            results.extend(result)
-            return results
-        
-        result, data_loaded_columns = get_data_loaded_columns(data = {self.survey_type_column: data_loaded_sheets[self.survey_sheet],
-                                                                      self.survey_name_column: data_loaded_sheets[self.survey_sheet]},
-                                                        rule=self.name)
+        result, data_loaded_sheets = get_data_loaded_sheets(
+            data=data,
+            sheet_names=[self.survey_sheet, *self.check_sheets],
+            rule=self.name,
+        )
 
         if result:
             results.extend(result)
             return results
 
-        result, schema_loaded_sheets = get_schema_loaded_sheets(schema=self.schema, 
-                                                       sheet_names=[self.survey_sheet],
-                                                        rule=self.name)
-        
-        if result:
-            results.extend(result)
-            return results        
+        result, data_loaded_columns = get_data_loaded_columns(
+            data={
+                self.survey_type_column: data_loaded_sheets[self.survey_sheet],
+                self.survey_name_column: data_loaded_sheets[self.survey_sheet],
+            },
+            rule=self.name,
+        )
 
-        result, schema_loaded_columns = get_schema_loaded_columns(data={self.survey_type_column: schema_loaded_sheets[self.survey_sheet],
-                                                                        self.survey_name_column: schema_loaded_sheets[self.survey_sheet]},
-                                                        rule=self.name)
-        
         if result:
             results.extend(result)
             return results
-        
-        result, schema_process_values = get_schema_process_values(data = {self.survey_sheet: {self.process_value_map_name_numeric: schema_loaded_columns[self.survey_type_column],
-                                                                                              self.process_value_map_name_temporal: schema_loaded_columns[self.survey_type_column]},
-                                                                         },
-                                                                 rule=self.name)
-             
+
+        result, schema_loaded_sheets = get_schema_loaded_sheets(
+            schema=self.schema, sheet_names=[self.survey_sheet], rule=self.name
+        )
+
         if result:
             results.extend(result)
             return results
-        
+
+        result, schema_loaded_columns = get_schema_loaded_columns(
+            data={
+                self.survey_type_column: schema_loaded_sheets[self.survey_sheet],
+                self.survey_name_column: schema_loaded_sheets[self.survey_sheet],
+            },
+            rule=self.name,
+        )
+
+        if result:
+            results.extend(result)
+            return results
+
+        result, schema_process_values = get_schema_process_values(
+            data={
+                self.survey_sheet: {
+                    self.process_value_map_name_numeric: schema_loaded_columns[
+                        self.survey_type_column
+                    ],
+                    self.process_value_map_name_temporal: schema_loaded_columns[
+                        self.survey_type_column
+                    ],
+                },
+            },
+            rule=self.name,
+        )
+
+        if result:
+            results.extend(result)
+            return results
+
         search_items = {key: data_loaded_sheets[key] for key in self.check_sheets}
-        result, data_id_columns = get_data_sheet_ids(schema=self.schema, data=search_items, rule=self.name)
+        result, data_id_columns = get_data_sheet_ids(
+            schema=self.schema, data=search_items, rule=self.name
+        )
 
         if result:
             results.extend(result)
             return results
-        
+
         # get the columns that need checking
-        numeric_columns = data_loaded_sheets[self.survey_sheet].data\
-                                                                .filter(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
-                                                                        .str
-                                                                        .to_lowercase()
-                                                                        .is_in(schema_process_values[self.process_value_map_name_numeric].values)) \
-                                                                .select([data_loaded_columns[self.survey_name_column].data_column_name])\
-                                                                .to_series().str.to_lowercase().to_list()
-        temporal_columns = data_loaded_sheets[self.survey_sheet].data\
-                                                            .filter(pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
-                                                                    .str
-                                                                    .to_lowercase()
-                                                                    .is_in(schema_process_values[self.process_value_map_name_temporal].values)) \
-                                                            .select([data_loaded_columns[self.survey_name_column].data_column_name]) \
-                                                            .to_series().str.to_lowercase().to_list()
-        
+        numeric_columns = (
+            data_loaded_sheets[self.survey_sheet]
+            .data.filter(
+                pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
+                .str.to_lowercase()
+                .is_in(
+                    schema_process_values[self.process_value_map_name_numeric].values
+                )
+            )
+            .select([data_loaded_columns[self.survey_name_column].data_column_name])
+            .to_series()
+            .str.to_lowercase()
+            .to_list()
+        )
+        temporal_columns = (
+            data_loaded_sheets[self.survey_sheet]
+            .data.filter(
+                pl.col(data_loaded_columns[self.survey_type_column].data_column_name)
+                .str.to_lowercase()
+                .is_in(
+                    schema_process_values[self.process_value_map_name_temporal].values
+                )
+            )
+            .select([data_loaded_columns[self.survey_name_column].data_column_name])
+            .to_series()
+            .str.to_lowercase()
+            .to_list()
+        )
 
         for sheet in self.check_sheets:
-            # # validate the sheet            
+            # # validate the sheet
 
-            check_sheet_id_column = data_id_columns[sheet][0]            
+            check_sheet_id_column = data_id_columns[sheet][0]
 
             # numeric check
             if numeric_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in numeric_columns if item in data_loaded_sheets[sheet].data.columns and not data_loaded_sheets[sheet].data.schema[item].is_numeric()]
-                
+                incorrect_data_type_columns = [
+                    item
+                    for item in numeric_columns
+                    if item in data_loaded_sheets[sheet].data.columns
+                    and not data_loaded_sheets[sheet].data.schema[item].is_numeric()
+                ]
+
                 if incorrect_data_type_columns:
                     # if there are dataframe columns with the incorrect data type
                     # then check the column values
 
                     # pivot the table to make the process easier
-                    check_df = data_loaded_sheets[sheet].data.select([check_sheet_id_column.data_column_name] + 
-                                                                incorrect_data_type_columns)\
-                                                        .unpivot(index=check_sheet_id_column.data_column_name,
-                                                                    variable_name='question',
-                                                                    value_name='value')
+                    check_df = (
+                        data_loaded_sheets[sheet]
+                        .data.select(
+                            [check_sheet_id_column.data_column_name]
+                            + incorrect_data_type_columns
+                        )
+                        .unpivot(
+                            index=check_sheet_id_column.data_column_name,
+                            variable_name="question",
+                            value_name="value",
+                        )
+                    )
                     # find invalid values
                     # if the value cant be converted it will return null.
                     # this is used as a filter on the dataframe
-                    incorrect_values_df = check_df.filter(pl.col('value').is_not_null()) \
-                                                    .filter(pl.col('value')
-                                                            .cast(pl.Float64, strict=False)
-                                                            .is_null())
-                                       
+                    incorrect_values_df = check_df.filter(
+                        pl.col("value").is_not_null()
+                    ).filter(pl.col("value").cast(pl.Float64, strict=False).is_null())
+
                     if incorrect_values_df.height > 0:
-                        results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'Non-numeric values were found in {sheet} when numeric values were expected. Check the output for details.'
-                            ,severity = SeverityLevel.ERROR
-                            ,sheet_name=sheet
-                            , details=incorrect_values_df.to_dict()
-                        ))
+                        results.append(
+                            ValidationResult(
+                                rule=self.name,
+                                message=f"Non-numeric values were found in {sheet} when numeric values were expected. Check the output for details.",
+                                severity=SeverityLevel.ERROR,
+                                sheet_name=sheet,
+                                details=incorrect_values_df.to_dict(),
+                            )
+                        )
 
             # temporal check
             if temporal_columns:
                 # check the data types of the data frame columns
-                incorrect_data_type_columns = [item for item in temporal_columns if item in data_loaded_sheets[sheet].data.columns and  not data_loaded_sheets[sheet].data.schema[item].is_temporal()]
+                incorrect_data_type_columns = [
+                    item
+                    for item in temporal_columns
+                    if item in data_loaded_sheets[sheet].data.columns
+                    and not data_loaded_sheets[sheet].data.schema[item].is_temporal()
+                ]
 
                 if incorrect_data_type_columns:
-                     # if there are dataframe columns with the incorrect data type
+                    # if there are dataframe columns with the incorrect data type
                     # then check the column values
 
                     # pivot the table to make the process easier
-                    check_df = data_loaded_sheets[sheet].data.select([check_sheet_id_column.data_column_name] + 
-                                                                incorrect_data_type_columns)\
-                                                        .unpivot(index=check_sheet_id_column.data_column_name,
-                                                                    variable_name='question',
-                                                                    value_name='value')
+                    check_df = (
+                        data_loaded_sheets[sheet]
+                        .data.select(
+                            [check_sheet_id_column.data_column_name]
+                            + incorrect_data_type_columns
+                        )
+                        .unpivot(
+                            index=check_sheet_id_column.data_column_name,
+                            variable_name="question",
+                            value_name="value",
+                        )
+                    )
                     # find invalid values
                     # if the value cant be converted it will return null.
                     # this is used as a filter on the dataframe
-                    incorrect_values_df = check_df.filter(pl.col('value').is_not_null()) \
-                                                    .filter(pl.col('value')
-                                                            .str.to_datetime(strict=False)
-                                                    # .cast(pl.Datetime, strict=False)
-                                                            .is_null())
-                    
+                    incorrect_values_df = check_df.filter(
+                        pl.col("value").is_not_null()
+                    ).filter(
+                        pl.col("value")
+                        .str.to_datetime(strict=False)
+                        # .cast(pl.Datetime, strict=False)
+                        .is_null()
+                    )
+
                     if incorrect_values_df.height > 0:
-                        results.append(ValidationResult(
-                            rule = self.name,
-                            message = f'Non-temporal values were found in {sheet} when temporal values were expected. Check the output for details.'
-                            ,severity = SeverityLevel.ERROR
-                            ,sheet_name=sheet
-                            , details=incorrect_values_df.to_dict()
-                        ))
+                        results.append(
+                            ValidationResult(
+                                rule=self.name,
+                                message=f"Non-temporal values were found in {sheet} when temporal values were expected. Check the output for details.",
+                                severity=SeverityLevel.ERROR,
+                                sheet_name=sheet,
+                                details=incorrect_values_df.to_dict(),
+                            )
+                        )
 
         return results

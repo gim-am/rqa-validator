@@ -1,4 +1,3 @@
-
 from typing import List
 
 from ..common.list_matching import match_sheet_columns, match_sheet_columns_ids
@@ -16,8 +15,10 @@ from .base import ValidationResult, SeverityLevel
 from ..loaders.excel_loader import ExcelLoaderData
 
 
-def get_data_loaded_sheet(data: ExcelLoaderData, sheet_name: str , rule: str) -> tuple[ValidationResult | None, DataSheetMap | None]:
-    """Gets a data loaded sheet if it exists. 
+def get_data_loaded_sheet(
+    data: ExcelLoaderData, sheet_name: str, rule: str
+) -> tuple[ValidationResult | None, DataSheetMap | None]:
+    """Gets a data loaded sheet if it exists.
 
     Args:
         data (ExcelLoaderData): excel data
@@ -31,16 +32,19 @@ def get_data_loaded_sheet(data: ExcelLoaderData, sheet_name: str , rule: str) ->
     loaded_sheet = data.get_loaded_sheet(sheet_name=sheet_name)
 
     if loaded_sheet is None:
-        result =ValidationResult(
-            rule = rule,
-            message = f'An excel sheet for {sheet_name} is expected.'
-            ,severity = SeverityLevel.ERROR
-            ,sheet_name=sheet_name
+        result = ValidationResult(
+            rule=rule,
+            message=f"An excel sheet for {sheet_name} is expected.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=sheet_name,
         )
 
     return result, loaded_sheet
 
-def get_data_loaded_sheets(data: ExcelLoaderData, sheet_names: List[str], rule: str) -> tuple[List[ValidationResult], dict[str, DataSheetMap]]:
+
+def get_data_loaded_sheets(
+    data: ExcelLoaderData, sheet_names: List[str], rule: str
+) -> tuple[List[ValidationResult], dict[str, DataSheetMap]]:
     """Gets a list of data loaded sheets if they exist.
 
     Args:
@@ -65,8 +69,11 @@ def get_data_loaded_sheets(data: ExcelLoaderData, sheet_names: List[str], rule: 
 
     return results, loaded_sheets
 
-def get_schema_loaded_sheet(schema: BaseDatasetSchema, sheet_name: str, rule: str) -> tuple[ValidationResult | None, SchemaSheetMap | None]:
-    """Gets a schema loaded sheet if it exists. 
+
+def get_schema_loaded_sheet(
+    schema: BaseDatasetSchema, sheet_name: str, rule: str
+) -> tuple[ValidationResult | None, SchemaSheetMap | None]:
+    """Gets a schema loaded sheet if it exists.
 
     Args:
         schema (BaseDatasetSchema): dataset scheema
@@ -81,15 +88,18 @@ def get_schema_loaded_sheet(schema: BaseDatasetSchema, sheet_name: str, rule: st
 
     if not schema_sheet:
         result = ValidationResult(
-            rule = rule ,
-            message = f'A schema sheet for {sheet_name} is expected.'
-            ,severity = SeverityLevel.ERROR
-            , sheet_name=sheet_name
+            rule=rule,
+            message=f"A schema sheet for {sheet_name} is expected.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=sheet_name,
         )
 
     return result, schema_sheet
 
-def get_schema_loaded_sheets(schema: BaseDatasetSchema, sheet_names: List[str], rule: str) -> tuple[List[ValidationResult], dict[str, SchemaSheetMap]]:
+
+def get_schema_loaded_sheets(
+    schema: BaseDatasetSchema, sheet_names: List[str], rule: str
+) -> tuple[List[ValidationResult], dict[str, SchemaSheetMap]]:
     """Gets a list of schema loaded sheets if it exists.
 
     Args:
@@ -114,7 +124,10 @@ def get_schema_loaded_sheets(schema: BaseDatasetSchema, sheet_names: List[str], 
 
     return results, loaded_sheets
 
-def get_data_loaded_column(loaded_sheet: DataSheetMap, column_name: str, rule:str) -> tuple[ValidationResult | None, DataColumnMap | None]:
+
+def get_data_loaded_column(
+    loaded_sheet: DataSheetMap, column_name: str, rule: str
+) -> tuple[ValidationResult | None, DataColumnMap | None]:
     """Gets a data loaded column if found.
 
     Args:
@@ -126,19 +139,22 @@ def get_data_loaded_column(loaded_sheet: DataSheetMap, column_name: str, rule:st
         tuple[ValidationResult | None, ColumnMap | None]: validation error if any, loaded column if found
     """
     result = None
-    
+
     column = loaded_sheet.get_column_map(column_name)
     if column is None:
         result = ValidationResult(
-            rule = rule,
-            message = f'A column for {column_name} is expected.'
-            ,severity = SeverityLevel.ERROR
-            , sheet_name= loaded_sheet.data_sheet_name
+            rule=rule,
+            message=f"A column for {column_name} is expected.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=loaded_sheet.data_sheet_name,
         )
-        
+
     return result, column
 
-def get_data_loaded_columns(data: dict[str, DataSheetMap], rule: str) -> tuple[List[ValidationResult], dict[str, DataColumnMap]]:
+
+def get_data_loaded_columns(
+    data: dict[str, DataSheetMap], rule: str
+) -> tuple[List[ValidationResult], dict[str, DataColumnMap]]:
     """Gets a list of data loaded columns if found.
 
     Args:
@@ -147,7 +163,7 @@ def get_data_loaded_columns(data: dict[str, DataSheetMap], rule: str) -> tuple[L
 
     Returns:
         tuple[List[ValidationResult], dict[str, ColumnMap]]: list of validation errors if any, column name and loaded column if found
-    
+
     """
     results: List[ValidationResult] = []
     loaded_columns: dict[str, DataColumnMap] = {}
@@ -163,7 +179,10 @@ def get_data_loaded_columns(data: dict[str, DataSheetMap], rule: str) -> tuple[L
 
     return results, loaded_columns
 
-def get_schema_loaded_column(loaded_sheet: SchemaSheetMap, column: str, rule: str) -> tuple[ValidationResult | None, SchemaColumnMap | None]:
+
+def get_schema_loaded_column(
+    loaded_sheet: SchemaSheetMap, column: str, rule: str
+) -> tuple[ValidationResult | None, SchemaColumnMap | None]:
     """Gets a schema column if it exists.
 
     Args:
@@ -181,15 +200,18 @@ def get_schema_loaded_column(loaded_sheet: SchemaSheetMap, column: str, rule: st
     if schema_column is None:
         # should not actually happen as its already mapped above.
         result = ValidationResult(
-            rule = rule,
-            message = f'A column for {column} in schema sheet {loaded_sheet.standard_name} is expected.'
-            ,severity = SeverityLevel.ERROR
-            ,sheet_name=loaded_sheet.standard_name
-            , column_name=column
+            rule=rule,
+            message=f"A column for {column} in schema sheet {loaded_sheet.standard_name} is expected.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=loaded_sheet.standard_name,
+            column_name=column,
         )
     return result, schema_column
 
-def get_schema_loaded_columns(data: dict[str, SchemaSheetMap], rule: str) -> tuple[List[ValidationResult], dict[str, SchemaColumnMap]]:
+
+def get_schema_loaded_columns(
+    data: dict[str, SchemaSheetMap], rule: str
+) -> tuple[List[ValidationResult], dict[str, SchemaColumnMap]]:
     """Gets a list of schema columns if they exists
 
     Args:
@@ -199,7 +221,7 @@ def get_schema_loaded_columns(data: dict[str, SchemaSheetMap], rule: str) -> tup
     Returns:
         tuple[List[ValidationResult], dict[str, ColumnMapping]]: list of validation errors if any, column and schema column map
     """
-    
+
     results: List[ValidationResult] = []
     loaded_columns: dict[str, SchemaColumnMap] = {}
 
@@ -214,7 +236,13 @@ def get_schema_loaded_columns(data: dict[str, SchemaSheetMap], rule: str) -> tup
     return results, loaded_columns
 
 
-def get_data_sheet_id(sheet_name: str, schema: BaseDatasetSchema, loaded_sheet: DataSheetMap, rule: str, expected: int = 1) -> tuple[ValidationResult | None, List[DataColumnMap]]:
+def get_data_sheet_id(
+    sheet_name: str,
+    schema: BaseDatasetSchema,
+    loaded_sheet: DataSheetMap,
+    rule: str,
+    expected: int = 1,
+) -> tuple[ValidationResult | None, List[DataColumnMap]]:
     """Gets unique columns for a scheema sheet and loaded sheet.
 
     Args:
@@ -232,21 +260,27 @@ def get_data_sheet_id(sheet_name: str, schema: BaseDatasetSchema, loaded_sheet: 
 
     if not ids:
         result = ValidationResult(
-            rule = rule,
-            message = f'A unique id column for {loaded_sheet.data_sheet_name} is expected but none were found.'
-            ,severity = SeverityLevel.ERROR
-            , sheet_name =  loaded_sheet.data_sheet_name
+            rule=rule,
+            message=f"A unique id column for {loaded_sheet.data_sheet_name} is expected but none were found.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=loaded_sheet.data_sheet_name,
         )
     elif len(ids) != expected:
         result = ValidationResult(
-                rule = rule,
-                message = f'A single unique column for schema sheet {sheet_name} and matching excel sheet {loaded_sheet.data_sheet_name} was expected.'
-                ,severity = SeverityLevel.ERROR
-                ,sheet_name=sheet_name
-            )
+            rule=rule,
+            message=f"A single unique column for schema sheet {sheet_name} and matching excel sheet {loaded_sheet.data_sheet_name} was expected.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=sheet_name,
+        )
     return result, ids
 
-def get_data_sheet_ids(schema: BaseDatasetSchema, data: dict[str, DataSheetMap], rule: str, expected: int = 1) -> tuple[List[ValidationResult], dict[str, List[DataColumnMap]]]:
+
+def get_data_sheet_ids(
+    schema: BaseDatasetSchema,
+    data: dict[str, DataSheetMap],
+    rule: str,
+    expected: int = 1,
+) -> tuple[List[ValidationResult], dict[str, List[DataColumnMap]]]:
     """Gets unique columns for a list of scheema sheets and loaded sheets.
 
     Args:
@@ -262,7 +296,9 @@ def get_data_sheet_ids(schema: BaseDatasetSchema, data: dict[str, DataSheetMap],
     loaded_columns: dict[str, List[DataColumnMap]] = {}
 
     for sheet, loaded_sheet in data.items():
-        result, loaded_column = get_data_sheet_id(sheet, schema, loaded_sheet,  rule, expected)
+        result, loaded_column = get_data_sheet_id(
+            sheet, schema, loaded_sheet, rule, expected
+        )
 
         if result is None:
             assert loaded_column is not None
@@ -272,7 +308,13 @@ def get_data_sheet_ids(schema: BaseDatasetSchema, data: dict[str, DataSheetMap],
 
     return results, loaded_columns
 
-def get_schema_process_value(process_value_map_name: str, sheet_name: str, schema_column: SchemaColumnMap, rule: str) -> tuple[ValidationResult | None, ProcessValueMap | None]:
+
+def get_schema_process_value(
+    process_value_map_name: str,
+    sheet_name: str,
+    schema_column: SchemaColumnMap,
+    rule: str,
+) -> tuple[ValidationResult | None, ProcessValueMap | None]:
     """Gets schema process values if found
 
     Args:
@@ -284,28 +326,31 @@ def get_schema_process_value(process_value_map_name: str, sheet_name: str, schem
     Returns:
         tuple[ValidationResult | None, ProcessValueMap | None]: validation errors if any, process values if found
     """
-    
-    result = None 
+
+    result = None
 
     process_values = schema_column.get_process_values(process_value_map_name)
 
     if process_values is None or len(process_values.values) == 0:
         result = ValidationResult(
-            rule = rule,
-            message = f'process_values were expected for column {schema_column.standard_name} for process {process_value_map_name}.'
-            ,severity = SeverityLevel.ERROR
-            , sheet_name= sheet_name
-            , column_name=schema_column.standard_name
+            rule=rule,
+            message=f"process_values were expected for column {schema_column.standard_name} for process {process_value_map_name}.",
+            severity=SeverityLevel.ERROR,
+            sheet_name=sheet_name,
+            column_name=schema_column.standard_name,
         )
     else:
         assert process_values is not None
-    
+
     return result, process_values
 
-def get_schema_process_values(data: dict[str, dict[str, SchemaColumnMap]], rule: str) -> tuple[List[ValidationResult], dict[str, ProcessValueMap]]:
+
+def get_schema_process_values(
+    data: dict[str, dict[str, SchemaColumnMap]], rule: str
+) -> tuple[List[ValidationResult], dict[str, ProcessValueMap]]:
     """Gets a list of schema process values if found.
 
-    
+
     Args:
         data (dict[str, dict[str, ColumnMapping]]): sheet name, [process value name, schema column]
         rule (str): validation rule
@@ -318,7 +363,9 @@ def get_schema_process_values(data: dict[str, dict[str, SchemaColumnMap]], rule:
 
     for sheet, item in data.items():
         for process, column in item.items():
-            result, process_value =  get_schema_process_value(process, sheet, column,  rule)
+            result, process_value = get_schema_process_value(
+                process, sheet, column, rule
+            )
 
             if result is None:
                 assert process_value is not None
@@ -328,7 +375,14 @@ def get_schema_process_values(data: dict[str, dict[str, SchemaColumnMap]], rule:
 
     return results, process_values
 
-def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str) -> tuple[ValidationResult | None, list[tuple]]:
+
+def get_matching_id_columns(
+    source: List[DataColumnMap],
+    source_sheet: str,
+    target: List[DataColumnMap],
+    target_sheet: str,
+    rule: str,
+) -> tuple[ValidationResult | None, list[tuple]]:
     """Get matching id columns between sheets.
 
     Args:
@@ -341,26 +395,33 @@ def get_matching_id_columns(source: List[DataColumnMap], source_sheet: str, targ
     Returns:
         tuple[ValidationResult | None, list[ColumnMap]]: validation errors if any, list of matched columns if found
     """
-    
-    result = None 
+
+    result = None
 
     matching_columns = match_sheet_columns(source, target)
-        # should only be one matching id column between the sheets.
+    # should only be one matching id column between the sheets.
     if len(matching_columns) != 1:
         result = ValidationResult(
-            rule = rule,
-            message = f'Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {len(matching_columns)} were found.'
-            ,severity = SeverityLevel.ERROR
+            rule=rule,
+            message=f"Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {len(matching_columns)} were found.",
+            severity=SeverityLevel.ERROR,
         )
-    
+
     if result is None:
         assert matching_columns is not None
-    
+
     return result, matching_columns
 
-def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, target: List[DataColumnMap], target_sheet: str, rule: str) -> tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
-    """ Attempts to find two id like columns that could be used to try and link two sheets. 
-    
+
+def get_matching_id_columns_alt(
+    source: List[DataColumnMap],
+    source_sheet: str,
+    target: List[DataColumnMap],
+    target_sheet: str,
+    rule: str,
+) -> tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]:
+    """Attempts to find two id like columns that could be used to try and link two sheets.
+
         Only is this if other more direct methods have been tried
 
     Args:
@@ -373,14 +434,14 @@ def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, 
     Returns:
         tuple[ValidationResult | None, list[DataColumnMap], list[DataColumnMap]]: validation results, matching id columns from source and target
     """
-    result = None 
+    result = None
 
     source_columns, target_columns = match_sheet_columns_ids(source, target)
     if len(source_columns) != 1 or len(target_columns) != 1:
         result = ValidationResult(
-            rule = rule,
-            message = f'Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {source_sheet} had {len(source_columns)} and {target_sheet} had {len(target_columns)}.'
-            ,severity = SeverityLevel.ERROR
+            rule=rule,
+            message=f"Expected 1 linkable ID column for sheets {source_sheet} and {target_sheet} but {source_sheet} had {len(source_columns)} and {target_sheet} had {len(target_columns)}.",
+            severity=SeverityLevel.ERROR,
         )
     if result is None:
         assert source_columns is not None
@@ -388,29 +449,31 @@ def get_matching_id_columns_alt(source: List[DataColumnMap], source_sheet: str, 
 
     return result, source_columns, target_columns
 
-def get_schema_id_column(source: SchemaSheetMap, rule: str) -> tuple[ValidationResult | None, List[SchemaColumnMap]]:
+
+def get_schema_id_column(
+    source: SchemaSheetMap, rule: str
+) -> tuple[ValidationResult | None, List[SchemaColumnMap]]:
     """Gets unique columns for a schema sheet
 
     Args:
-        source (SchemaSheetMap): Sheet to search 
+        source (SchemaSheetMap): Sheet to search
         rule (str): validation rule
 
     Returns:
         tuple[ValidationResult | None, List[SchemaColumnMap]]: validation results, unique columns if found
     """
-    result = None 
+    result = None
     matching_columns = source.get_unique_columns()
     if len(matching_columns) != 1:
         result = ValidationResult(
-            rule = rule,
-            message = f'Expected 1 ID column for sheet {source.standard_name} but {len(matching_columns)} were found.'
-            ,severity = SeverityLevel.ERROR
+            rule=rule,
+            message=f"Expected 1 ID column for sheet {source.standard_name} but {len(matching_columns)} were found.",
+            severity=SeverityLevel.ERROR,
         )
     if result is None:
         assert matching_columns is not None
 
     return result, matching_columns
-
 
 
 # def get_matching_id_columns(source: dict[str, List[ColumnMap]], target: dict[str, List[ColumnMap]], rule: str):
@@ -419,5 +482,3 @@ def get_schema_id_column(source: SchemaSheetMap, rule: str) -> tuple[ValidationR
 
 #     for (source_sheet, source_values), (target_sheet, target_values) in zip(source.items(), target.items()):
 #         result, matching_column = get_matching_id_column(source_values, source_sheet, target_values, target_sheet, rule)
-
-

@@ -17,9 +17,10 @@ class NaNCheck(BaseValidator):
     Invalid values are stored in the config file.
 
     """
-    def __init__(self,
-                 schema: BaseDatasetSchema,
-                 check_sheets: List[str] = ['clean_data']) -> None:
+
+    def __init__(
+        self, schema: BaseDatasetSchema, check_sheets: List[str] = ["clean_data"]
+    ) -> None:
         """
         Args:
             schema (BaseDatasetSchema): schema for the dataset
@@ -30,7 +31,7 @@ class NaNCheck(BaseValidator):
 
     @property
     def name(self) -> str:
-        return 'NaNCheck'
+        return "NaNCheck"
 
     def validate(self, data: ExcelLoaderData) -> List[ValidationResult]:
         """Checks columns for invalid numeric values like NaN and -999.
@@ -43,49 +44,63 @@ class NaNCheck(BaseValidator):
         """
         results: List[ValidationResult] = []
 
-        output_difference_df =  pl.DataFrame([
-                pl.Series("uuid",[], dtype=pl.String),
-                pl.Series("sheet",[], dtype=pl.String),
-                pl.Series("column",[], dtype=pl.String),
-                pl.Series("value",[], dtype=pl.String)
-            ])
-        
-        result, data_loaded_sheets = get_data_loaded_sheets(data=data, 
-                                                       sheet_names=self.check_sheets,
-                                                        rule=self.name)
+        output_difference_df = pl.DataFrame(
+            [
+                pl.Series("uuid", [], dtype=pl.String),
+                pl.Series("sheet", [], dtype=pl.String),
+                pl.Series("column", [], dtype=pl.String),
+                pl.Series("value", [], dtype=pl.String),
+            ]
+        )
+
+        result, data_loaded_sheets = get_data_loaded_sheets(
+            data=data, sheet_names=self.check_sheets, rule=self.name
+        )
 
         if result:
             results.extend(result)
             return results
-        
-        result, sheet_ids = get_data_sheet_ids(self.schema, data_loaded_sheets, self.name)
+
+        result, sheet_ids = get_data_sheet_ids(
+            self.schema, data_loaded_sheets, self.name
+        )
         if result:
             results.extend(result)
             return results
 
-
-        for sheet in self.check_sheets:     
-
+        for sheet in self.check_sheets:
             nan_value_expressions = []
-            filtered_columns = filter_list(data_loaded_sheets[sheet].data.columns,settings.IGNORE_COLUMNS_FOR_VALIDATION )
+            filtered_columns = filter_list(
+                data_loaded_sheets[sheet].data.columns,
+                settings.IGNORE_COLUMNS_FOR_VALIDATION,
+            )
             filtered_df = data_loaded_sheets[sheet].data.select(filtered_columns)
 
             # build expression to find possible invalid values or NaNs
             for column in filtered_columns:
                 expression = pl.any_horizontal(
                     (
-                        (pl.col(column).is_nan() | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES))) if filtered_df.schema[column].is_float() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_NUMERIC_VALUES) ) if filtered_df.schema[column].is_integer() else False
-                        | (pl.col(column).is_in( settings.NANCHECK_STRING_VALUES) ) if filtered_df.schema[column] == pl.String else pl.lit(False)
-
+                        (
+                            pl.col(column).is_nan()
+                            | (pl.col(column).is_in(settings.NANCHECK_NUMERIC_VALUES))
+                        )
+                        if filtered_df.schema[column].is_float()
+                        else False
+                        | (pl.col(column).is_in(settings.NANCHECK_NUMERIC_VALUES))
+                        if filtered_df.schema[column].is_integer()
+                        else False
+                        | (pl.col(column).is_in(settings.NANCHECK_STRING_VALUES))
+                        if filtered_df.schema[column] == pl.String
+                        else pl.lit(False)
                     ).alias(f"is_{column}_nan_value")
-
                 )
                 nan_value_expressions.append(expression)
 
             # get a df that has nan/invalid data in a row
             nan_df = filtered_df.with_columns(nan_value_expressions)
-            has_nan = pl.any_horizontal([pl.col(f"is_{column}_nan_value") for column in filtered_columns])
+            has_nan = pl.any_horizontal(
+                [pl.col(f"is_{column}_nan_value") for column in filtered_columns]
+            )
             nan_only_df = nan_df.filter(has_nan)
 
             # create df of only invalid data
@@ -96,52 +111,52 @@ class NaNCheck(BaseValidator):
 
                 # unvpvot values
                 values_df = nan_only_df.unpivot(
-                index=[id_col],
-                on=filtered_columns,
-                variable_name="column",
-                value_name="value"
+                    index=[id_col],
+                    on=filtered_columns,
+                    variable_name="column",
+                    value_name="value",
                 )
-                
+
                 # unpivot flags. Extract question name from flag column name
                 flags_df = nan_only_df.unpivot(
                     index=[id_col],
                     on=[f"is_{c}_nan_value" for c in filtered_columns],
-                    variable_name="flag_col_name", 
-                    value_name="is_changed"
-                    ).with_columns(
-                        pl.col("flag_col_name")
-                        .str.replace("^is_", "", literal=False)
-                        .str.replace("_nan_value$", "", literal=False)
-                        .alias("column")
-                        )
-                
+                    variable_name="flag_col_name",
+                    value_name="is_changed",
+                ).with_columns(
+                    pl.col("flag_col_name")
+                    .str.replace("^is_", "", literal=False)
+                    .str.replace("_nan_value$", "", literal=False)
+                    .alias("column")
+                )
+
                 # join all together
                 # Filter only rows where the NaN flag is True
                 merged_df = values_df.join(
-                    flags_df,
-                    on=[id_col, "column"],
-                    how="inner"
-                ).filter(pl.col("is_changed") )
-                                
-                # get the valies
-                output_df = merged_df.select([
-                    pl.col(id_col).alias('uuid'),
-                    pl.lit(sheet).alias("sheet"),
-                    pl.col("column"),
-                    pl.col("value").cast(pl.Utf8).alias("value")
-                ])
-                # concat results to those from previous sheets
-                output_difference_df = pl.concat([output_difference_df,
-                                                        output_df])
+                    flags_df, on=[id_col, "column"], how="inner"
+                ).filter(pl.col("is_changed"))
 
+                # get the valies
+                output_df = merged_df.select(
+                    [
+                        pl.col(id_col).alias("uuid"),
+                        pl.lit(sheet).alias("sheet"),
+                        pl.col("column"),
+                        pl.col("value").cast(pl.Utf8).alias("value"),
+                    ]
+                )
+                # concat results to those from previous sheets
+                output_difference_df = pl.concat([output_difference_df, output_df])
 
         if output_difference_df.height > 0:
             # df_to_csv(data=difference_df, filename=validation_results_filename)
-            results.append(ValidationResult(
-                rule = self.name,
-                message = f'There were {output_difference_df.height} possible invalid values found. Check the output results for details.'
-                ,severity = SeverityLevel.ERROR
-                ,details=output_difference_df.to_dict()
-            ))
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message=f"There were {output_difference_df.height} possible invalid values found. Check the output results for details.",
+                    severity=SeverityLevel.ERROR,
+                    details=output_difference_df.to_dict(),
+                )
+            )
 
         return results
