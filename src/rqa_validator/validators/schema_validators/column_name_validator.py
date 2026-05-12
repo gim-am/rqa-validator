@@ -28,7 +28,7 @@ class ColumnNameCheck(BaseValidator):
             List[ValidationResult]: list of validation errors
         """
         results: list[ValidationResult] = []
-        pattern = re.compile(r"[^a-zA-Z_.\d:]")
+        pattern = re.compile(r"[^a-zA-Z_./\-\\\d:]")
 
         for sheet in data.loaded_sheets:
             matches = list(filter(pattern.search, sheet.data_columns))

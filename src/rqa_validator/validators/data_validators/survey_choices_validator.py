@@ -1,5 +1,6 @@
 import polars as pl
 
+from ...common.expression_builder import normalise_list
 from ...common.list_matching import filter_loaded_sheets, match_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
@@ -256,6 +257,10 @@ class SurveyChoicesCheck(BaseValidator):
 
                 valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
 
+                question_data_type = data_loaded_sheets[sheet].data.schema.get(question)
+                if question_data_type is not None:
+                    valid_choices = normalise_list(valid_choices, question_data_type)
+
                 difference_expression = (
                     pl.when(pl.col(question).is_not_null())
                     .then(
@@ -288,6 +293,9 @@ class SurveyChoicesCheck(BaseValidator):
             for question in filtered_questions_select_one:
                 col_has_difference = f"{question}_has_difference"
                 valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
+                question_data_type = data_loaded_sheets[sheet].data.schema.get(question)
+                if question_data_type is not None:
+                    valid_choices = normalise_list(valid_choices, question_data_type)
 
                 difference_expression = (
                     pl.when(pl.col(question).is_not_null())

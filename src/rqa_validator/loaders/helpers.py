@@ -122,7 +122,7 @@ def match_excel_sheet_to_schema(
         if matched, a list of any validation warnings if relevant.
     """
     results: list[ValidationResult] = []
-    fuzzy_matched_values_schema: list[FuzzMatch] = []
+    fuzzy_matched_values_schema: dict[str, list[FuzzMatch]] = {}
 
     for sheet_config in schema_sheets:
         literal_matches, fuzzy_matched_values = match_list_to_list(
@@ -136,22 +136,23 @@ def match_excel_sheet_to_schema(
             results = []
             return sheet_config.standard_name, results
         elif fuzzy_matched_values:
-            fuzzy_matched_values_schema.extend(fuzzy_matched_values)
+            fuzzy_matched_values_schema[sheet_config.standard_name] = fuzzy_matched_values
 
-    if fuzzy_matched_values_schema:
-        if len(fuzzy_matched_values_schema) == 1:
+    if bool(fuzzy_matched_values_schema):
+        if len(fuzzy_matched_values_schema.keys()) == 1:
             # fuzzy match to only 1 schema sheet
+            sheet_name = list(fuzzy_matched_values_schema.keys())[0]
             results.append(
                 ValidationResult(
                     rule="Match excel sheeet to schema",
                     message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"
-                    f" schema sheet {fuzzy_matched_values_schema[0].standard_name}.",
+                    f" schema sheet {sheet_name}.",
                     severity=SeverityLevel.INFO,
                     sheet_name=excel_sheet_name,
                     details={excel_sheet_name: fuzzy_matched_values_schema},
                 )
             )
-            return fuzzy_matched_values_schema[0].standard_name, results
+            return sheet_name, results
         else:
             # fuzzy match to multiple schema sheets
             results.append(

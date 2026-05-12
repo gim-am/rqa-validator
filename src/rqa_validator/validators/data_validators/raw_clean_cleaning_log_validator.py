@@ -367,10 +367,10 @@ class RawToCleanToLog(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} differences \
-                                    found in the {self.clean_data_sheet} sheet that \
-                                    were not reflected in the {self.cleaning_log_sheet}\
-                                    sheet. Check the output for details.",
+                            message=f"There were {difference_df.height} differences"
+                            f" found in the '{self.clean_data_sheet}' sheet that"
+                            f" were not reflected in the '{self.cleaning_log_sheet}'"
+                            " sheet. Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=self.cleaning_log_sheet,
                             details=difference_df.to_dict(),
@@ -380,10 +380,10 @@ class RawToCleanToLog(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_raw_to_clean_df.height} \
-                                differences found between the {self.clean_data_sheet} \
-                                sheet and the {self.raw_data_sheet} but no cleaning \
-                                log was found. Check the output for details.",
+                        message=f"There were {difference_raw_to_clean_df.height}"
+                        f" differences found between the '{self.clean_data_sheet}'"
+                        f" sheet and the '{self.raw_data_sheet}' but no cleaning"
+                        " log was found. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_raw_to_clean_df.to_dict(),

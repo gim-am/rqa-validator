@@ -2,6 +2,32 @@ import polars as pl
 from polars import DataType, Expr
 
 
+def normalise_list(items: list[str], dtype: DataType) -> list[str]:
+    """converts a list of strings that are actually numeric types to floats.
+
+    passing in datatype in case this needs to be expanded later.
+
+
+    Args:
+        items (list[str]): list of items to convert
+        dtype (DataType): datatype to check against
+
+    Returns:
+        list[str]: returns the normalised list
+    """
+    if dtype.is_numeric():
+        normalized: list[str] = []
+        for item in items:
+            try:
+                val = float(item)
+                normalized.append(str(val))
+            except ValueError:
+                normalized.append(item)
+        return normalized
+
+    return items
+
+
 def create_column_difference_expression(
     column_1: str, column_2: str, dtype1: DataType, dtype2: DataType
 ) -> Expr:

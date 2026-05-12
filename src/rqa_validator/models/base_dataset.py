@@ -182,7 +182,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                 standard_name="cleaning_log",
                 alternate_names=["clog_logbook"],
                 mandatory_columns=[
-                    SchemaColumnMap(standard_name="uuid"),
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["x_uuid"]),
                     SchemaColumnMap(standard_name="old_value"),
                     SchemaColumnMap(standard_name="new_value"),
                     SchemaColumnMap(

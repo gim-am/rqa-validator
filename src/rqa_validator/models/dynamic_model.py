@@ -188,7 +188,7 @@ class DynamicDataset(BaseDataset):
                     id_check_sheets.append(details.linked_clean_sheet)
                     clean_sheet = self.sheet_matching[details.linked_clean_sheet]
 
-                if len(clean_sheets) == 1:
+                if len(clean_sheets) == 1 or details.parent_sheet is None:
                     rowsum_sheets.append("deletion_log")
                 else:
                     master_deletion_log = "deletion_log"
