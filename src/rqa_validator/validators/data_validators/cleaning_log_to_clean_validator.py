@@ -414,9 +414,9 @@ class CleaningLogToClean(BaseValidator):
         if not changes_only.is_empty():
             # unpivot new values
             new_values_df = changes_only.unpivot(
-                index=[clean_log_id_columns.data_column_name] + [f"{q}_val" for q in questions],
+                index=[clean_log_id_columns.data_column_name],
                 on=questions,
-                variable_name="question",
+                variable_name=self.cleaning_log_question_column,
                 value_name=f"{self.cleaning_log_sheet}_value",
             )
 
@@ -429,8 +429,8 @@ class CleaningLogToClean(BaseValidator):
                 .rename({f"{q}_val": q for q in questions})
                 .unpivot(
                     index=[clean_log_id_columns.data_column_name],
-                    on=questions,
-                    variable_name="question",
+                    on=questions,  # Now unpivoting the renamed columns
+                    variable_name=self.cleaning_log_question_column,
                     value_name=f"{self.clean_data_sheet}_value",
                 )
             )
@@ -445,19 +445,19 @@ class CleaningLogToClean(BaseValidator):
                 pl.col("flag_col_name")
                 .str.replace("^is_", "", literal=False)
                 .str.replace("_changed$", "", literal=False)
-                .alias("question")
+                .alias(self.cleaning_log_question_column)
             )
 
             # join all together.  Filter the changed rows
             merged_df = (
                 new_values_df.join(
                     original_values_df,
-                    on=[clean_log_id_columns.data_column_name, "question"],
+                    on=[clean_log_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .join(
                     flags_long_df,
-                    on=[clean_log_id_columns.data_column_name, "question"],
+                    on=[clean_log_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .filter(pl.col("is_changed"))
@@ -469,7 +469,7 @@ class CleaningLogToClean(BaseValidator):
                     pl.col(clean_log_id_columns.data_column_name).alias(
                         clean_log_id_columns.data_column_name
                     ),
-                    pl.col("question"),
+                    pl.col(self.cleaning_log_question_column),
                     pl.col(f"{self.cleaning_log_sheet}_value"),
                     pl.col(f"{self.clean_data_sheet}_value"),
                 ]

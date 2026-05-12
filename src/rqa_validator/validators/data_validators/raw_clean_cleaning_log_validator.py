@@ -1,4 +1,5 @@
 # from ...common.file_export import df_to_csv
+
 import polars as pl
 
 from ...common.expression_builder import create_column_difference_expression
@@ -292,8 +293,7 @@ class RawToCleanToLog(BaseValidator):
         if not changes_only.is_empty():
             # unpivot new values
             new_values_df = changes_only.unpivot(
-                index=[clean_data_id_columns.data_column_name]
-                + [f"{q}_original_value" for q in clean_data_columns],
+                index=[clean_data_id_columns.data_column_name],
                 on=clean_data_columns,
                 variable_name=self.cleaning_log_question_column,
                 value_name=self.cleaning_log_new_value_column,
@@ -309,7 +309,7 @@ class RawToCleanToLog(BaseValidator):
                 .rename({f"{q}_original_value": q for q in clean_data_columns})
                 .unpivot(
                     index=[clean_data_id_columns.data_column_name],
-                    on=clean_data_columns,
+                    on=clean_data_columns,  # Now unpivoting the renamed columns
                     variable_name=self.cleaning_log_question_column,
                     value_name=self.cleaning_log_old_value_column,
                 )
@@ -332,18 +332,12 @@ class RawToCleanToLog(BaseValidator):
             merged_df = (
                 new_values_df.join(
                     original_values_df,
-                    on=[
-                        clean_data_id_columns.data_column_name,
-                        self.cleaning_log_question_column,
-                    ],
+                    on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .join(
                     flags_long_df,
-                    on=[
-                        clean_data_id_columns.data_column_name,
-                        self.cleaning_log_question_column,
-                    ],
+                    on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .filter(pl.col("is_changed"))
