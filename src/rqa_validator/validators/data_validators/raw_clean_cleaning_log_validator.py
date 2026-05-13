@@ -224,6 +224,20 @@ class RawToCleanToLog(BaseValidator):
                     .str.to_lowercase()
                     .is_in(schema_change_type_values.values)
                 )
+                .filter(
+                    (
+                        pl.col(clean_log_id_columns.data_column_name)
+                        .cast(pl.Utf8)
+                        .str.strip_chars(" ")
+                        .is_not_null()
+                    )
+                    & (
+                        pl.col(clean_log_id_columns.data_column_name)
+                        .cast(pl.Utf8)
+                        .str.strip_chars(" ")
+                        != ""
+                    )
+                )
                 .select(
                     [
                         clean_log_id_columns.data_column_name,

@@ -76,7 +76,8 @@ def match_excel_columns_to_schema(
                         rule="Match excel column to schema",
                         message=f"The schema sheet '{schema_sheet.standard_name}'"
                         f" column '{column.standard_name}' was fuzzy matched"
-                        " withan excel column. See output for details.",
+                        " with an excel column.  If this was an accurate match consider renaming"
+                        " this column in the future. See output for details.",
                         severity=SeverityLevel.INFO,
                         sheet_name=schema_sheet.standard_name,
                         column_name=column.standard_name,
@@ -146,7 +147,8 @@ def match_excel_sheet_to_schema(
                 ValidationResult(
                     rule="Match excel sheeet to schema",
                     message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"
-                    f" schema sheet {sheet_name}.",
+                    f" schema sheet {sheet_name}. If this was an accurate match consider renaming"
+                    f" this excel sheet to {sheet_name} in the future.",
                     severity=SeverityLevel.INFO,
                     sheet_name=excel_sheet_name,
                     details={excel_sheet_name: fuzzy_matched_values_schema},
