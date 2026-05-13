@@ -33,6 +33,17 @@ class ExcelLoaderData:
             List[str]: List of sheet names.
         """
         return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
+    
+    def get_loaded_sheet_excel_names(self) -> list[str]:
+        """Gets all the excel names for the loaded excel sheets
+        that were mapped to the origianl schema.
+
+        This is related to dynamic model creation process. 
+
+        Returns:
+            List[str]: List of sheet names.
+        """
+        return [sheet.data_sheet_name for sheet in self.loaded_sheets if not sheet.auto_loaded]
 
     def get_unloaded_sheet_mapped_names(self) -> list[str]:
         """Gets all the standard names for the loaded excel sheets
@@ -211,6 +222,7 @@ class ExcelLoader:
                         data_sheet_name=excel_sheet_name,
                         data=df,
                         data_columns=df_columns,
+                        auto_loaded = True
                     )
                 )
 

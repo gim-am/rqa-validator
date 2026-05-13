@@ -155,6 +155,7 @@ class DynamicDataset(BaseDataset):
                             message=f"No linked cleaning data sheet for the sheet"
                             f"'{sheet}' were found so the 'CleaningLogToClean' and"
                             "'CrossSheetIdCheck' rules could not be run.",
+                            sheet_name=sheet,
                             severity=SeverityLevel.WARNING,
                         )
                     )
@@ -175,6 +176,7 @@ class DynamicDataset(BaseDataset):
                             message=f"No linked raw sheet for the sheet '{sheet}' were"
                             "found so the 'RawToCleanToLog' rule could not be run.",
                             severity=SeverityLevel.WARNING,
+                            sheet_name=sheet,
                         )
                     )
 
@@ -188,20 +190,19 @@ class DynamicDataset(BaseDataset):
                     id_check_sheets.append(details.linked_clean_sheet)
                     clean_sheet = self.sheet_matching[details.linked_clean_sheet]
 
-                if len(clean_sheets) == 1 or details.parent_sheet is None:
-                    rowsum_sheets.append("deletion_log")
-                else:
-                    master_deletion_log = "deletion_log"
+                    if len(clean_sheets) == 1 or details.parent_sheet is None:
+                        rowsum_sheets.append("deletion_log")
+                    else:
+                        master_deletion_log = "deletion_log"
 
-                if rowsum_sheets:
-                    self.validators.append(
-                        CrossSheetRowSumCheck(
-                            schema=self.schema,
-                            master_sheet=sheet,
-                            child_sheets=rowsum_sheets,
-                            master_deletion_log=master_deletion_log,
+                        self.validators.append(
+                            CrossSheetRowSumCheck(
+                                schema=self.schema,
+                                master_sheet=sheet,
+                                child_sheets=rowsum_sheets,
+                                master_deletion_log=master_deletion_log,
+                            )
                         )
-                    )
                 else:
                     results.append(
                         ValidationResult(
@@ -210,6 +211,7 @@ class DynamicDataset(BaseDataset):
                             "were found so the 'CrossSheetRowSumCheck' rule could"
                             "not be run.",
                             severity=SeverityLevel.WARNING,
+                            sheet_name=sheet,
                         )
                     )
 
@@ -234,6 +236,7 @@ class DynamicDataset(BaseDataset):
                             f"'{sheet}' was found so the 'CrossSheetIdCheck' rule"
                             "could not be run.",
                             severity=SeverityLevel.WARNING,
+                            sheet_name=sheet,
                         )
                     )
 
@@ -414,13 +417,16 @@ class DynamicDataset(BaseDataset):
         """
         results: list[ValidationResult] = []
 
-        expected_names = self.schema.get_all_sheet_names()
+        
         min_matching_score: float = 0.8
         name_scaler: float = 0.4
         overlap_scaler: float = 0.6
+        # get schema sheet names and already matched excel sheet names
+        expected_names = self.schema.get_all_sheet_names()
+        expected_names.extend(self.data.get_loaded_sheet_excel_names())
 
         for sheet in self.data.loaded_sheets:
-            if sheet.data_sheet_name.lower() in expected_names:
+            if sheet.data_sheet_name.lower() in expected_names: 
                 # dont need to process existing items that should have
                 # been matched when loading the data
                 continue
@@ -595,6 +601,50 @@ class DynamicDataset(BaseDataset):
                 # unexpected sheets validator
                 self.data.remove_loaded_sheet(sheet)
 
+        # check parent counts if loops. should only be one sheet without a parent
+        clean_sheets = [
+            item for item, value in self.sheet_matching.items() if value.classification == "clean"
+        ]
+        if len(clean_sheets) > 1:
+            clean_parent_sheets = [
+                item
+                for item, value in self.sheet_matching.items()
+                if value.classification == "clean" and value.parent_sheet is None
+            ]
+            if len(clean_parent_sheets) > 1:
+                results.append(
+                    ValidationResult(
+                        rule="DynamicDataset Creation",
+                        message=f"There are unmatched clean sheets. {len(clean_parent_sheets)}"
+                        " clean data sheets did not match to a parent."
+                        " There should only be 1 clean sheet without a parent.",
+                        severity=SeverityLevel.ERROR,
+                        details={"Unmatched clean sheets": clean_parent_sheets},
+                    )
+                )
+
+        raw_sheets = [
+            item for item, value in self.sheet_matching.items() if value.classification == "raw"
+        ]
+
+        if len(raw_sheets) > 1:
+            raw_parent_sheets = [
+                item
+                for item, value in self.sheet_matching.items()
+                if value.classification == "raw" and value.parent_sheet is None
+            ]
+            if len(raw_parent_sheets) > 1:
+                results.append(
+                    ValidationResult(
+                        rule="DynamicDataset Creation",
+                        message=f"There are unmatched raw sheets. {len(raw_parent_sheets)} raw data"
+                        " sheets did not match to a parent."
+                        " There should only be 1 raw sheet without a parent.",
+                        severity=SeverityLevel.ERROR,
+                        details={"Unmatched raw sheets": raw_parent_sheets},
+                    )
+                )
+
         results.append(
             ValidationResult(
                 rule="DynamicDataset Creation",
@@ -694,32 +744,59 @@ class DynamicDataset(BaseDataset):
             _type_: return column if one match is found, otherwise None
         """
         unique_cols = []
+        majority_unique_cols = []
+
+
+        def _additional_matching(columns: list[str]):
+            """Perform some additional checks to find possible unique columns"""
+            matching_columns = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
+            if len(matching_columns) == 1:
+                return matching_columns[0]
+
+            alt_matches = []
+            # child sheets often have a unique column like person
+            for column in columns:
+                if "person" in column:
+                    alt_matches.append(column)
+
+            if len(alt_matches) == 1:
+                return alt_matches[0]
+            
+            return None
+
+
         for col_name in df.columns:
+            if col_name in settings.IGNORE_COLUMNS_FOR_VALIDATION:
+                continue
             # Check if the number of unique values equals the total row count
             unique_count = df[col_name].n_unique()
             total_count = len(df)
 
             if unique_count == total_count:
                 unique_cols.append(col_name)
+            elif unique_count/total_count > 0.98: 
+                # sometimes there can be a few duplicates 
+                # (which there shouldnt and will cause validation errors later)
+                # but still try to find the correct column if no unique ones are found
+                majority_unique_cols.append(col_name)
 
         # some other columns, often from kobo, will show as unique
         # but these are not wanted
-        unique_cols = filter_list(unique_cols, settings.IGNORE_COLUMNS_FOR_VALIDATION)
-        if len(unique_cols) == 1:
+        # unique_cols = filter_list(unique_cols, settings.IGNORE_COLUMNS_FOR_VALIDATION)
+        unique_cols_len = len(unique_cols)
+        majority_unique_cols_len = len(majority_unique_cols)
+        if unique_cols_len == 1:
             return unique_cols[0]
-        elif len(unique_cols) > 1:
+        elif unique_cols_len > 1:
             # try to match to common names if more than one match
-            matching_columns = match_list(unique_cols, settings.COMMON_ID_COLUMN_NAMES)
-            if len(matching_columns) == 1:
-                return matching_columns[0]
-
-            alt_matches = []
-            # child sheets often have a unique column like person
-            for column in unique_cols:
-                if "person" in column:
-                    alt_matches.append(column)
-
-            if len(alt_matches) == 1:
-                return alt_matches[0]
+            alt_match = _additional_matching(unique_cols)
+            if alt_match is not None:
+                return alt_match
+        elif majority_unique_cols_len == 1:
+            return majority_unique_cols[0]
+        elif majority_unique_cols_len > 1:
+            alt_match = _additional_matching(majority_unique_cols)
+            if alt_match is not None:
+                return alt_match
 
         return None
