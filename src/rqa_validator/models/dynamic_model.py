@@ -417,7 +417,6 @@ class DynamicDataset(BaseDataset):
         """
         results: list[ValidationResult] = []
 
-        
         min_matching_score: float = 0.8
         name_scaler: float = 0.4
         overlap_scaler: float = 0.6
@@ -426,7 +425,7 @@ class DynamicDataset(BaseDataset):
         expected_names.extend(self.data.get_loaded_sheet_excel_names())
 
         for sheet in self.data.loaded_sheets:
-            if sheet.data_sheet_name.lower() in expected_names: 
+            if sheet.data_sheet_name.lower() in expected_names:
                 # dont need to process existing items that should have
                 # been matched when loading the data
                 continue
@@ -746,7 +745,6 @@ class DynamicDataset(BaseDataset):
         unique_cols = []
         majority_unique_cols = []
 
-
         def _additional_matching(columns: list[str]):
             """Perform some additional checks to find possible unique columns"""
             matching_columns = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
@@ -761,9 +759,8 @@ class DynamicDataset(BaseDataset):
 
             if len(alt_matches) == 1:
                 return alt_matches[0]
-            
-            return None
 
+            return None
 
         for col_name in df.columns:
             if col_name in settings.IGNORE_COLUMNS_FOR_VALIDATION:
@@ -774,8 +771,8 @@ class DynamicDataset(BaseDataset):
 
             if unique_count == total_count:
                 unique_cols.append(col_name)
-            elif unique_count/total_count > 0.98: 
-                # sometimes there can be a few duplicates 
+            elif unique_count / total_count > 0.98:
+                # sometimes there can be a few duplicates
                 # (which there shouldnt and will cause validation errors later)
                 # but still try to find the correct column if no unique ones are found
                 majority_unique_cols.append(col_name)

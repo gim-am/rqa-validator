@@ -89,6 +89,10 @@ class CrossSheetIdCheck(BaseValidator):
                 continue
             assert child_loaded_sheet is not None
 
+            if child_loaded_sheet.data.height < 1:
+                # no data in sheet. eg empty deletion log
+                continue
+
             # gets ids from a child sheet that are not present in a master sheet
 
             # this process assumes that:

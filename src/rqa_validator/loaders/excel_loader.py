@@ -33,12 +33,12 @@ class ExcelLoaderData:
             List[str]: List of sheet names.
         """
         return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
-    
+
     def get_loaded_sheet_excel_names(self) -> list[str]:
         """Gets all the excel names for the loaded excel sheets
         that were mapped to the origianl schema.
 
-        This is related to dynamic model creation process. 
+        This is related to dynamic model creation process.
 
         Returns:
             List[str]: List of sheet names.
@@ -212,21 +212,21 @@ class ExcelLoader:
                 )
                 results.extend(u_results)
             else:
-                df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
-                # dont lower the columns as the caseing is needed for validation checks
-                df_columns = df.columns
-                df = df.rename(str.lower)
-                data.loaded_sheets.append(
-                    DataSheetMap(
-                        schema_sheet_name=excel_sheet_name,
-                        data_sheet_name=excel_sheet_name,
-                        data=df,
-                        data_columns=df_columns,
-                        auto_loaded = True
+                if load_all_sheets:
+                    df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
+                    # dont lower the columns as the caseing is needed for validation checks
+                    df_columns = df.columns
+                    df = df.rename(str.lower)
+                    data.loaded_sheets.append(
+                        DataSheetMap(
+                            schema_sheet_name=excel_sheet_name,
+                            data_sheet_name=excel_sheet_name,
+                            data=df,
+                            data_columns=df_columns,
+                            auto_loaded=True,
+                        )
                     )
-                )
-
-                if not load_all_sheets:
+                else:
                     # 7
                     data.unexpected_sheets.append(excel_sheet_name)
 
