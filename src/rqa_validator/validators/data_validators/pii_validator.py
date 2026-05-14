@@ -74,29 +74,31 @@ class PiiDataCheck(BaseValidator):
             )
 
             if literal_matches:
-                for item in literal_matches:
-                    column_match_df = column_match_df.vstack(
-                        pl.DataFrame(
+                column_match_df = column_match_df.vstack(
+                    pl.DataFrame(
+                        (
                             {
                                 "sheet": sheet.data_sheet_name,
                                 "column": item,
                                 "match_type": "literal",
                                 "match_values": item,
-                            },
-                        )
-                    )
-            if fuzzy_matched_values:
-                for item in fuzzy_matched_values:
-                    column_match_df = column_match_df.vstack(
-                        pl.DataFrame(
-                            {
-                                "sheet": sheet.data_sheet_name,
-                                "column": item.standard_name,
-                                "match_type": "fuzzy",
-                                "match_values": item.matches,
                             }
-                        )
+                            for item in literal_matches
+                        ),
                     )
+                )
+            if fuzzy_matched_values:
+                column_match_df = column_match_df.vstack(
+                    pl.DataFrame(
+                        {
+                            "sheet": sheet.data_sheet_name,
+                            "column": item.standard_name,
+                            "match_type": "fuzzy",
+                            "match_values": item.matches,
+                        }
+                        for item in fuzzy_matched_values
+                    )
+                )
 
             # scan column data
             result, id_column = get_data_sheet_id(

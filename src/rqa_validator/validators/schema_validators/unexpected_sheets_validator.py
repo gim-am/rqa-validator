@@ -20,14 +20,14 @@ class UnexpectedSheetsCheck(BaseValidator):
 
         results: list[ValidationResult] = []
 
-        for sheet in data.unexpected_sheets:
-            results.append(
-                ValidationResult(
-                    rule=self.name,
-                    message=f"An unexpected sheet '{sheet}' was found. Check if this is"
-                    " required to be published/archived.",
-                    severity=SeverityLevel.WARNING,
-                )
+        results.append(
+            ValidationResult(
+                rule=self.name,
+                message="Unexpected sheets were foung in the dataset. Check to see if these are"
+                " required to be published/archived. Check output for details.",
+                severity=SeverityLevel.WARNING,
+                details={"unexpected_sheets": data.unexpected_sheets},
             )
+        )
 
         return results

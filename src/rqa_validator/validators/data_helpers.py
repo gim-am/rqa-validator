@@ -88,6 +88,7 @@ def get_data_loaded_column(
             message=f"A column for '{column_name}' is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
+            column_name=column_name,
         )
 
     return result, column

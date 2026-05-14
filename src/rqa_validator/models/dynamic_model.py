@@ -241,11 +241,13 @@ class DynamicDataset(BaseDataset):
                     )
 
         if consent_sheet is not None:
+            consent_linked_clean_sheet = self.sheet_matching[consent_sheet].linked_clean_sheet
+            assert consent_linked_clean_sheet is not None
             self.validators.append(
                 ConsentCheck(
                     schema=self.schema,
                     raw_data_sheet=consent_sheet,
-                    clean_data_sheet=self.sheet_matching[consent_sheet].linked_clean_sheet,
+                    clean_data_sheet=consent_linked_clean_sheet,
                 )
             )
         else:

@@ -1,6 +1,8 @@
+import polars as pl
+
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
-from ...validators.base import BaseValidator, ValidationResult
+from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import get_data_loaded_columns, get_data_loaded_sheets
 
 
@@ -33,7 +35,24 @@ class MandatoryColumns(BaseValidator):
         )
 
         if result:
-            results.extend(result)
+            sheet_df = pl.DataFrame(
+                [
+                    {
+                        "sheet": item.sheet_name,
+                    }
+                    for item in result
+                ]
+            ).to_dict(as_series=False)
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message="Some excel sheets were expected but not found."
+                    " See output for details.",
+                    severity=SeverityLevel.ERROR,
+                    details=sheet_df,
+                )
+            )
+
             return results
 
         for sheet, loaded_sheet in data_loaded_sheets.items():
@@ -49,5 +68,17 @@ class MandatoryColumns(BaseValidator):
 
             if result:
                 results.extend(result)
+
+        if results:
+            column_df = pl.DataFrame(
+                [{"sheet": item.sheet_name, "column": item.column_name} for item in results]
+            ).to_dict(as_series=False)
+            result = ValidationResult(
+                rule=self.name,
+                message="Some excel columns were expected but not found. See output for details.",
+                severity=SeverityLevel.ERROR,
+                details=column_df,
+            )
+            return [result]
 
         return results

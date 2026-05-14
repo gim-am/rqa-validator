@@ -49,35 +49,36 @@ class MissingSheetsCheck(BaseValidator):
         missing_sheets = filter_list(expected_sheets, provided_sheets)
         optional_missing_sheets = filter_list(optional_sheets, provided_sheets)
 
-        for sheet in missing_sheets:
+        if missing_sheets:
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"A sheet for '{sheet}' was expexted but was not found.",
-                    sheet_name=sheet,
+                    message="Some sheets were expexted but not found. See the output for details.",
                     severity=SeverityLevel.ERROR,
+                    details={"missing_sheets": missing_sheets},
                 )
             )
 
-        for sheet in optional_missing_sheets:
-            if sheet == "sampling_info":
+        if optional_missing_sheets:
+            if "sampling_info" in optional_missing_sheets:
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for '{sheet}' is expected when weights are"
+                        message="A sheet for 'sampling_info' is expected when weights are"
                         " added to the clean data. Add this sheet if required.",
-                        sheet_name=sheet,
+                        sheet_name="sampling_info",
                         severity=SeverityLevel.WARNING,
                     )
                 )
-            else:
+            optional_missing_sheets = filter_list(optional_missing_sheets, ["sampling_info"])
+            if optional_missing_sheets:
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"A sheet for '{sheet}' is optional. Check if this sheet"
-                        " is required or not for this dataset.",
-                        sheet_name=sheet,
+                        message="Some optional sheets were not found. Check if these sheets"
+                        " are required or not for this dataset.",
                         severity=SeverityLevel.WARNING,
+                        details={"optional_sheets": optional_missing_sheets},
                     )
                 )
 
