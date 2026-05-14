@@ -6,7 +6,7 @@ from ...common.list_matching import filter_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
-from ...validators.helpers import get_data_loaded_sheets, get_data_sheet_ids
+from ..data_helpers import get_data_loaded_sheets, get_data_sheet_ids
 
 
 class NaNDataCheck(BaseValidator):

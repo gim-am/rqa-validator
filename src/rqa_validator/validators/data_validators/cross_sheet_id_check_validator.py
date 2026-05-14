@@ -4,7 +4,8 @@ from ...common.schema_matching import get_matching_unique_columns
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
-from ...validators.helpers import (
+from ..data_helpers import (
+    check_id_column_overlap,
     get_data_loaded_sheet,
     get_data_loaded_sheets,
     get_data_sheet_ids,
@@ -135,6 +136,21 @@ class CrossSheetIdCheck(BaseValidator):
             else:
                 child_data_id_columns = child_matching_columns[0]
                 master_id_columns = child_matching_columns[0]
+
+            # check the intersection of the id columns to make sure they
+            # are indeed linkable
+            result = check_id_column_overlap(
+                child_data_id_columns.data_column_name,
+                child_loaded_sheet.data,
+                sheet,
+                master_id_columns.data_column_name,
+                data_loaded_sheets[self.master_sheet].data,
+                self.master_sheet,
+                self.name,
+            )
+            results.append(result)
+            if result.severity != SeverityLevel.INFO:
+                continue
 
             # filter id column. should only actually filter anything if the sheet
             # is a cleaning log sheet as it contains ids from multiple

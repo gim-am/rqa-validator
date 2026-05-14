@@ -4,7 +4,7 @@ import polars as pl
 
 from config import settings
 
-from ..common.list_matching import filter_list, match_list
+from ..common.list_matching import filter_list, get_set_overlap, match_list
 from ..loaders.excel_loader import ExcelLoaderData
 from ..loaders.helpers import match_excel_columns_to_schema
 from ..models.base import (
@@ -527,12 +527,8 @@ class DynamicDataset(BaseDataset):
                     log_set = set(
                         log_sheet.data.select(linking_log_column).to_series().unique().to_list()
                     )
-                    intersection = log_set.intersection(data_sheet.id_column_set)
 
-                    if len(intersection) > 0:
-                        overlap = len(intersection) / len(log_set)
-                    else:
-                        overlap = 0
+                    overlap = get_set_overlap(log_set, data_sheet.id_column_set)
 
                     combined_score = (name_sim * name_scaler) + (overlap * overlap_scaler)
 
@@ -569,15 +565,14 @@ class DynamicDataset(BaseDataset):
                 if not raw_prof.id_column_set:
                     continue
 
-                # Score 1: Name similarity
+                # Name similarity
                 name_sim = SequenceMatcher(None, clean_name, raw_name).ratio()
 
-                # Score 2: ID overlap (Clean IDs should be subset of Raw IDs)
-                intersection = clean_prof.id_column_set.intersection(raw_prof.id_column_set)
-                id_overlap = len(intersection) / len(clean_prof.id_column_set)
+                # ID overlap (clean IDs should be subset of raw IDs)
+                overlap = get_set_overlap(clean_prof.id_column_set, raw_prof.id_column_set)
 
                 # Combined score (weight name similarity higher)
-                combined_score = (name_sim * name_scaler) + (id_overlap * overlap_scaler)
+                combined_score = (name_sim * name_scaler) + (overlap * overlap_scaler)
 
                 if combined_score > best_score:
                     best_score = combined_score

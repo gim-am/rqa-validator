@@ -238,3 +238,24 @@ def filter_loaded_sheets(
         Dict[str, DataSheetMap]: filtered dict of loaded data sheets
     """
     return {key: loaded_sheets[key] for key in sheets}
+
+
+def get_set_overlap(source_data: set, target_data: set) -> float:
+    """Gets the overlap of two sets by calculating the intersection \
+     of both sets
+
+    Args:
+        source_data (set): set of source data
+        target_data (set): set of target data
+
+    Returns:
+        float: overlap 
+    """
+    intersection = source_data.intersection(target_data)
+
+    if len(intersection) > 0:
+        overlap = len(intersection) / len(source_data)
+    else:
+        overlap = 0.0
+
+    return overlap

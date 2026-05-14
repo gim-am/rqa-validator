@@ -3,12 +3,12 @@ from dataclasses import dataclass
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
-from ...validators.helpers import (
+from ..data_helpers import (
     get_data_loaded_sheet,
     get_data_loaded_sheets,
     get_data_sheet_id,
-    get_schema_loaded_sheet,
 )
+from ..schema_helpers import get_schema_loaded_sheet
 
 
 class CrossSheetRowSumCheck(BaseValidator):

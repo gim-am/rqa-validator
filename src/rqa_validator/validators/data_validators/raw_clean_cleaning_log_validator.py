@@ -7,15 +7,15 @@ from ...common.list_matching import filter_list, match_list
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ..base import BaseValidator, SeverityLevel, ValidationResult
-from ..helpers import (
+from ..data_helpers import (
+    check_id_column_overlap,
     get_data_loaded_columns,
     get_data_loaded_sheets,
     get_data_sheet_ids,
     get_matching_id_columns,
     get_matching_id_columns_alt,
-    get_schema_loaded_sheets,
-    get_schema_process_value,
 )
+from ..schema_helpers import get_schema_loaded_sheets, get_schema_process_value
 
 
 class RawToCleanToLog(BaseValidator):
@@ -167,6 +167,21 @@ class RawToCleanToLog(BaseValidator):
             else:
                 clean_data_id_columns = clean_to_log_matching_id_columns[0][0]
                 clean_log_id_columns = clean_to_log_matching_id_columns[0][1]
+
+            # check the intersection of the id columns to make sure they
+            # are indeed linkable
+            result = check_id_column_overlap(
+                clean_log_id_columns.data_column_name,
+                data_loaded_sheets[self.cleaning_log_sheet].data,
+                self.cleaning_log_sheet,
+                clean_data_id_columns.data_column_name,
+                data_loaded_sheets[self.clean_data_sheet].data,
+                self.clean_data_sheet,
+                self.name,
+            )
+            results.append(result)
+            if result.severity != SeverityLevel.INFO:
+                return results
 
             result, data_loaded_columns = get_data_loaded_columns(
                 data={
