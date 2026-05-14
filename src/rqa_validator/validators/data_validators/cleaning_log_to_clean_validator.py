@@ -253,7 +253,7 @@ class CleaningLogToClean(BaseValidator):
                     } Ids had multiple changes for the same question. "
                     "These were not validated. Check the output for details.",
                     severity=SeverityLevel.WARNING,
-                    details=multiple_change_df.to_dict(),
+                    details=multiple_change_df.to_dict(as_series=False),
                 )
             )
 
@@ -281,7 +281,7 @@ class CleaningLogToClean(BaseValidator):
                     f"'{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}'."
                     " Check the output for details.",
                     severity=SeverityLevel.WARNING,
-                    details=same_value_df.to_dict(),
+                    details=same_value_df.to_dict(as_series=False),
                 )
             )
 
@@ -502,7 +502,7 @@ class CleaningLogToClean(BaseValidator):
                         f" Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
-                        details=difference_df.to_dict(),
+                        details=difference_df.to_dict(as_series=False),
                     )
                 )
 

@@ -479,81 +479,81 @@ class DynamicDataset(BaseDataset):
             for k, v in self.sheet_matching.items()
             if v.classification == "log" and v.log_type == "cleaning"
         ]
-        data_sheets = [k for k, v in self.sheet_matching.items() if v.classification != "log"]
+        clean_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "clean"]
+        raw_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "raw"]
 
         # try to  link the cleaning logs to another sheet
-        for log_name in cleaning_log_sheets:
-            log_sheet = self.sheet_matching[log_name]
+        for log_sheet in cleaning_log_sheets:
+            match_log_sheet = self.sheet_matching[log_sheet]
 
             best_parent = None
             best_score = -1
             best_linking_log_column = None
 
-            for data_name in data_sheets:
-                data_sheet = self.sheet_matching[data_name]
-                if data_sheet.id_column_set is None:
+            for clean_sheet in clean_sheets:
+                match_clean_sheet = self.sheet_matching[clean_sheet]
+                if match_clean_sheet.id_column_set is None:
                     continue
-                if data_sheet.id_column is None:
+                if match_clean_sheet.id_column is None:
                     continue
 
                 # find a linking column
                 linking_log_column = self._find_linking_column(
-                    log_sheet.data.columns, data_sheet.id_column, True
+                    match_log_sheet.data.columns, match_clean_sheet.id_column, True
                 )
                 # compare names and overlapping id values
                 if linking_log_column is not None:
                     log_set = set(
-                        log_sheet.data.select(linking_log_column).to_series().unique().to_list()
+                        match_log_sheet.data.select(linking_log_column)
+                        .to_series()
+                        .unique()
+                        .to_list()
                     )
                     combined_score = self._get_similarity_score(
-                        log_name, log_set, data_name, data_sheet.id_column_set
+                        log_sheet, log_set, clean_sheet, match_clean_sheet.id_column_set
                     )
 
                     if combined_score > best_score:
                         best_score = combined_score
-                        best_parent = data_name
+                        best_parent = clean_sheet
                         best_linking_log_column = linking_log_column
             # if there was a good enough score then assume its a parent
             if best_score > min_matching_score and best_parent is not None:
-                if (
-                    log_sheet.log_type == "cleaning"
-                    and self.sheet_matching[best_parent].classification == "clean"
-                ):
-                    self.sheet_matching[best_parent].linked_cleaning_log = log_name
-                    self.sheet_matching[log_name].log_id_column = best_linking_log_column
+                self.sheet_matching[best_parent].linked_cleaning_log = log_sheet
+                self.sheet_matching[log_sheet].log_id_column = best_linking_log_column
 
-        raw_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "raw"]
-        clean_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "clean"]
-
-        self._match_child_parent(raw_sheets, self.sheet_matching)
-        self._match_child_parent(clean_sheets, self.sheet_matching)
+        self._match_child_parent(raw_sheets)
+        self._match_child_parent(clean_sheets)
 
         # map raw data sheets to clean data sheets
-        for clean_name in clean_sheets:
-            clean_prof = self.sheet_matching[clean_name]
-            if not clean_prof.id_column_set:
+        for clean_sheet in clean_sheets:
+            match_clean_sheet = self.sheet_matching[clean_sheet]
+            if not match_clean_sheet.id_column_set:
                 continue
 
             best_raw = None
             best_score = -1
 
-            for raw_name in raw_sheets:
-                raw_prof = self.sheet_matching[raw_name]
-                if not raw_prof.id_column_set:
+            for raw_sheet in raw_sheets:
+                match_raw_sheet = self.sheet_matching[raw_sheet]
+                if not match_raw_sheet.id_column_set:
                     continue
 
                 combined_score = self._get_similarity_score(
-                    clean_name, clean_prof.id_column_set, raw_name, raw_prof.id_column_set
+                    clean_sheet,
+                    match_clean_sheet.id_column_set,
+                    raw_sheet,
+                    match_raw_sheet.id_column_set,
                 )
 
                 if combined_score > best_score:
                     best_score = combined_score
-                    best_raw = raw_name
+                    best_raw = raw_sheet
 
             if best_score > min_matching_score:
                 assert best_raw is not None
-                self.sheet_matching[clean_name].linked_raw_sheet = best_raw
-                self.sheet_matching[best_raw].linked_clean_sheet = clean_name
+                self.sheet_matching[clean_sheet].linked_raw_sheet = best_raw
+                self.sheet_matching[best_raw].linked_clean_sheet = clean_sheet
 
         unknown_sheets = [
             k for k, v in self.sheet_matching.items() if v.classification == "unknown"
@@ -568,9 +568,6 @@ class DynamicDataset(BaseDataset):
                 self.data.remove_loaded_sheet(sheet)
 
         # check parent counts if loops. should only be one sheet without a parent
-        clean_sheets = [
-            item for item, value in self.sheet_matching.items() if value.classification == "clean"
-        ]
         if len(clean_sheets) > 1:
             clean_parent_sheets = [
                 item
@@ -588,10 +585,6 @@ class DynamicDataset(BaseDataset):
                         details={"Unmatched clean sheets": clean_parent_sheets},
                     )
                 )
-
-        raw_sheets = [
-            item for item, value in self.sheet_matching.items() if value.classification == "raw"
-        ]
 
         if len(raw_sheets) > 1:
             raw_parent_sheets = [
@@ -705,55 +698,55 @@ class DynamicDataset(BaseDataset):
 
         return None
 
-    def _match_child_parent(
-        self, sheets: list[str], matched_sheets: dict[str, DynamicSheetMatching]
-    ):
+    def _match_child_parent(self, sheets: list[str]):
         """Attempt to match child parent sheets based on finding possible
         foreign keys between the sheets.
 
         No name matching is done for this process as the names are likely
         to be very different between child and parent sheets.
         """
-        for child_name in sheets:
-            child_prof = matched_sheets[child_name]
-            if not child_prof.id_column_set:
+        for child_sheet in sheets:
+            child_match_sheet = self.sheet_matching[child_sheet]
+            if not child_match_sheet.id_column_set:
                 continue
 
             best_parent = None
             best_score = -1
-            best_fk_col = None
+            best_fk_column = None
 
-            for parent_name in sheets:
-                if parent_name == child_name:
+            for parent_sheet in sheets:
+                if parent_sheet == child_sheet:
                     continue
-                parent_prof = matched_sheets[parent_name]
-                if not parent_prof.id_column_set:
+                parent_match_sheet = self.sheet_matching[parent_sheet]
+                if not parent_match_sheet.id_column_set:
                     continue
 
                 # Find FK column in child that matches parent's primary ID
-                if parent_prof.id_column is not None:
+                if parent_match_sheet.id_column is not None:
                     # try to find an id column match
                     linking_column = self._find_linking_column(
-                        child_prof.data.columns, parent_prof.id_column
+                        child_match_sheet.data.columns, parent_match_sheet.id_column
                     )
                     # see what the overlap of id values is
                     if linking_column is not None:
                         child_set = set(
-                            child_prof.data.select(linking_column).to_series().unique().to_list()
+                            child_match_sheet.data.select(linking_column)
+                            .to_series()
+                            .unique()
+                            .to_list()
                         )
-
-                        overlap = get_set_overlap(child_set, parent_prof.id_column_set)
+                        overlap = get_set_overlap(child_set, parent_match_sheet.id_column_set)
 
                         if overlap > best_score:
                             best_score = overlap
-                            best_parent = parent_name
-                            best_fk_col = linking_column
+                            best_parent = parent_sheet
+                            best_fk_column = linking_column
 
             if best_score > 0.8:
                 assert best_parent is not None
-                matched_sheets[child_name].parent_sheet = best_parent
-                matched_sheets[child_name].parent_linking_column = best_fk_col
-                matched_sheets[best_parent].children.append(child_name)
+                self.sheet_matching[child_sheet].parent_sheet = best_parent
+                self.sheet_matching[child_sheet].parent_linking_column = best_fk_column
+                self.sheet_matching[best_parent].children.append(child_sheet)
 
     def _find_unique_column(self, df: pl.DataFrame):
         """Attempts to find a unique column in a dataframe

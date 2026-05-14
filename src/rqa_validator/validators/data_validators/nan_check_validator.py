@@ -147,7 +147,7 @@ class NaNDataCheck(BaseValidator):
                     message=f"There were {output_difference_df.height} possible invalid"
                     " values found. Check the output for details.",
                     severity=SeverityLevel.ERROR,
-                    details=output_difference_df.to_dict(),
+                    details=output_difference_df.to_dict(as_series=False),
                 )
             )
 

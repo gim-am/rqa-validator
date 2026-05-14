@@ -402,7 +402,7 @@ class RawToCleanToLog(BaseValidator):
                             " sheet. Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=self.cleaning_log_sheet,
-                            details=difference_df.to_dict(),
+                            details=difference_df.to_dict(as_series=False),
                         )
                     )
             else:
@@ -415,7 +415,7 @@ class RawToCleanToLog(BaseValidator):
                         " log was found. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
-                        details=difference_raw_to_clean_df.to_dict(),
+                        details=difference_raw_to_clean_df.to_dict(as_series=False),
                     )
                 )
 

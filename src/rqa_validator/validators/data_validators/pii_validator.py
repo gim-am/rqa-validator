@@ -147,7 +147,7 @@ class PiiDataCheck(BaseValidator):
                         " pii data. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
-                        details=final_df.to_dict(),
+                        details=final_df.to_dict(as_series=False),
                     )
                 )
 

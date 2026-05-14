@@ -219,7 +219,7 @@ class DataTypeCheck(BaseValidator):
                                 " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
-                                details=incorrect_values_df.to_dict(),
+                                details=incorrect_values_df.to_dict(as_series=False),
                             )
                         )
 
@@ -268,7 +268,7 @@ class DataTypeCheck(BaseValidator):
                                 " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
-                                details=incorrect_values_df.to_dict(),
+                                details=incorrect_values_df.to_dict(as_series=False),
                             )
                         )
 

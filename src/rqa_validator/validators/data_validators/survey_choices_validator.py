@@ -371,7 +371,7 @@ class SurveyChoicesCheck(BaseValidator):
                             "Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
-                            details=difference_df.to_dict(),
+                            details=difference_df.to_dict(as_series=False),
                         )
                     )
 

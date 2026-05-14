@@ -159,7 +159,7 @@ class ConsentCheck(BaseValidator):
                         severity=SeverityLevel.ERROR,
                         details=clean_data_filter_df.select(
                             [clean_data_id_column.data_column_name]
-                        ).to_dict(),
+                        ).to_dict(as_series=False),
                     )
                 )
 

@@ -77,11 +77,8 @@ class UniqueColumn(BaseValidator):
                                     " unique values. Check the output for details.",
                                     severity=SeverityLevel.ERROR,
                                     sheet_name=loaded_sheet_info.schema_sheet_name,
-                                    details=unique_duplicated_rows_df.to_dict(),
+                                    details=unique_duplicated_rows_df.to_dict(as_series=False),
                                 )
                             )
-
-        # if duplicated_ids_df.height > 0:
-        #     df_to_csv(duplicated_ids_df, output_filename)
 
         return results
