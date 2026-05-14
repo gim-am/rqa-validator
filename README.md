@@ -13,6 +13,7 @@
 ├── Dockerfile
 ├── .dockerignore
 ├── .env
+├── .github
 ├── .gitignore
 ├── main.py
 ├── pyproject.toml
@@ -47,6 +48,7 @@
 │   │   └── validators
 │   │       ├── base.py
 │   │       ├── config.py
+│   │       ├── data_helpers.py
 │   │       ├── data_validators
 │   │       │   ├── cleaning_log_to_clean_validator.py
 │   │       │   ├── column_data_type_validator.py
@@ -59,8 +61,8 @@
 │   │       │   ├── raw_clean_cleaning_log_validator.py
 │   │       │   ├── survey_choices_validator.py
 │   │       │   └── unique_column_validator.py
-│   │       ├── helpers.py
 │   │       ├── __init__.py
+│   │       ├── schema_helpers.py
 │   │       └── schema_validators
 │   │           ├── column_name_validator.py
 │   │           ├── duplicate_sheet_match_validator.py
@@ -68,6 +70,7 @@
 │   │           ├── mandatory_column_validator.py
 │   │           ├── missing_sheets_validator.py
 │   │           └── unexpected_sheets_validator.py
+│   └── tests
 └── uv.lock
 
 ```
