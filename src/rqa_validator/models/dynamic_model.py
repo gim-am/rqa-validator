@@ -418,8 +418,6 @@ class DynamicDataset(BaseDataset):
         results: list[ValidationResult] = []
 
         min_matching_score: float = 0.8
-        name_scaler: float = 0.4
-        overlap_scaler: float = 0.6
         # get schema sheet names and already matched excel sheet names
         expected_names = self.schema.get_all_sheet_names()
         expected_names.extend(self.data.get_loaded_sheet_excel_names())
@@ -459,7 +457,7 @@ class DynamicDataset(BaseDataset):
             # some cleaning logs contain columns that could be unique but ignore these
             # as they probably wont be the columns needed for validation processes
             if self.sheet_matching[sheet.data_sheet_name].log_type != "cleaning":
-                unique_col = self.find_unique_column(sheet.data)
+                unique_col = self._find_unique_column(sheet.data)
                 id_set = None
                 if unique_col is not None:
                     id_set = set(sheet.data.select(unique_col).to_series().unique().to_list())
@@ -499,38 +497,17 @@ class DynamicDataset(BaseDataset):
                     continue
 
                 # find a linking column
-                linking_log_column = None
-                # look for a same name match
-                if data_sheet.id_column in log_sheet.data.columns:
-                    linking_log_column = data_sheet.id_column
-                else:
-                    alt_matches = []
-                    # or a partial match
-                    for column in log_sheet.data.columns:
-                        if column in data_sheet.id_column:
-                            alt_matches.append(column)
-
-                    if len(alt_matches) == 1:
-                        linking_log_column = alt_matches[0]
-                    else:
-                        # or a common name
-                        matching_columns = match_list(
-                            log_sheet.data.columns, settings.COMMON_ID_COLUMN_NAMES
-                        )
-                        if len(matching_columns) == 1:
-                            linking_log_column = matching_columns[0]
-
+                linking_log_column = self._find_linking_column(
+                    log_sheet.data.columns, data_sheet.id_column, True
+                )
                 # compare names and overlapping id values
                 if linking_log_column is not None:
-                    name_sim = SequenceMatcher(None, log_name, data_name).ratio()
-
                     log_set = set(
                         log_sheet.data.select(linking_log_column).to_series().unique().to_list()
                     )
-
-                    overlap = get_set_overlap(log_set, data_sheet.id_column_set)
-
-                    combined_score = (name_sim * name_scaler) + (overlap * overlap_scaler)
+                    combined_score = self._get_similarity_score(
+                        log_name, log_set, data_name, data_sheet.id_column_set
+                    )
 
                     if combined_score > best_score:
                         best_score = combined_score
@@ -548,8 +525,8 @@ class DynamicDataset(BaseDataset):
         raw_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "raw"]
         clean_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "clean"]
 
-        self.match_child_parent(raw_sheets, self.sheet_matching)
-        self.match_child_parent(clean_sheets, self.sheet_matching)
+        self._match_child_parent(raw_sheets, self.sheet_matching)
+        self._match_child_parent(clean_sheets, self.sheet_matching)
 
         # map raw data sheets to clean data sheets
         for clean_name in clean_sheets:
@@ -565,14 +542,9 @@ class DynamicDataset(BaseDataset):
                 if not raw_prof.id_column_set:
                     continue
 
-                # Name similarity
-                name_sim = SequenceMatcher(None, clean_name, raw_name).ratio()
-
-                # ID overlap (clean IDs should be subset of raw IDs)
-                overlap = get_set_overlap(clean_prof.id_column_set, raw_prof.id_column_set)
-
-                # Combined score (weight name similarity higher)
-                combined_score = (name_sim * name_scaler) + (overlap * overlap_scaler)
+                combined_score = self._get_similarity_score(
+                    clean_name, clean_prof.id_column_set, raw_name, raw_prof.id_column_set
+                )
 
                 if combined_score > best_score:
                     best_score = combined_score
@@ -667,13 +639,80 @@ class DynamicDataset(BaseDataset):
 
         return results
 
-    def match_child_parent(
+    def _get_similarity_score(
+        self,
+        source_name: str,
+        source_data: set,
+        target_name: str,
+        target_data: set,
+        name_scaler: float = 0.4,
+        overlap_scaler: float = 0.6,
+    ) -> float:
+        """Calculates the similarity between two objects. This could be either
+        - two columns and their names or
+        - two sheet names and their id columns
+        This is done by calculating the similarity of their names and the
+        intersection of their id columns and then applying some weights
+        to the results.
+
+        Args:
+            source_name (str): name of the source item. either a column or sheet name
+            source_data (set): the set of source id column values
+            target_name (str): name of the target item. either a column or sheet name
+            target_data (set): the set of target id column values
+            name_scaler (float, optional): weight applied to name. Defaults to 0.4.
+            overlap_scaler (float, optional): weight applied to overlap. Defaults to 0.6.
+
+        Returns:
+            float: similarity score.
+        """
+        name_similarity = SequenceMatcher(None, source_name, target_name).ratio()
+        overlap = get_set_overlap(source_data, target_data)
+        return (name_similarity * name_scaler) + (overlap * overlap_scaler)
+
+    def _find_linking_column(
+        self, child_cols: list[str], parent_id_col: str, allow_common_names: bool = False
+    ) -> str | None:
+        """Attempts to find name matches between a parent id column and a list of
+               child columns.
+
+               Optionaly also checks a list of common names if no match was found.
+
+        Args:
+            child_cols (list[str]): list of child columns to search
+            parent_id_col (str): name of parent column
+            allow_common_names (bool, optional): Option to check for common names.
+                Defaults to False.
+
+        Returns:
+            str | None: returns a name match if found. otherwise None
+        """
+
+        #  Exact match
+        if parent_id_col in child_cols:
+            return parent_id_col
+
+        # Partial match
+        alt_matches = [col for col in child_cols if parent_id_col in col]
+        if len(alt_matches) == 1:
+            return alt_matches[0]
+
+        # check common names
+        if allow_common_names:
+            matching_columns: list[str] = match_list(child_cols, settings.COMMON_ID_COLUMN_NAMES)
+            if len(matching_columns) == 1:
+                return matching_columns[0]
+
+        return None
+
+    def _match_child_parent(
         self, sheets: list[str], matched_sheets: dict[str, DynamicSheetMatching]
     ):
         """Attempt to match child parent sheets based on finding possible
         foreign keys between the sheets.
 
-
+        No name matching is done for this process as the names are likely
+        to be very different between child and parent sheets.
         """
         for child_name in sheets:
             child_prof = matched_sheets[child_name]
@@ -693,32 +732,20 @@ class DynamicDataset(BaseDataset):
 
                 # Find FK column in child that matches parent's primary ID
                 if parent_prof.id_column is not None:
-                    linking_column = None
-                    # try to find an exact column match
-                    # if no match look for the parent column name in the
-                    # child column names
-                    if parent_prof.id_column in child_prof.data.columns:
-                        linking_column = parent_prof.id_column
-                    else:
-                        alt_matches = []
-                        for column in child_prof.data.columns:
-                            if parent_prof.id_column in column:
-                                alt_matches.append(column)
-
-                        if len(alt_matches) == 1:
-                            linking_column = alt_matches[0]
-
+                    # try to find an id column match
+                    linking_column = self._find_linking_column(
+                        child_prof.data.columns, parent_prof.id_column
+                    )
                     # see what the overlap of id values is
                     if linking_column is not None:
                         child_set = set(
                             child_prof.data.select(linking_column).to_series().unique().to_list()
                         )
 
-                        intersection = child_set.intersection(parent_prof.id_column_set)
-                        overlap_score = len(intersection) / len(child_set)
+                        overlap = get_set_overlap(child_set, parent_prof.id_column_set)
 
-                        if overlap_score > best_score:
-                            best_score = overlap_score
+                        if overlap > best_score:
+                            best_score = overlap
                             best_parent = parent_name
                             best_fk_col = linking_column
 
@@ -728,25 +755,25 @@ class DynamicDataset(BaseDataset):
                 matched_sheets[child_name].parent_linking_column = best_fk_col
                 matched_sheets[best_parent].children.append(child_name)
 
-    def find_unique_column(self, df: pl.DataFrame):
+    def _find_unique_column(self, df: pl.DataFrame):
         """Attempts to find a unique column in a dataframe
 
         Args:
             df (pl.DataFrame): dataframe to check
 
         Returns:
-            _type_: return column if one match is found, otherwise None
+            str | None: return column if one match is found, otherwise None
         """
         unique_cols = []
         majority_unique_cols = []
 
-        def _additional_matching(columns: list[str]):
+        def _additional_matching(columns: list[str]) -> str | None:
             """Perform some additional checks to find possible unique columns"""
-            matching_columns = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
+            matching_columns: list[str] = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
             if len(matching_columns) == 1:
                 return matching_columns[0]
 
-            alt_matches = []
+            alt_matches: list[str] = []
             # child sheets often have a unique column like person
             for column in columns:
                 if "person" in column:
