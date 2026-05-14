@@ -50,6 +50,15 @@ class PiiDataCheck(BaseValidator):
             "phone": r"^(\+|0)[\d\s\-\(\)\+]+$",
         }
 
+        column_match_df = pl.DataFrame(
+            [
+                pl.Series("sheet", [], dtype=pl.String),
+                pl.Series("column", [], dtype=pl.String),
+                pl.Series("match_type", [], dtype=pl.String),
+                pl.Series("match_values", [], dtype=pl.String),
+            ]
+        )
+
         expressions = [
             pl.col("value").cast(pl.Utf8).str.extract(pattern, 0).alias(f"match_{type}")
             for type, pattern in patterns.items()
@@ -66,31 +75,29 @@ class PiiDataCheck(BaseValidator):
 
             if literal_matches:
                 for item in literal_matches:
-                    results.append(
-                        ValidationResult(
-                            rule=self.name + " literal comparison",
-                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"
-                            " pii column. Check to see if it should be removed:"
-                            f" {item}.",
-                            severity=SeverityLevel.WARNING,
-                            sheet_name=sheet.data_sheet_name,
-                            column_name=item,
+                    column_match_df = column_match_df.vstack(
+                        pl.DataFrame(
+                            {
+                                "sheet": sheet.data_sheet_name,
+                                "column": item,
+                                "match_type": "literal",
+                                "match_values": item,
+                            },
                         )
                     )
             if fuzzy_matched_values:
                 for item in fuzzy_matched_values:
-                    results.append(
-                        ValidationResult(
-                            rule=self.name + " fuzzy match comparison",
-                            message=f"The sheet '{sheet.data_sheet_name}' has a possible"
-                            " pii column. Check to the details to see if it"
-                            " should be removed.",
-                            severity=SeverityLevel.WARNING,
-                            sheet_name=sheet.data_sheet_name,
-                            column_name=item.standard_name,
-                            details=item.matches,
+                    column_match_df = column_match_df.vstack(
+                        pl.DataFrame(
+                            {
+                                "sheet": sheet.data_sheet_name,
+                                "column": item.standard_name,
+                                "match_type": "fuzzy",
+                                "match_values": item.matches,
+                            }
                         )
                     )
+
             # scan column data
             result, id_column = get_data_sheet_id(
                 sheet.data_sheet_name, self.schema, sheet, self.name
@@ -147,8 +154,17 @@ class PiiDataCheck(BaseValidator):
                         " pii data. Check the output for details.",
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
-                        details=final_df.to_dict(as_series=False),
+                        details=final_df.to_dict(),
                     )
                 )
+        if column_match_df.height > 0:
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message="Possible Pii columns were found. Check the output for details.",
+                    severity=SeverityLevel.WARNING,
+                    details=column_match_df.to_dict(as_series=False),
+                )
+            )
 
         return results
