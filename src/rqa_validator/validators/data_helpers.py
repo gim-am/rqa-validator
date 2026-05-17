@@ -1,4 +1,3 @@
-from polars import DataFrame
 
 from ..common.list_matching import get_set_overlap, match_sheet_columns, match_sheet_columns_ids
 from ..common.schema_matching import get_matching_unique_columns
@@ -197,13 +196,13 @@ def get_data_sheet_ids(
     return results, loaded_columns
 
 
-def get_matching_id_columns(
+def get_matching_columns(
     source: list[DataColumnMap],
     source_sheet: str,
     target: list[DataColumnMap],
     target_sheet: str,
     rule: str,
-) -> tuple[ValidationResult | None, list[tuple]]:
+) -> tuple[ValidationResult | None, list[tuple[DataColumnMap, DataColumnMap]]]:
     """Get matching id columns between sheets.
 
     Args:
@@ -220,7 +219,9 @@ def get_matching_id_columns(
 
     result = None
 
-    matching_columns = match_sheet_columns(source, target)
+    matching_columns: list[tuple[DataColumnMap, DataColumnMap]] = match_sheet_columns(
+        source, target
+    )
     # should only be one matching id column between the sheets.
     if len(matching_columns) != 1:
         result = ValidationResult(
@@ -236,7 +237,7 @@ def get_matching_id_columns(
     return result, matching_columns
 
 
-def get_matching_id_columns_alt(
+def get_matching_columns_alt(
     source: list[DataColumnMap],
     source_sheet: str,
     target: list[DataColumnMap],
@@ -277,13 +278,134 @@ def get_matching_id_columns_alt(
     return result, source_columns, target_columns
 
 
+def get_id_linking_columns(
+    schema: BaseDatasetSchema,
+    data_loaded_sheets: dict[str, DataSheetMap],
+    source_sheet: str,
+    target_sheet: str,
+    rule: str,
+) -> (
+    tuple[list[ValidationResult], None, None]
+    | tuple[list[ValidationResult], DataColumnMap, DataColumnMap]
+):
+    """Trys to find linkable id columns between two sheets.
+
+    This follows the following process:
+    - checks if both sheets have a unique column
+       If they both have one then these columns are used
+    - If only one or none of the sheets have a unique column
+        name matching is performed
+
+    if possible linking columns are found then the intersection
+    of their values is calculated. if there is a high enough
+    intersection between their values then these colums are returned.
+    else no columns are returned
+
+    Note: if one sheet is likely to contain only a subset of the ids of
+    the other sheet (cleaning log vs clean or clean vs raw) then the source
+    sheet should always be the sheet that contains the subset of values.
+
+    Args:
+        schema (BaseDatasetSchema): dataset schema
+        data_loaded_sheets (dict[str, DataSheetMap]): the loaded data for the sheets
+        source_sheet (str): name of the source sheet
+        target_sheet (str): name of the target sheet
+        rule (str): name of the rule calling this process
+
+    Returns:
+        tuple[list[ValidationResult], None, None] | 
+            tuple[list[ValidationResult], DataColumnMap, DataColumnMap]: _description_
+    """
+    results: list[ValidationResult] = []
+
+    # check if both sheets have an ID column
+    result_source, source_sheet_id = get_data_sheet_id(
+        schema=schema,
+        sheet_name=source_sheet,
+        loaded_sheet=data_loaded_sheets[source_sheet],
+        rule=rule,
+        expected=1,
+    )
+
+    result_target, target_sheet_id = get_data_sheet_id(
+        schema=schema,
+        sheet_name=target_sheet,
+        loaded_sheet=data_loaded_sheets[target_sheet],
+        rule=rule,
+        expected=1,
+    )
+
+    if result_target is not None or result_source is not None:
+        # if one of the sheets does not have a unique column then attempt
+        # some exacpt name matching
+        result_match, matching_columns = get_matching_columns(
+            source=source_sheet_id
+            if result_source is None
+            else data_loaded_sheets[source_sheet].column_map,
+            source_sheet=source_sheet,
+            target=target_sheet_id
+            if result_target is None
+            else data_loaded_sheets[target_sheet].column_map,
+            target_sheet=target_sheet,
+            rule=rule,
+        )
+        if result_match is not None:
+            # if no exact name match attempt some alternate name matches
+            result_match_alt, source_sheet_id, target_sheet_id = get_matching_columns_alt(
+                source=source_sheet_id
+                if result_source is None
+                else data_loaded_sheets[source_sheet].column_map,
+                source_sheet=source_sheet,
+                target=target_sheet_id
+                if result_target is None
+                else data_loaded_sheets[target_sheet].column_map,
+                target_sheet=target_sheet,
+                rule=rule,
+            )
+            if result_match_alt is not None:
+                results.append(
+                    ValidationResult(
+                        rule=rule,
+                        message=f"Unable to find possible linkable ID columns for sheet"
+                        f" '{source_sheet}' and sheet '{target_sheet}'",
+                        severity=SeverityLevel.ERROR,
+                    )
+                )
+                return results, None, None
+            else:
+                source_sheet_id = source_sheet_id[0]
+                target_sheet_id = target_sheet_id[0]
+        else:
+            source_sheet_id = matching_columns[0][0]
+            target_sheet_id = matching_columns[0][1]
+    else:
+        source_sheet_id = source_sheet_id[0]
+        target_sheet_id = target_sheet_id[0]
+
+    # if a match was found check the overlap to make sure
+    # that it is a legitimate match
+    result_overlap = check_id_column_overlap(
+        source_column=source_sheet_id.data_column_name,
+        source_sheet=source_sheet,
+        target_column=target_sheet_id.data_column_name,
+        target_sheet=target_sheet,
+        data_loaded_sheets=data_loaded_sheets,
+        rule=rule,
+    )
+
+    results.append(result_overlap)
+    if result_overlap.severity != SeverityLevel.INFO:
+        return results, None, None
+
+    return results, source_sheet_id, target_sheet_id
+
+
 def check_id_column_overlap(
     source_column: str,
-    source_data: DataFrame,
     source_sheet: str,
     target_column: str,
-    target_dataframe: DataFrame,
     target_sheet: str,
+    data_loaded_sheets: dict[str, DataSheetMap],
     rule: str,
     min_overlap: float = 0.9,
 ) -> ValidationResult:
@@ -306,8 +428,12 @@ def check_id_column_overlap(
         ValidationResult | None: validation error if overlap is too low. otherwise None
     """
 
-    source_set = set(source_data.select(source_column).to_series().unique().to_list())
-    target_set = set(target_dataframe.select(target_column).to_series().unique().to_list())
+    source_set = set(
+        data_loaded_sheets[source_sheet].data.select(source_column).to_series().unique().to_list()
+    )
+    target_set = set(
+        data_loaded_sheets[target_sheet].data.select(target_column).to_series().unique().to_list()
+    )
     overlap = get_set_overlap(source_set, target_set)
 
     if overlap < min_overlap:

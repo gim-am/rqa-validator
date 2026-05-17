@@ -8,12 +8,9 @@ from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ..base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import (
-    check_id_column_overlap,
     get_data_loaded_columns,
     get_data_loaded_sheets,
-    get_data_sheet_ids,
-    get_matching_id_columns,
-    get_matching_id_columns_alt,
+    get_id_linking_columns,
 )
 from ..schema_helpers import get_schema_loaded_sheets, get_schema_process_value
 
@@ -112,76 +109,32 @@ class RawToCleanToLog(BaseValidator):
             results.extend(result)
             return results
 
-        result, data_sheet_ids = get_data_sheet_ids(
+        result, clean_data_id_columns, raw_data_id_columns = get_id_linking_columns(
             schema=self.schema,
-            data={
-                self.clean_data_sheet: data_loaded_sheets[self.clean_data_sheet],
-                self.raw_data_sheet: data_loaded_sheets[self.raw_data_sheet],
-            },
+            data_loaded_sheets=data_loaded_sheets,
+            source_sheet=self.clean_data_sheet,
+            target_sheet=self.raw_data_sheet,
             rule=self.name,
         )
-
-        if result:
+        if raw_data_id_columns is None or clean_data_id_columns is None:
             results.extend(result)
             return results
+        assert raw_data_id_columns is not None
+        assert clean_data_id_columns is not None
 
-        result, raw_to_clean_matching_id_columns = get_matching_id_columns(
-            data_sheet_ids[self.raw_data_sheet],
-            self.raw_data_sheet,
-            data_loaded_sheets[self.clean_data_sheet].column_map,
-            self.clean_data_sheet,
-            self.name,
-        )
-        if result is not None:
-            results.append(result)
-            return results
-
-        assert raw_to_clean_matching_id_columns is not None
-        raw_data_id_columns = raw_to_clean_matching_id_columns[0][0]
-
-        if self.cleaning_log_sheet is None:
-            clean_data_id_columns = raw_to_clean_matching_id_columns[0][1]
-        else:
-            # if there is a cleaning log, get the id columns
-            result, clean_to_log_matching_id_columns = get_matching_id_columns(
-                data_sheet_ids[self.clean_data_sheet],
-                self.clean_data_sheet,
-                data_loaded_sheets[self.cleaning_log_sheet].column_map,
-                self.cleaning_log_sheet,
-                self.name,
+        if self.cleaning_log_sheet is not None:
+            result, clean_log_id_columns, clean_data_id_columns = get_id_linking_columns(
+                schema=self.schema,
+                data_loaded_sheets=data_loaded_sheets,
+                source_sheet=self.cleaning_log_sheet,
+                target_sheet=self.clean_data_sheet,
+                rule=self.name,
             )
-            if result is not None:
-                result, clean_data_id_columns, clean_log_id_columns = get_matching_id_columns_alt(
-                    data_sheet_ids[self.clean_data_sheet],
-                    self.clean_data_sheet,
-                    data_loaded_sheets[self.cleaning_log_sheet].column_map,
-                    self.cleaning_log_sheet,
-                    self.name,
-                )
-                if result is not None:
-                    results.append(result)
-                    return results
-                else:
-                    clean_data_id_columns = clean_data_id_columns[0]
-                    clean_log_id_columns = clean_log_id_columns[0]
-            else:
-                clean_data_id_columns = clean_to_log_matching_id_columns[0][0]
-                clean_log_id_columns = clean_to_log_matching_id_columns[0][1]
-
-            # check the intersection of the id columns to make sure they
-            # are indeed linkable
-            result = check_id_column_overlap(
-                clean_log_id_columns.data_column_name,
-                data_loaded_sheets[self.cleaning_log_sheet].data,
-                self.cleaning_log_sheet,
-                clean_data_id_columns.data_column_name,
-                data_loaded_sheets[self.clean_data_sheet].data,
-                self.clean_data_sheet,
-                self.name,
-            )
-            results.append(result)
-            if result.severity != SeverityLevel.INFO:
+            if raw_data_id_columns is None or clean_data_id_columns is None:
+                results.extend(result)
                 return results
+            assert clean_data_id_columns is not None
+            assert clean_log_id_columns is not None
 
             result, data_loaded_columns = get_data_loaded_columns(
                 data={

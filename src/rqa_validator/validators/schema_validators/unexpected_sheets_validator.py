@@ -20,14 +20,15 @@ class UnexpectedSheetsCheck(BaseValidator):
 
         results: list[ValidationResult] = []
 
-        results.append(
-            ValidationResult(
-                rule=self.name,
-                message="Unexpected sheets were foung in the dataset. Check to see if these are"
-                " required to be published/archived. Check output for details.",
-                severity=SeverityLevel.WARNING,
-                details={"unexpected_sheets": data.unexpected_sheets},
+        if data.unexpected_sheets:
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message="Unexpected sheets were found in the dataset. Check to see if these are"
+                    " required to be published/archived. Check output for details.",
+                    severity=SeverityLevel.WARNING,
+                    details={"unexpected_sheets": data.unexpected_sheets},
+                )
             )
-        )
 
         return results

@@ -21,7 +21,7 @@ class ColumnNameCheck(BaseValidator):
         - A-Z
         - a-z
         - 0-9
-        - . or _
+        - . or _ or - or / or \\
 
         Args:
             data (ExcelLoaderData): data to be validated
@@ -36,7 +36,7 @@ class ColumnNameCheck(BaseValidator):
         )
 
         for sheet in data.loaded_sheets:
-            matches = list(filter(pattern.search, sheet.data_columns))
+            matches = list(filter(pattern.search, sheet.data.columns))
             if matches:
                 column_match_df = column_match_df.vstack(
                     pl.DataFrame(
@@ -44,7 +44,7 @@ class ColumnNameCheck(BaseValidator):
                     )
                 )
 
-        if column_match_df.height > 1:
+        if column_match_df.height > 0:
             results.append(
                 ValidationResult(
                     rule=self.name,

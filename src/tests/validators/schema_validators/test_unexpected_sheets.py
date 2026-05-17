@@ -69,7 +69,7 @@ class TestUnexpectedSheets:
         result = valid_schema_validator.validate(unexpected_excel_data)
 
         assert isinstance(result, list)
-        assert len(result) == 2
+        assert len(result) == 1
 
     def test_expected_data(
         self,

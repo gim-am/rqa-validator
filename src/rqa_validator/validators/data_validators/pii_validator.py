@@ -94,7 +94,7 @@ class PiiDataCheck(BaseValidator):
                             "sheet": sheet.data_sheet_name,
                             "column": item.standard_name,
                             "match_type": "fuzzy",
-                            "match_values": item.matches,
+                            "match_values": str(item.matches),
                         }
                         for item in fuzzy_matched_values
                     )
