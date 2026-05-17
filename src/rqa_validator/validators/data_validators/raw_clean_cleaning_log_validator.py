@@ -273,7 +273,7 @@ class RawToCleanToLog(BaseValidator):
         # old vs. new values in a single operation.
 
         if not changes_only.is_empty():
-            # unpivot new values
+            # unpivot new values (clean data)
             new_values_df = changes_only.unpivot(
                 index=[clean_data_id_columns.data_column_name],
                 on=clean_data_columns,
@@ -281,7 +281,7 @@ class RawToCleanToLog(BaseValidator):
                 value_name=self.cleaning_log_new_value_column,
             )
 
-            # unpivot original values
+            # unpivot original values (raw data)
             # need to rename so question names match
             original_values_df = (
                 changes_only.select(

@@ -387,15 +387,15 @@ class CleaningLogToClean(BaseValidator):
         # the uuid and question name. This allows us to filter for changes and compare
         # old vs. new values in a single operation.
         if not changes_only.is_empty():
-            # unpivot new values
+            # unpivot values (clean_data)
             new_values_df = changes_only.unpivot(
                 index=[clean_log_id_columns.data_column_name],
                 on=questions,
                 variable_name=self.cleaning_log_question_column,
-                value_name=f"{self.cleaning_log_sheet}_value",
+                value_name=f"{self.clean_data_sheet}_value",
             )
 
-            #    unpivot original values
+            #    unpivot values (cleaning log)
             # need to rename so question names match
             original_values_df = (
                 changes_only.select(
@@ -406,7 +406,7 @@ class CleaningLogToClean(BaseValidator):
                     index=[clean_log_id_columns.data_column_name],
                     on=questions,  # Now unpivoting the renamed columns
                     variable_name=self.cleaning_log_question_column,
-                    value_name=f"{self.clean_data_sheet}_value",
+                    value_name=f"{self.cleaning_log_sheet}_value",
                 )
             )
 
