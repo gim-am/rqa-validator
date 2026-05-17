@@ -1,6 +1,6 @@
 import polars as pl
 
-from config import settings
+from rqa_validator.config import settings
 
 from ...common.list_matching import filter_list, match_list_to_list
 from ...loaders.base import DataColumnMap

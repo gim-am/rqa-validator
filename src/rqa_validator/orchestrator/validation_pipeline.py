@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-from config import settings
+from rqa_validator.config import settings
 
 from ..loaders.base import DataSheetMap
 from ..loaders.excel_loader import ExcelLoader, ExcelLoaderData

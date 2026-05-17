@@ -3,7 +3,7 @@ from pathlib import Path
 
 import polars as pl
 
-from config import settings
+from rqa_validator.config import settings
 
 
 def df_to_csv(

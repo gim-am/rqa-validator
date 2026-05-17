@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from config import settings
+from rqa_validator.config import settings
 from src.rqa_validator.orchestrator.validation_pipeline import ValidationPipeline
 
 

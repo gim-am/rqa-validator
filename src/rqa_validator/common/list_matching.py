@@ -4,7 +4,7 @@ from typing import Any
 
 from thefuzz import fuzz, process
 
-from config import settings
+from rqa_validator.config import settings
 
 from ..loaders.base import DataColumnMap, DataSheetMap
 
