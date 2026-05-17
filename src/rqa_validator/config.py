@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from src.rqa_validator.utils.logging import JIVELogger
+from .utils.logging import JIVELogger
 
 
 class Settings(BaseSettings):
