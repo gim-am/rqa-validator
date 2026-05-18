@@ -120,8 +120,8 @@ class CleaningLogToClean(BaseValidator):
             target_sheet=self.clean_data_sheet,
             rule=self.name,
         )
+        results.extend(result)
         if clean_data_id_columns is None or clean_log_id_columns is None:
-            results.extend(result)
             return results
         assert clean_log_id_columns is not None
         assert clean_data_id_columns is not None

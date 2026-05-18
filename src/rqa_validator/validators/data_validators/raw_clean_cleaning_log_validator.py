@@ -116,8 +116,8 @@ class RawToCleanToLog(BaseValidator):
             target_sheet=self.raw_data_sheet,
             rule=self.name,
         )
+        results.extend(result)
         if raw_data_id_columns is None or clean_data_id_columns is None:
-            results.extend(result)
             return results
         assert raw_data_id_columns is not None
         assert clean_data_id_columns is not None
@@ -130,8 +130,8 @@ class RawToCleanToLog(BaseValidator):
                 target_sheet=self.clean_data_sheet,
                 rule=self.name,
             )
-            if raw_data_id_columns is None or clean_data_id_columns is None:
-                results.extend(result)
+            results.extend(result)
+            if raw_data_id_columns is None or clean_data_id_columns is None:                
                 return results
             assert clean_data_id_columns is not None
             assert clean_log_id_columns is not None
