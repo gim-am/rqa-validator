@@ -319,7 +319,7 @@ def get_id_linking_columns(
     results: list[ValidationResult] = []
 
     # check if both sheets have an ID column
-    result_source, source_sheet_id = get_data_sheet_id(
+    result_source, source_sheet_id_column = get_data_sheet_id(
         schema=schema,
         sheet_name=source_sheet,
         loaded_sheet=data_loaded_sheets[source_sheet],
@@ -327,7 +327,7 @@ def get_id_linking_columns(
         expected=1,
     )
 
-    result_target, target_sheet_id = get_data_sheet_id(
+    result_target, target_sheet_id_column = get_data_sheet_id(
         schema=schema,
         sheet_name=target_sheet,
         loaded_sheet=data_loaded_sheets[target_sheet],
@@ -339,11 +339,11 @@ def get_id_linking_columns(
         # if one of the sheets does not have a unique column then attempt
         # some exacpt name matching
         result_match, matching_columns = get_matching_columns(
-            source=source_sheet_id
+            source=source_sheet_id_column
             if result_source is None
             else data_loaded_sheets[source_sheet].column_map,
             source_sheet=source_sheet,
-            target=target_sheet_id
+            target=target_sheet_id_column
             if result_target is None
             else data_loaded_sheets[target_sheet].column_map,
             target_sheet=target_sheet,
@@ -351,12 +351,12 @@ def get_id_linking_columns(
         )
         if result_match is not None:
             # if no exact name match attempt some alternate name matches
-            result_match_alt, source_sheet_id, target_sheet_id = get_matching_columns_alt(
-                source=source_sheet_id
+            result_match_alt, source_sheet_id_column, target_sheet_id_column = get_matching_columns_alt(
+                source=source_sheet_id_column
                 if result_source is None
                 else data_loaded_sheets[source_sheet].column_map,
                 source_sheet=source_sheet,
-                target=target_sheet_id
+                target=target_sheet_id_column
                 if result_target is None
                 else data_loaded_sheets[target_sheet].column_map,
                 target_sheet=target_sheet,
@@ -373,31 +373,40 @@ def get_id_linking_columns(
                 )
                 return results, None, None
             else:
-                source_sheet_id = source_sheet_id[0]
-                target_sheet_id = target_sheet_id[0]
+                source_sheet_id_column = source_sheet_id_column[0]
+                target_sheet_id_column = target_sheet_id_column[0]
         else:
-            source_sheet_id = matching_columns[0][0]
-            target_sheet_id = matching_columns[0][1]
+            source_sheet_id_column = matching_columns[0][0]
+            target_sheet_id_column = matching_columns[0][1]
     else:
-        source_sheet_id = source_sheet_id[0]
-        target_sheet_id = target_sheet_id[0]
+        source_sheet_id_column = source_sheet_id_column[0]
+        target_sheet_id_column = target_sheet_id_column[0]
 
     # if a match was found check the overlap to make sure
     # that it is a legitimate match
     result_overlap = check_id_column_overlap(
-        source_column=source_sheet_id.data_column_name,
+        source_column=source_sheet_id_column.data_column_name,
         source_sheet=source_sheet,
-        target_column=target_sheet_id.data_column_name,
+        target_column=target_sheet_id_column.data_column_name,
         target_sheet=target_sheet,
         data_loaded_sheets=data_loaded_sheets,
         rule=rule,
     )
 
-    results.append(result_overlap)
-    if result_overlap.severity != SeverityLevel.INFO:
+    
+    if result_overlap is not None:
+        results.append(result_overlap)        
         return results, None, None
+    
+    results.append(ValidationResult(
+            rule=rule,
+            message=f"Column '{source_sheet_id_column.data_column_name}'"
+             f" in sheet '{source_sheet}' was linked to"
+            f" column '{target_sheet_id_column.data_column_name}' in sheet '{target_sheet}'.",
+            severity=SeverityLevel.INFO,
+        ))
 
-    return results, source_sheet_id, target_sheet_id
+    return results, source_sheet_id_column, target_sheet_id_column
 
 
 def check_id_column_overlap(
@@ -408,7 +417,7 @@ def check_id_column_overlap(
     data_loaded_sheets: dict[str, DataSheetMap],
     rule: str,
     min_overlap: float = 0.9,
-) -> ValidationResult:
+)  -> ValidationResult | None:
     """Compares the intersection of two columns and calculates their overlap.
     Useful for verifying that id columns that have been matched through their
     names are actually linkable.
@@ -427,7 +436,7 @@ def check_id_column_overlap(
     Returns:
         ValidationResult | None: validation error if overlap is too low. otherwise None
     """
-
+    result = None
     source_set = set(
         data_loaded_sheets[source_sheet].data.select(source_column).to_series().unique().to_list()
     )
@@ -444,14 +453,6 @@ def check_id_column_overlap(
             f" {min_overlap} is required for these columns to be considered linkable"
             " id columns.",
             severity=SeverityLevel.ERROR,
-        )
-    else:
-        result = ValidationResult(
-            rule=rule,
-            message=f"Column '{source_column}' in sheet '{source_sheet}' was linked to"
-            f" column '{target_column}' in sheet '{target_sheet}' with an"
-            f" overlap of {overlap}.",
-            severity=SeverityLevel.INFO,
-        )
+        )       
 
     return result

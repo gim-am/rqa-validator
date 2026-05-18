@@ -67,17 +67,6 @@ class CrossSheetIdCheck(BaseValidator):
             results.extend(result)
             return results
 
-        result, data_sheet_ids = get_data_sheet_ids(
-            schema=self.schema,
-            data={self.master_sheet: data_loaded_sheets[self.master_sheet]},
-            rule=self.name,
-        )
-
-        if result:
-            results.extend(result)
-            return results
-
-        master_matching_columns = data_sheet_ids[self.master_sheet][0]
 
         for sheet in self.child_sheets:
             result, child_loaded_sheet = get_data_loaded_sheet(data, sheet, self.name)
@@ -125,11 +114,11 @@ class CrossSheetIdCheck(BaseValidator):
                 )
                 .join(
                     other=data_loaded_sheets[self.master_sheet].data.select(
-                        master_matching_columns.data_column_name
+                        master_id_columns.data_column_name
                     ),
                     how=join_type,
                     left_on=child_data_id_columns.data_column_name,
-                    right_on=master_matching_columns.data_column_name,
+                    right_on=master_id_columns.data_column_name,
                 )
                 .to_series()
                 .to_list()
@@ -142,7 +131,7 @@ class CrossSheetIdCheck(BaseValidator):
                         f" '{child_loaded_sheet.data_sheet_name}' and column"
                         f" '{child_data_id_columns.data_column_name}' were not found in"
                         f" sheet '{data_loaded_sheets[self.master_sheet].data_sheet_name}'"
-                        f" column '{master_matching_columns.data_column_name}'."
+                        f" column '{master_id_columns.data_column_name}'."
                         "Check output for details. ",
                         severity=SeverityLevel.ERROR,
                         sheet_name=child_loaded_sheet.data_sheet_name,
