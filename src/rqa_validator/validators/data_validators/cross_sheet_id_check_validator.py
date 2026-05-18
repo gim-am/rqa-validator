@@ -6,7 +6,6 @@ from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import (
     get_data_loaded_sheet,
     get_data_loaded_sheets,
-    get_data_sheet_ids,
     get_id_linking_columns,
 )
 
@@ -66,7 +65,6 @@ class CrossSheetIdCheck(BaseValidator):
         if result:
             results.extend(result)
             return results
-
 
         for sheet in self.child_sheets:
             result, child_loaded_sheet = get_data_loaded_sheet(data, sheet, self.name)
