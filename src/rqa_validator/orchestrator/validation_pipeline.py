@@ -135,7 +135,7 @@ class ValidationPipeline:
                 results = validator.validate(data)
                 if results:
                     all_results.extend(results)
-                
+
                 if not [item for item in results if item.severity in set_errors]:
                     all_results.append(
                         ValidationResult(

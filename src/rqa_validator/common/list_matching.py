@@ -40,8 +40,8 @@ def match_list_to_list(
     """
 
     if lower_values:
-        l_source = list(map(str.lower, source))
-        l_target = list(map(str.lower, target))
+        l_source = lower_list_items(source)
+        l_target = lower_list_items(target)
     else:
         l_source = source
         l_target = target
@@ -71,6 +71,10 @@ def match_list_to_list(
 
                     fuzzy_matched_values.append(details)
     return literal_matches, fuzzy_matched_values
+
+
+def lower_list_items(source: list[str]):
+    return list(map(str.lower, source))
 
 
 def match_list(source: list, target: list) -> list:

@@ -4,6 +4,7 @@ from pathlib import Path
 import fastexcel
 import polars as pl
 
+from ..common.list_matching import duplicate_list_items, lower_list_items, unique_list
 from ..models.base_dataset import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
 from .base import DataColumnMap, DataSheetMap
@@ -171,8 +172,12 @@ class ExcelLoader:
                 df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
                 # dont lower the columns as the caseing is needed for validation checks
                 df_columns = df.columns
-                df = df.rename(str.lower)
+                result = self._check_duplicate_columns(df_columns, excel_sheet_name)
+                if result is not None:
+                    results.append(result)
+                    continue
 
+                df = df.rename(str.lower)
                 schema_sheet = self.schema.get_schema_loaded_sheet(l_mapped_name)
                 if schema_sheet is not None:
                     # it should not be none as it was just matched.
@@ -216,6 +221,10 @@ class ExcelLoader:
                     df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
                     # dont lower the columns as the caseing is needed for validation checks
                     df_columns = df.columns
+                    result = self._check_duplicate_columns(df_columns, excel_sheet_name)
+                    if result is not None:
+                        results.append(result)
+                        continue
                     df = df.rename(str.lower)
                     data.loaded_sheets.append(
                         DataSheetMap(
@@ -231,3 +240,16 @@ class ExcelLoader:
                     data.unexpected_sheets.append(excel_sheet_name)
 
         return data, results
+
+    def _check_duplicate_columns(self, columns: list[str], sheet_name: str):
+        duplicate_columns = duplicate_list_items(lower_list_items(columns))
+        if duplicate_columns:
+            result = ValidationResult(
+                rule="Excel Sheet Loading",
+                message=f"Excel sheet {sheet_name} has duplicate column names"
+                " and could not be loaded. Check the output for details.",
+                severity=SeverityLevel.ERROR,
+                sheet_name=sheet_name,
+                details={"duplicate_columns": unique_list(duplicate_columns)},
+            )
+            return result

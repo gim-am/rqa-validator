@@ -86,7 +86,7 @@ class CrossSheetIdCheck(BaseValidator):
                 rule=self.name,
             )
             results.extend(result)
-            if child_data_id_columns is None or master_id_columns is None:                
+            if child_data_id_columns is None or master_id_columns is None:
                 return results
             assert child_data_id_columns is not None
             assert master_id_columns is not None

@@ -131,7 +131,7 @@ class RawToCleanToLog(BaseValidator):
                 rule=self.name,
             )
             results.extend(result)
-            if raw_data_id_columns is None or clean_data_id_columns is None:                
+            if raw_data_id_columns is None or clean_data_id_columns is None:
                 return results
             assert clean_data_id_columns is not None
             assert clean_log_id_columns is not None
