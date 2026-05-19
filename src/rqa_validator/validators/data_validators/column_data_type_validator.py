@@ -252,11 +252,16 @@ class DataTypeCheck(BaseValidator):
                     # find invalid values
                     # if the value cant be converted it will return null.
                     # this is used as a filter on the dataframe
+                    # if the column is numeric (likely utc) then this will
+                    # currently also throw an error
                     incorrect_values_df = check_df.filter(pl.col("value").is_not_null()).filter(
-                        pl.col("value")
-                        .str.to_datetime(strict=False)
-                        # .cast(pl.Datetime, strict=False)
-                        .is_null()
+                        (check_df.schema["value"].is_numeric())
+                        | (
+                            pl.col("value")
+                            .str.to_datetime(strict=False)
+                            # .cast(pl.Datetime, strict=False)
+                            .is_null()
+                        )
                     )
 
                     if incorrect_values_df.height > 0:

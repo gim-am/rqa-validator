@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 from typing import Any
 
@@ -149,7 +150,8 @@ class ValidationPipeline:
                 all_results.append(
                     ValidationResult(
                         rule=validator.name,
-                        message=f"Validator '{validator.name}' encountered an error: {str(e)}",
+                        message=f"Validator '{validator.name}' encountered an error:"
+                        f" {traceback.format_exc()}",
                         severity=SeverityLevel.ADMIN_ERROR,
                         details=self._get_validator_params(validator),
                     )

@@ -62,8 +62,8 @@ def create_column_difference_expression(
         """Handle null/empty string equivalence in comparison results.
 
         When expr_result is null (meaning at least one input was null/empty):
-        - If BOTH are null/empty → they are equal → return False (not different)
-        - If ONLY ONE is null/empty → they are different → return True
+        - If both are null/empty → they are equal → return False (not different)
+        - If only one is null/empty → they are different → return True
         """
         return (
             pl.when(expr_result.is_null())
@@ -79,52 +79,96 @@ def create_column_difference_expression(
             .otherwise(expr_result)
         )
 
-    if dtype1.is_numeric() or dtype2.is_numeric():
-        # Cast to Float64 to handle Int vs Float
-        # Note: If one is string and not numeric, this cast might fail or return null.
-        norm_c1 = (
-            pl.when(dtype1 == pl.String)
-            .then(
-                pl.when(pl.col(column_1).str.strip_chars() == "")
-                .then(None)
-                .otherwise(pl.col(column_1))
-                .cast(pl.Float64)
-            )
-            .otherwise(pl.col(column_1).cast(pl.Float64))
-        )
-
-        norm_c2 = (
-            pl.when(dtype2 == pl.String)
-            .then(
-                pl.when(pl.col(column_2).str.strip_chars() == "")
-                .then(None)
-                .otherwise(pl.col(column_2))
-                .cast(pl.Float64)
-            )
-            .otherwise(pl.col(column_2).cast(pl.Float64))
-        )
-
-        raw_diff = norm_c1 != norm_c2
-        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)
-
-    elif dtype1.is_temporal() or dtype2.is_temporal():
+    if dtype1.is_temporal() or dtype2.is_temporal():
         # Normalize to Datetime
         # use the str.to_datetime logic here if strings are involved
         def to_dt(column_expr: Expr, column_dtype: DataType):
             if column_dtype.is_temporal():
-                return column_expr.cast(pl.Datetime)
+                return column_expr.cast(pl.Datetime, strict=False)
+            elif column_dtype == pl.String:
+                return column_expr.str.to_datetime(strict=False)  # .cast(pl.Datetime, strict=False)
             else:
-                return column_expr.str.to_datetime(strict=False)
+                # if a float (possibly utc) or other is returned
+                return pl.lit(None).cast(pl.Datetime)
 
-        norm_c1 = to_dt(pl.col(column_1), dtype1)
-        norm_c2 = to_dt(pl.col(column_2), dtype2)
+        column_1_normalised = to_dt(pl.col(column_1), dtype1)
+        column_2_normalised = to_dt(pl.col(column_2), dtype2)
 
-        raw_diff = norm_c1 != norm_c2
-        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)
+        # Check if both conversions were successful
+        both_valid = ~column_1_normalised.is_null() & ~column_2_normalised.is_null()
+
+        # Typed comparison
+        temporal_diff = column_1_normalised != column_2_normalised
+
+        # Fallback: String comparison for rows where date parsing failed
+        column_1_str = pl.col(column_1).cast(pl.Utf8)
+        column_2_str = pl.col(column_2).cast(pl.Utf8)
+        str_diff = column_1_str != column_2_str
+
+        # Combine logic
+        raw_diff = pl.when(both_valid).then(temporal_diff).otherwise(str_diff)
+
+        norm_c1_final = normalize_to_null_if_empty(pl.col(column_1), dtype1).cast(pl.Utf8)
+        norm_c2_final = normalize_to_null_if_empty(pl.col(column_2), dtype2).cast(pl.Utf8)
+
+        # Check if columns are effectively null
+
+        column_1_null = pl.col(column_1).is_null() | (
+            pl.col(column_1).cast(pl.Utf8).str.strip_chars() == ""
+        )
+
+        column_2_null = pl.col(column_2).is_null() | (
+            pl.col(column_2).cast(pl.Utf8).str.strip_chars() == ""
+        )
+
+        final_result = (
+            pl.when(column_1_null & column_2_null)
+            .then(pl.lit(False))
+            .when(column_1_null | column_2_null)
+            .then(pl.lit(True))
+            .otherwise(raw_diff)
+        )
+
+        return final_result
+
+    elif dtype1.is_numeric() or dtype2.is_numeric():
+        # Cast to Float64 to handle Int vs Float
+        # Note: If one is string and not numeric, this cast might fail or return null.
+        def cast_to_float(column: str, dtype: DataType):
+            return (
+                pl.when(dtype == pl.String)
+                .then(
+                    pl.when(pl.col(column).str.strip_chars() == "")
+                    .then(None)
+                    .otherwise(pl.col(column))
+                    .cast(pl.Float64, strict=False)
+                )
+                .otherwise(pl.col(column).cast(pl.Float64, strict=False))
+            )
+
+        column_1_normalised = cast_to_float(column_1, dtype1)
+        column_2_normalised = cast_to_float(column_2, dtype2)
+
+        # Check if both conversions were successful
+        both_numeric = ~column_1_normalised.is_null() & ~column_2_normalised.is_null()
+        # Typed comparison (only valid if both are numbers)
+        numeric_diff = column_1_normalised != column_2_normalised
+        # Fallback: String comparison for rows where conversion failed
+        column_1_str = pl.col(column_1).cast(pl.Utf8)
+        column_2_str = pl.col(column_2).cast(pl.Utf8)
+        str_diff = column_1_str != column_2_str
+
+        raw_diff = pl.when(both_numeric).then(numeric_diff).otherwise(str_diff)
+        # We pass the original columns (normalized for empty strings) to the null handler
+        # to ensure empty strings are treated as nulls correctly
+        norm_c1_final = normalize_to_null_if_empty(pl.col(column_1), dtype1)
+        norm_c2_final = normalize_to_null_if_empty(pl.col(column_2), dtype2)
+
+        return handle_nulls_and_empty(raw_diff, norm_c1_final, norm_c2_final)
 
     else:
-        norm_c1 = normalize_to_null_if_empty(pl.col(column_1), dtype1)
-        norm_c2 = normalize_to_null_if_empty(pl.col(column_2), dtype2)
+        column_1_normalised = normalize_to_null_if_empty(pl.col(column_1), dtype1)
+        column_2_normalised = normalize_to_null_if_empty(pl.col(column_2), dtype2)
 
-        raw_diff = norm_c1.cast(pl.Utf8) != norm_c2.cast(pl.Utf8)
-        return handle_nulls_and_empty(raw_diff, norm_c1, norm_c2)
+        raw_diff = column_1_normalised.cast(pl.Utf8) != column_2_normalised.cast(pl.Utf8)
+        return handle_nulls_and_empty(raw_diff, column_1_normalised, column_2_normalised)

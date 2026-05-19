@@ -112,6 +112,14 @@ class ExcelLoader:
             class that contains the loaded data, sheets etc,
             list of validation warnings
 
+        TODO
+        Current Issues:
+        when there is an empty column at the start of a sheet, fastexcel
+        cant determine a datatype and throws an error:
+            calamine cell error...could not determine dtype for column...
+        currently there is no way to skip empty columns when loading an
+        excel sheet
+
         """
         results: list[ValidationResult] = []
         # get a list of excel sheet names
@@ -242,6 +250,20 @@ class ExcelLoader:
         return data, results
 
     def _check_duplicate_columns(self, columns: list[str], sheet_name: str):
+        """Checks to see if an excel sheet has duplicate column names once the
+        names are lowered.
+
+        Some sheets will have column names like ...iraq and ...Iraq. These are
+        technically different so they can be loaded ok but sheets should not have
+        columns with the same name.
+
+        Args:
+            columns (list[str]): excel sheet columns
+            sheet_name (str): name of excel sheet
+
+        Returns:
+            _type_: validation error if duplicates are found.
+        """
         duplicate_columns = duplicate_list_items(lower_list_items(columns))
         if duplicate_columns:
             result = ValidationResult(

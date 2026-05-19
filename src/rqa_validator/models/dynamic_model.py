@@ -242,14 +242,25 @@ class DynamicDataset(BaseDataset):
 
         if consent_sheet is not None:
             consent_linked_clean_sheet = self.sheet_matching[consent_sheet].linked_clean_sheet
-            assert consent_linked_clean_sheet is not None
-            self.validators.append(
-                ConsentCheck(
-                    schema=self.schema,
-                    raw_data_sheet=consent_sheet,
-                    clean_data_sheet=consent_linked_clean_sheet,
+            if consent_linked_clean_sheet is None:
+                results.append(
+                    ValidationResult(
+                        rule="DynamicDataset Creation build_validators",
+                        message="No linked clean sheet for the raw data sheet"
+                        f"'{consent_sheet}' was found so the 'ConsentCheck' rule"
+                        "could not be run.",
+                        severity=SeverityLevel.WARNING,
+                        sheet_name=consent_sheet,
+                    )
                 )
-            )
+            else:
+                self.validators.append(
+                    ConsentCheck(
+                        schema=self.schema,
+                        raw_data_sheet=consent_sheet,
+                        clean_data_sheet=consent_linked_clean_sheet,
+                    )
+                )
         else:
             results.append(
                 ValidationResult(
@@ -335,7 +346,7 @@ class DynamicDataset(BaseDataset):
                                 process_values=[
                                     ProcessValueMap(
                                         process_name="consent_check_validation",
-                                        values=["yes"],
+                                        values=["yes", "oui"],
                                     )
                                 ],
                             ),

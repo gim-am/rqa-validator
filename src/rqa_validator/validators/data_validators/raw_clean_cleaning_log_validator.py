@@ -273,9 +273,12 @@ class RawToCleanToLog(BaseValidator):
         # old vs. new values in a single operation.
 
         if not changes_only.is_empty():
+            # the index id has to be the column that was the 'left_on' value when
+            # creating joined_df
+
             # unpivot new values (clean data)
             new_values_df = changes_only.unpivot(
-                index=[clean_data_id_columns.data_column_name],
+                index=[raw_data_id_columns.data_column_name],
                 on=clean_data_columns,
                 variable_name=self.cleaning_log_question_column,
                 value_name=self.cleaning_log_new_value_column,
@@ -285,12 +288,12 @@ class RawToCleanToLog(BaseValidator):
             # need to rename so question names match
             original_values_df = (
                 changes_only.select(
-                    [clean_data_id_columns.data_column_name]
+                    [raw_data_id_columns.data_column_name]
                     + [f"{q}_original_value" for q in clean_data_columns]
                 )
                 .rename({f"{q}_original_value": q for q in clean_data_columns})
                 .unpivot(
-                    index=[clean_data_id_columns.data_column_name],
+                    index=[raw_data_id_columns.data_column_name],
                     on=clean_data_columns,  # Now unpivoting the renamed columns
                     variable_name=self.cleaning_log_question_column,
                     value_name=self.cleaning_log_old_value_column,
@@ -299,7 +302,7 @@ class RawToCleanToLog(BaseValidator):
 
             # unpivot flags. Extract question name from flag column name
             flags_long_df = changes_only.unpivot(
-                index=[clean_data_id_columns.data_column_name],
+                index=[raw_data_id_columns.data_column_name],
                 on=[f"is_{q}_changed" for q in clean_data_columns],
                 variable_name="flag_column_name",
                 value_name="is_changed",
@@ -314,12 +317,12 @@ class RawToCleanToLog(BaseValidator):
             merged_df = (
                 new_values_df.join(
                     original_values_df,
-                    on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
+                    on=[raw_data_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .join(
                     flags_long_df,
-                    on=[clean_data_id_columns.data_column_name, self.cleaning_log_question_column],
+                    on=[raw_data_id_columns.data_column_name, self.cleaning_log_question_column],
                     how="inner",
                 )
                 .filter(pl.col("is_changed"))
@@ -328,7 +331,7 @@ class RawToCleanToLog(BaseValidator):
             # select the columns because they are all present in the merged DF
             difference_raw_to_clean_df = merged_df.select(
                 [
-                    pl.col(clean_data_id_columns.data_column_name).alias("uuid"),
+                    pl.col(raw_data_id_columns.data_column_name).alias("uuid"),
                     pl.col(self.cleaning_log_question_column),
                     pl.col(self.cleaning_log_old_value_column),
                     pl.col(self.cleaning_log_new_value_column),

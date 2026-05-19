@@ -265,10 +265,10 @@ class SurveyChoicesCheck(BaseValidator):
                     pl.when(pl.col(question).is_not_null())
                     .then(
                         pl.col(question)
+                        .cast(pl.Utf8)
                         .str.split(self.select_multiple_value_separator)
                         .list.eval(
                             pl.element()
-                            .cast(pl.Utf8)
                             .str.to_lowercase()
                             .str.replace(r"_", "", n=-1)
                             .str.strip_chars(" ")
