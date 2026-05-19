@@ -2,6 +2,8 @@ import traceback
 from pathlib import Path
 from typing import Any
 
+from fastexcel import CalamineCellError
+
 from rqa_validator.config import settings
 
 from ..loaders.base import DataSheetMap
@@ -98,12 +100,23 @@ class ValidationPipeline:
                     details=self._excel_loader_to_dict(data),
                 )
             )
-
+        except CalamineCellError as ce:
+            all_results.append(
+                ValidationResult(
+                    rule="ExcelFileLoading",
+                    message=f"Loading of the excel file '{filepath.name}'"
+                    f" encountered an error. Check that the excel sheets do not contain"
+                    f" empty columns without headers: {str(ce)}",
+                    severity=SeverityLevel.ADMIN_ERROR,
+                )
+            )
+            settings.logger.log_exception(ce)
+            return self._compile_results(all_results)
         except Exception as e:
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
-                    message=f"Loading of the excel file '{filepath}'"
+                    message=f"Loading of the excel file '{filepath.name}'"
                     f" encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
                 )
