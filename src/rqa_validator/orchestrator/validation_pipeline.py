@@ -107,7 +107,7 @@ class ValidationPipeline:
                     message=f"Loading of the excel file '{filepath.name}'"
                     f" encountered an error. Check that the excel sheets do not contain"
                     f" empty columns without headers: {str(ce)}",
-                    severity=SeverityLevel.ADMIN_ERROR,
+                    severity=SeverityLevel.ERROR,
                 )
             )
             settings.logger.log_exception(ce)

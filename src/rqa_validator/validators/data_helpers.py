@@ -83,7 +83,8 @@ def get_data_loaded_column(
     if column is None:
         result = ValidationResult(
             rule=rule,
-            message=f"A column for '{column_name}' is expected.",
+            message=f"A column for '{column_name}' in sheet {loaded_sheet.data_sheet_name}"
+            " is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
             column_name=column_name,

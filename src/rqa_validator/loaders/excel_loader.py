@@ -4,11 +4,15 @@ from pathlib import Path
 import fastexcel
 import polars as pl
 
-from ..common.list_matching import duplicate_list_items, lower_list_items, unique_list
 from ..models.base_dataset import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
 from .base import DataColumnMap, DataSheetMap
-from .helpers import match_excel_columns_to_schema, match_excel_sheet_to_schema
+from .helpers import (
+    check_duplicate_columns,
+    match_excel_columns_to_schema,
+    match_excel_sheet_to_schema,
+    remove_empty_rows,
+)
 
 
 @dataclass
@@ -177,10 +181,12 @@ class ExcelLoader:
                 or (l_results and (not (u_mapped_name and not u_results) or not u_mapped_name))
             ):
                 # sheets that are expected and loaded for further data validation
-                df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
+                df, result = self._load_excel_sheet(excel_file, excel_sheet_name)
+                if result is not None:
+                    results.append(result)
                 # dont lower the columns as the caseing is needed for validation checks
                 df_columns = df.columns
-                result = self._check_duplicate_columns(df_columns, excel_sheet_name)
+                result = check_duplicate_columns(df_columns, excel_sheet_name)
                 if result is not None:
                     results.append(result)
                     continue
@@ -226,10 +232,13 @@ class ExcelLoader:
                 results.extend(u_results)
             else:
                 if load_all_sheets:
-                    df: pl.DataFrame = excel_file.load_sheet(excel_sheet_name).to_polars()
+                    df, result = self._load_excel_sheet(excel_file, excel_sheet_name)
+                    if result is not None:
+                        results.append(result)
+
                     # dont lower the columns as the caseing is needed for validation checks
                     df_columns = df.columns
-                    result = self._check_duplicate_columns(df_columns, excel_sheet_name)
+                    result = check_duplicate_columns(df_columns, excel_sheet_name)
                     if result is not None:
                         results.append(result)
                         continue
@@ -249,29 +258,10 @@ class ExcelLoader:
 
         return data, results
 
-    def _check_duplicate_columns(self, columns: list[str], sheet_name: str):
-        """Checks to see if an excel sheet has duplicate column names once the
-        names are lowered.
+    def _load_excel_sheet(
+        self, excel_file: fastexcel.ExcelReader, sheet_name: str
+    ) -> tuple[pl.DataFrame, ValidationResult | None]:
+        data_df: pl.DataFrame = excel_file.load_sheet(sheet_name).to_polars()
+        data_df, result = remove_empty_rows(data_df, sheet_name)
 
-        Some sheets will have column names like ...iraq and ...Iraq. These are
-        technically different so they can be loaded ok but sheets should not have
-        columns with the same name.
-
-        Args:
-            columns (list[str]): excel sheet columns
-            sheet_name (str): name of excel sheet
-
-        Returns:
-            _type_: validation error if duplicates are found.
-        """
-        duplicate_columns = duplicate_list_items(lower_list_items(columns))
-        if duplicate_columns:
-            result = ValidationResult(
-                rule="Excel Sheet Loading",
-                message=f"Excel sheet {sheet_name} has duplicate column names"
-                " and could not be loaded. Check the output for details.",
-                severity=SeverityLevel.ERROR,
-                sheet_name=sheet_name,
-                details={"duplicate_columns": unique_list(duplicate_columns)},
-            )
-            return result
+        return data_df, result
