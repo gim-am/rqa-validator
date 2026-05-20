@@ -21,7 +21,9 @@ class Settings(BaseSettings):
     IGNORE_COLUMNS_FOR_VALIDATION: list[str] = [
         "enum_id",
         "_index",
+        "index",
         "_parent_index",
+        "parent_index",
         "start",
         "end",
         "audit_url",

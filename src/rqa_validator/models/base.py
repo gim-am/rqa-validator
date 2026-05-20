@@ -23,7 +23,7 @@ class DynamicSheetMatching:
 
 @dataclass
 class ProcessValueMap:
-    """Values expexted in a column required for a validation process"""
+    """Values expected in a column required for a validation process"""
 
     process_name: str
     values: list = field(default_factory=list)

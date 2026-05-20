@@ -1,4 +1,3 @@
-import polars as pl
 
 from rqa_validator.config import settings
 
@@ -200,68 +199,10 @@ def check_duplicate_columns(columns: list[str], sheet_name: str) -> ValidationRe
     if duplicate_columns:
         result = ValidationResult(
             rule="Excel Sheet Loading",
-            message=f"Excel sheet '{sheet_name}' has duplicate column names"
-            " and could not be loaded. Check the output for details.",
+            message=f"Excel sheet '{sheet_name}' has {len(duplicate_columns)} duplicate column"
+            " names and could not be loaded. Check the output for details.",
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
             details={"duplicate_columns": unique_list(duplicate_columns)},
         )
         return result
-
-
-def remove_empty_rows(
-    data: pl.DataFrame, sheet_name: str
-) -> tuple[pl.DataFrame, ValidationResult | None]:
-    """Remove rows from sheets that are completly empty
-
-    Args:
-        data (pl.DataFrame): excel sheet dataframe
-        sheet_name (str): excel sheet name
-
-    Returns:
-        tuple[DataFrame, ValidationResult | None]: a cleaned dataframe,
-            a validation message if a row was removed, else None
-    """
-
-    def get_empty_row_mask(df: pl.DataFrame):
-        """Create a mask identifying rows where all columns are empty."""
-
-        def _col_empty_check(column: str):
-            dtype = df.schema[column]
-
-            # check null, empty string, and whitespace-only
-            if dtype in (pl.String, pl.Utf8):
-                return (
-                    (pl.col(column).is_null())
-                    | (pl.col(column).is_in(["", None]))
-                    | (pl.col(column).str.strip_chars().eq(""))
-                )
-
-            # null check
-            else:
-                return pl.col(column).is_null()
-
-        # Build list of per-column empty checks
-        empty_checks = [_col_empty_check(column) for column in df.columns]
-
-        # All columns must be "empty" for the row to be dropped
-        return pl.all_horizontal(empty_checks)
-
-    result = None
-    initial_row_count = data.height
-
-    # filter empty strings, whitespaces, nulls
-    all_empty_mask = get_empty_row_mask(data)
-    df_clean = data.filter(~all_empty_mask)
-
-    final_row_count = df_clean.height
-    if initial_row_count != final_row_count:
-        result = ValidationResult(
-            rule="Excel Sheet Loading",
-            message=f" {initial_row_count - final_row_count} empty row/s were removed"
-            f" from sheet '{sheet_name}'.",
-            severity=SeverityLevel.INFO,
-            sheet_name=sheet_name,
-        )
-
-    return df_clean, result

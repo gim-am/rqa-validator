@@ -367,7 +367,7 @@ class SurveyChoicesCheck(BaseValidator):
                             rule=self.name,
                             message=f"There were {difference_df.height} values found in"
                             f" the {sheet} sheet that were not reflected in the"
-                            f" {self.survey_sheet} sheet. "
+                            f" {self.choices_sheet} sheet. "
                             "Check the output for details.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,

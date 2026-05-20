@@ -53,7 +53,7 @@ class MissingSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message="Some sheets were expexted but not found. See the output for details.",
+                    message="Some sheets were expected but not found. See the output for details.",
                     severity=SeverityLevel.ERROR,
                     details={"missing_sheets": missing_sheets},
                 )

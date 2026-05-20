@@ -11,7 +11,6 @@ from .helpers import (
     check_duplicate_columns,
     match_excel_columns_to_schema,
     match_excel_sheet_to_schema,
-    remove_empty_rows,
 )
 
 
@@ -20,6 +19,7 @@ class ExcelLoaderData:
     loaded_sheets: list[DataSheetMap] = field(default_factory=list)
     unloaded_sheets: list[DataSheetMap] = field(default_factory=list)
     unexpected_sheets: list = field(default_factory=list)
+    hidden_sheets: list = field(default_factory=list)
 
     def add_column_map_to_loaded_sheet(self, sheet: str, column_map: DataColumnMap):
         loaded_sheet = self.get_loaded_sheet(sheet)
@@ -134,6 +134,17 @@ class ExcelLoader:
 
         data = ExcelLoaderData()
 
+        def _load_excel_sheet(excel_file: fastexcel.ExcelReader, sheet_name: str) -> pl.DataFrame:
+            excel_sheet = excel_file.load_sheet(
+                sheet_name, whitespace_as_null=True, skip_whitespace_tail_rows=True
+            )
+            # check hidden sheets
+            if excel_sheet.visible != "visible":
+                data.hidden_sheets.append(sheet_name)
+            data_df: pl.DataFrame = excel_sheet.to_polars()
+
+            return data_df
+
         for excel_sheet_name in all_sheets:
             l_mapped_name, l_results = match_excel_sheet_to_schema(
                 excel_sheet_name, self.schema.schema_loaded_sheets
@@ -181,9 +192,7 @@ class ExcelLoader:
                 or (l_results and (not (u_mapped_name and not u_results) or not u_mapped_name))
             ):
                 # sheets that are expected and loaded for further data validation
-                df, result = self._load_excel_sheet(excel_file, excel_sheet_name)
-                if result is not None:
-                    results.append(result)
+                df = _load_excel_sheet(excel_file, excel_sheet_name)
                 # dont lower the columns as the caseing is needed for validation checks
                 df_columns = df.columns
                 result = check_duplicate_columns(df_columns, excel_sheet_name)
@@ -232,10 +241,7 @@ class ExcelLoader:
                 results.extend(u_results)
             else:
                 if load_all_sheets:
-                    df, result = self._load_excel_sheet(excel_file, excel_sheet_name)
-                    if result is not None:
-                        results.append(result)
-
+                    df = _load_excel_sheet(excel_file, excel_sheet_name)
                     # dont lower the columns as the caseing is needed for validation checks
                     df_columns = df.columns
                     result = check_duplicate_columns(df_columns, excel_sheet_name)
@@ -257,11 +263,3 @@ class ExcelLoader:
                     data.unexpected_sheets.append(excel_sheet_name)
 
         return data, results
-
-    def _load_excel_sheet(
-        self, excel_file: fastexcel.ExcelReader, sheet_name: str
-    ) -> tuple[pl.DataFrame, ValidationResult | None]:
-        data_df: pl.DataFrame = excel_file.load_sheet(sheet_name).to_polars()
-        data_df, result = remove_empty_rows(data_df, sheet_name)
-
-        return data_df, result

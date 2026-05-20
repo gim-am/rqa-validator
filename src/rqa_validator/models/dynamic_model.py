@@ -481,7 +481,7 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation",
-                            message="No unique ID column was found for sheet"
+                            message="Could not find a single unique ID column for sheet"
                             f"'{sheet.data_sheet_name}'.",
                             severity=SeverityLevel.INFO,
                             sheet_name=sheet.data_sheet_name,

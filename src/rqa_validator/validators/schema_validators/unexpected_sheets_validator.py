@@ -31,4 +31,16 @@ class UnexpectedSheetsCheck(BaseValidator):
                 )
             )
 
+        if data.hidden_sheets:
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message="There are hidden sheets in the dataset. Check to see if these should"
+                    " be shown or removed before the dataset is published/archived."
+                    " Check output for details.",
+                    severity=SeverityLevel.ERROR,
+                    details={"hidden_sheets": data.hidden_sheets},
+                )
+            )
+
         return results
