@@ -3,6 +3,7 @@ import pytest
 from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.models.preprocess import validate_schema
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -65,17 +66,14 @@ class TestSchemaSheets:
     def test_valid_schema(self, valid_schema: BaseDatasetSchema):
         result = validate_schema(valid_schema)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_schema(self, invalid_schema: BaseDatasetSchema):
         result = validate_schema(invalid_schema)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema2(self, invalid_schema_2: BaseDatasetSchema):
         result = validate_schema(invalid_schema_2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

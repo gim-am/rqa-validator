@@ -3,6 +3,7 @@ import pytest
 from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.models.preprocess import lowercase_schema_mappings, validate_schema
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -166,35 +167,29 @@ class TestSchemaSheets:
         lowercase_schema_mappings(valid_schema)
         result = validate_schema(valid_schema)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_schema(self, invalid_schema: BaseDatasetSchema):
         result = validate_schema(invalid_schema)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema2(self, invalid_schema_2: BaseDatasetSchema):
         result = validate_schema(invalid_schema_2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema3(self, invalid_schema_3: BaseDatasetSchema):
         result = validate_schema(invalid_schema_3)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema4(self, invalid_schema_4: BaseDatasetSchema):
         result = validate_schema(invalid_schema_4)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema5(self, invalid_schema_5: BaseDatasetSchema):
         result = validate_schema(invalid_schema_5)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

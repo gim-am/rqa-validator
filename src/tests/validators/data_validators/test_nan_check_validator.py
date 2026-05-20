@@ -10,6 +10,7 @@ from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.nan_check_validator import NaNDataCheck
+from tests.helpers import do_basic_checks, error_counter
 
 
 @pytest.fixture
@@ -206,18 +207,17 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_data(
         self, valid_schema_validator: BaseValidator, invalid_excel_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(invalid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 1
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
 
     def test_invalid_data2(
         self,
@@ -226,10 +226,10 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(invalid_excel_data2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 2
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 2
 
     def test_invalid_data3(
         self,
@@ -238,8 +238,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(invalid_excel_data3)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data4(
         self,
@@ -248,5 +247,4 @@ class TestCleaningLog:
     ):
         result = invalid_schema_validator.validate(invalid_excel_data4)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

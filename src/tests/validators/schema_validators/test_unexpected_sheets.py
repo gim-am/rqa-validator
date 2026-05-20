@@ -6,6 +6,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.unexpected_sheets_validator import (
     UnexpectedSheetsCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -33,6 +34,28 @@ def unexpected_excel_data():
 
     data = ExcelLoaderData(loaded_sheets=[loaded_sheet])
     data.unexpected_sheets = unexpected_sheets
+
+    return data
+
+@pytest.fixture
+def hidden_excel_data():
+    """Create ExcelLoaderData with matching columns"""
+    df = pl.DataFrame(
+        {
+            "uuid": [1, 2, 3, 4, 5],
+        }
+    )
+
+    loaded_sheet = DataSheetMap(
+        schema_sheet_name="raw_datax",
+        data_sheet_name="raw_datax",
+        data=df,
+        data_columns=["uuid"],
+    )
+    hidden_excel_data = ["somesheet", "anothersheet"]
+
+    data = ExcelLoaderData(loaded_sheets=[loaded_sheet])
+    data.hidden_sheets = hidden_excel_data
 
     return data
 
@@ -68,8 +91,16 @@ class TestUnexpectedSheets:
     ):
         result = valid_schema_validator.validate(unexpected_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
+
+    def test_hidden_data(
+        self,
+        valid_schema_validator: BaseValidator,
+        hidden_excel_data: ExcelLoaderData,
+    ):
+        result = valid_schema_validator.validate(hidden_excel_data)
+
+        do_basic_checks(result, 1)
 
     def test_expected_data(
         self,
@@ -78,5 +109,4 @@ class TestUnexpectedSheets:
     ):
         result = valid_schema_validator.validate(expected_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)

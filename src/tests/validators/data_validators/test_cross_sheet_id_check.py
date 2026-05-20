@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.cross_sheet_id_check_validator import (
     CrossSheetIdCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -93,6 +94,66 @@ def valid_excel_data():
     df_clean = pl.DataFrame(
         {
             "uuid": [2, 3, 4, 5],
+        }
+    )
+
+    df_clean_log = pl.DataFrame(
+        {
+            "uuid": [5],
+        }
+    )
+
+    loaded_sheets = [
+        DataSheetMap(
+            schema_sheet_name="raw_data",
+            data_sheet_name="raw_data",
+            data=df_raw,
+            data_columns=["uuid"],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
+        ),
+        DataSheetMap(
+            schema_sheet_name="clean_data",
+            data_sheet_name="clean_data",
+            data=df_clean,
+            data_columns=["uuid"],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
+        ),
+        DataSheetMap(
+            schema_sheet_name="deletion_log",
+            data_sheet_name="deletion_log",
+            data=df_deleted,
+            data_columns=["uuid"],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
+        ),
+        DataSheetMap(
+            schema_sheet_name="cleaning_log",
+            data_sheet_name="cleaning_log",
+            data=df_clean_log,
+            data_columns=["uuid"],
+            column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
+        ),
+    ]
+
+    return ExcelLoaderData(loaded_sheets=loaded_sheets)
+
+@pytest.fixture
+def invalid_excel_data():
+    """Create ExcelLoaderData with matching columns"""
+    df_raw = pl.DataFrame(
+        {
+            "uuid": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        }
+    )
+
+    df_deleted = pl.DataFrame(
+        {
+            "uuid": [1],
+        }
+    )
+
+    df_clean = pl.DataFrame(
+        {
+            "uuid": [2, 3, 4, 5, 6, 7, 8, 9, 10, 90],
         }
     )
 
@@ -654,8 +715,14 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
+
+    def test_invalid_data(
+        self, valid_schema_validator: BaseValidator, invalid_excel_data: ExcelLoaderData
+    ):
+        result = valid_schema_validator.validate(invalid_excel_data)
+
+        do_basic_checks(result, 1)
 
     def test_master_extra_id_column_data(
         self,
@@ -664,8 +731,7 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(master_extra_id_column_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_child_extra_id_column_data(
         self,
@@ -674,8 +740,7 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(child_extra_id_column_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_child_extra_id_data(
         self,
@@ -684,8 +749,7 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(child_missing_id_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_child_missing_sheets_data(
         self,
@@ -694,8 +758,7 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(child_missing_sheets_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 3
+        do_basic_checks(result, 3)
 
     def test_master_missing_sheets_data(
         self,
@@ -704,24 +767,21 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(master_missing_sheets_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_master_no_id_data(
         self, valid_schema_validator: BaseValidator, master_no_id_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(master_no_id_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_child_no_id_data(
         self, valid_schema_validator: BaseValidator, master_no_id_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(master_no_id_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_child_missing_id_column(
         self,
@@ -730,13 +790,11 @@ class TestCrossSheetIdCheck:
     ):
         result = valid_schema_validator.validate(child_missing_id_column)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_no_match_id_column(
         self, valid_schema_validator: BaseValidator, no_match_id_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(no_match_id_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

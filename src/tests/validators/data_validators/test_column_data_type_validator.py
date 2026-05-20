@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.column_data_type_validator import (
     DataTypeCheck,
 )
+from tests.helpers import do_basic_checks, error_counter
 
 
 @pytest.fixture
@@ -797,48 +798,42 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_missing_sheet_data(
         self, valid_schema_validator: BaseValidator, missing_sheet: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_sheet)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet2_data(
         self, valid_schema_validator: BaseValidator, missing_sheet2: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_sheet2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column_data(
         self, valid_schema_validator: BaseValidator, missing_column1: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_column1)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column2_data(
         self, valid_schema_validator: BaseValidator, missing_column2: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_column2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column3_data(
         self, valid_schema_validator: BaseValidator, missing_column3: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_column3)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet1_schema(
         self,
@@ -847,8 +842,7 @@ class TestDataType:
     ):
         result = schema_missing_sheet1_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet2_schema(
         self,
@@ -857,8 +851,7 @@ class TestDataType:
     ):
         result = schema_missing_sheet2_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column1_schema(
         self,
@@ -867,8 +860,7 @@ class TestDataType:
     ):
         result = schema_missing_column1_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column2_schema(
         self,
@@ -877,8 +869,7 @@ class TestDataType:
     ):
         result = schema_missing_column2_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_process1_schema(
         self,
@@ -887,8 +878,7 @@ class TestDataType:
     ):
         result = schema_missing_process1_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_process2_schema(
         self,
@@ -897,18 +887,16 @@ class TestDataType:
     ):
         result = schema_missing_process2_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data(
         self, valid_schema_validator: BaseValidator, invalid_excel_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(invalid_excel_data)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 1
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
 
     def test_invalid_data2(
         self,
@@ -917,10 +905,10 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(invalid_excel_data2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 1
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
 
     def test_invalid_data3(
         self,
@@ -928,10 +916,10 @@ class TestDataType:
         invalid_excel_data3: ExcelLoaderData,
     ):
         result = valid_schema_validator.validate(invalid_excel_data3)
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 2)
 
-        assert isinstance(result, list)
-        assert len(result) == 2
-        assert result[0].details is not None
-        assert result[1].details is not None
-        assert len(result[0].details["uuid"]) == 1
-        assert len(result[1].details["uuid"]) == 1
+        assert filtered_results[0].details is not None
+        assert filtered_results[1].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
+        assert len(filtered_results[1].details["uuid"]) == 1

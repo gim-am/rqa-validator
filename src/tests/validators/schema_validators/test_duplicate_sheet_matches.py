@@ -8,6 +8,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.duplicate_sheet_match_validator import (
     DuplicateSheetMatches,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -91,13 +92,11 @@ class TestMissingSheets:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_data(
         self, valid_schema_validator: BaseValidator, invalid_excel_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(invalid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

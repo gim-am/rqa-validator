@@ -7,6 +7,7 @@ from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
 from rqa_validator.models.base_dataset import BaseDatasetSchema
 from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.pii_validator import PiiDataCheck
+from tests.helpers import do_basic_checks, error_counter
 
 
 @pytest.fixture
@@ -110,6 +111,7 @@ def invalid_excel_data2():
         data_sheet_name="raw_data",
         data=df,
         data_columns=["uuid"],
+        column_map=[DataColumnMap(schema_column_name='uuid', data_column_name='uuid')]
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -141,35 +143,32 @@ class TestPiiColumns:
     def test_valid_data(self, validator: BaseValidator, valid_excel_data: ExcelLoaderData):
         result = validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_data(self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData):
         result = validator.validate(invalid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_fuzzy_data(
         self, validator: BaseValidator, invalid_fuzzy_excel_data: ExcelLoaderData
     ):
         result = validator.validate(invalid_fuzzy_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data2(self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData):
         result = validator.validate(invalid_excel_data2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["row_index"]) == 2
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 2
 
     def test_invalid_data3(self, validator: BaseValidator, invalid_excel_data3: ExcelLoaderData):
         result = validator.validate(invalid_excel_data3)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 2
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 2

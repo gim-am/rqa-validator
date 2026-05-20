@@ -9,6 +9,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators import (
     CrossSheetRowSumCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -373,8 +374,7 @@ class TestCrossSheetRowSum:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_missing_deleted_data(
         self,
@@ -383,29 +383,25 @@ class TestCrossSheetRowSum:
     ):
         result = valid_schema_validator.validate(missing_deleted_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_clean_data(
         self, valid_schema_validator: BaseValidator, missing_clean_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_clean_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet_data(
         self, valid_schema_validator: BaseValidator, missing_sheet_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_sheet_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 3
+        do_basic_checks(result, 3)
 
     def test_parent_child_data(
         self, valid_schema_child_validator: BaseValidator, valid_excel_data_child: ExcelLoaderData
     ):
         result = valid_schema_child_validator.validate(valid_excel_data_child)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)

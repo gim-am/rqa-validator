@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.consent_check_validator import (
     ConsentCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -447,16 +448,14 @@ class TestConsentCheck:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_data(
         self, valid_schema_validator: BaseValidator, invalid_excel_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(invalid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
         assert result[0].details is not None
         assert len(result[0].details["uuid"]) == 2
 
@@ -467,8 +466,7 @@ class TestConsentCheck:
     ):
         result = valid_schema_validator.validate(invalid_excel_data2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data3(
         self,
@@ -477,8 +475,7 @@ class TestConsentCheck:
     ):
         result = valid_schema_validator.validate(invalid_excel_data3)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data4(
         self,
@@ -487,16 +484,14 @@ class TestConsentCheck:
     ):
         result = valid_schema_validator.validate(invalid_excel_data4)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema(
         self, invalid_schema_validator: BaseValidator, valid_excel_data: ExcelLoaderData
     ):
         result = invalid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema2(
         self,
@@ -505,8 +500,7 @@ class TestConsentCheck:
     ):
         result = invalid_schema_validator2.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema3(
         self,
@@ -515,8 +509,7 @@ class TestConsentCheck:
     ):
         result = invalid_schema_validator3.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema4(
         self,
@@ -525,5 +518,4 @@ class TestConsentCheck:
     ):
         result = invalid_schema_validator4.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

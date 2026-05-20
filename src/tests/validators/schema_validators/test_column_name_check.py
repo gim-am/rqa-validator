@@ -6,6 +6,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.column_name_validator import (
     ColumnNameCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -70,17 +71,14 @@ class TestColumnNames:
     def test_valid_data(self, validator: BaseValidator, valid_excel_data: ExcelLoaderData):
         result = validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_data(self, validator: BaseValidator, invalid_excel_data: ExcelLoaderData):
         result = validator.validate(invalid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_data2(self, validator: BaseValidator, invalid_excel_data2: ExcelLoaderData):
         result = validator.validate(invalid_excel_data2)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

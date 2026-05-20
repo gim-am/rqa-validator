@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.cleaning_log_to_clean_validator import (
     CleaningLogToClean,
 )
+from tests.helpers import do_basic_checks, error_counter
 
 
 @pytest.fixture
@@ -1456,8 +1457,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_invalid_cleanlog_data(
         self,
@@ -1465,11 +1465,10 @@ class TestCleaningLog:
         invalid_cleanlog_data_excel_data: ExcelLoaderData,
     ):
         result = valid_schema_validator.validate(invalid_cleanlog_data_excel_data)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 1
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
 
     def test_invalid_clean_data(
         self,
@@ -1477,11 +1476,10 @@ class TestCleaningLog:
         invalid_clean_data_excel_data: ExcelLoaderData,
     ):
         result = valid_schema_validator.validate(invalid_clean_data_excel_data)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert result[0].details is not None
-        assert len(result[0].details["uuid"]) == 1
+        filtered_results = error_counter(result)
+        do_basic_checks(filtered_results, 1)
+        assert filtered_results[0].details is not None
+        assert len(filtered_results[0].details["uuid"]) == 1
 
     def test_missing_question_clean_data(
         self,
@@ -1490,8 +1488,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_question_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_question_log_data(
         self,
@@ -1500,8 +1497,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_question_log_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet_1_data(
         self,
@@ -1510,8 +1506,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_sheet_1_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_sheet_2_data(
         self,
@@ -1520,8 +1515,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_sheet_2_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     # def test_missing_column_1_data(
     #     self,
@@ -1531,7 +1525,7 @@ class TestCleaningLog:
     #     result = valid_schema_validator.validate(missing_column_1_excel_data)
 
     #     assert isinstance(result, list)
-    #     assert len(result) == 1
+    #     assert len(error_counter(result)) == 1
 
     def test_missing_column_2_data(
         self,
@@ -1540,8 +1534,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_column_2_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column_3_data(
         self,
@@ -1550,8 +1543,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_column_3_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column_4_data(
         self,
@@ -1560,8 +1552,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_column_4_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column_5_data(
         self,
@@ -1570,16 +1561,14 @@ class TestCleaningLog:
     ):
         result = invalid_schema4_validator.validate(missing_column_5_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_multientry_data(
         self, valid_schema_validator: BaseValidator, multi_entry_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(multi_entry_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_empty_value_data(
         self,
@@ -1588,8 +1577,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(valid_excel_data_empty_value)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_empty_value_data_invalid(
         self,
@@ -1598,8 +1586,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(invalid_excel_data_empty_value)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_change_type_column(
         self,
@@ -1608,16 +1595,14 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_change_type)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema(
         self, invalid_schema_validator: BaseValidator, valid_excel_data: ExcelLoaderData
     ):
         result = invalid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_schema2(
         self,
@@ -1626,8 +1611,7 @@ class TestCleaningLog:
     ):
         result = invalid_schema2_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
         #  missing columns, multiple edits
 
     def test_same_old_new_value(
@@ -1635,8 +1619,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(same_old_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_old_value_column(
         self,
@@ -1645,8 +1628,7 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_old_data_column)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_question_column(
         self,
@@ -1655,5 +1637,4 @@ class TestCleaningLog:
     ):
         result = valid_schema_validator.validate(missing_question_column)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

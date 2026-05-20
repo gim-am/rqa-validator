@@ -147,7 +147,9 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         standard_name="consent",
                         alternate_names=[],
                         process_values=[
-                            ProcessValueMap(process_name="consent_check_validation", values=["yes"])
+                            ProcessValueMap(
+                                process_name="consent_check_validation", values=["yes", "oui"]
+                            )
                         ],
                     ),
                 ],

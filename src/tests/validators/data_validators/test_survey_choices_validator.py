@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.survey_choices_validator import (
     SurveyChoicesCheck,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -495,16 +496,14 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_missing_sheet_data(
         self, valid_schema_validator: BaseValidator, missing_sheet_data: ExcelLoaderData
     ):
         result = valid_schema_validator.validate(missing_sheet_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_column_data(
         self,
@@ -513,8 +512,7 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(missing_column_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_id_column_data(
         self,
@@ -523,8 +521,7 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(missing_id_column_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_select_one_data(
         self,
@@ -533,8 +530,7 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(invalid_select_one_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_invalid_select_multiple_data(
         self,
@@ -543,8 +539,7 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(invalid_select_multiple_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_choice_data(
         self,
@@ -553,5 +548,4 @@ class TestDataType:
     ):
         result = valid_schema_validator.validate(invalid_choice_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)

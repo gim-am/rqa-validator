@@ -12,6 +12,7 @@ from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.mandatory_column_validator import (
     MandatoryColumns,
 )
+from tests.helpers import do_basic_checks
 
 
 @pytest.fixture
@@ -139,8 +140,7 @@ class TestMandatoryColumns:
     ):
         result = valid_schema_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_no_mandatory_columns(
         self,
@@ -149,8 +149,7 @@ class TestMandatoryColumns:
     ):
         result = valid_no_mandatory_columns_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 0
+        do_basic_checks(result, 0)
 
     def test_missing_column(
         self,
@@ -159,8 +158,7 @@ class TestMandatoryColumns:
     ):
         result = invalid_schema_missing_sheet_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
 
     def test_missing_mandatory_column(
         self,
@@ -169,5 +167,4 @@ class TestMandatoryColumns:
     ):
         result = invalid_schema_missing_mandatory_column_validator.validate(valid_excel_data)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
+        do_basic_checks(result, 1)
