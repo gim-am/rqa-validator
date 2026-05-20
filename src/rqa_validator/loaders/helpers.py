@@ -1,4 +1,3 @@
-
 from rqa_validator.config import settings
 
 from ..common.list_matching import (

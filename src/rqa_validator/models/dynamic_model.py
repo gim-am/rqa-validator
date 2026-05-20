@@ -152,11 +152,11 @@ class DynamicDataset(BaseDataset):
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation build_validators",
-                            message=f"No linked cleaning data sheet for the sheet"
+                            message=f"No linked cleaning log data sheet for the sheet"
                             f"'{sheet}' were found so the 'CleaningLogToClean' and"
                             "'CrossSheetIdCheck' rules could not be run.",
                             sheet_name=sheet,
-                            severity=SeverityLevel.WARNING,
+                            severity=SeverityLevel.ERROR,
                         )
                     )
 
@@ -175,7 +175,7 @@ class DynamicDataset(BaseDataset):
                             rule="DynamicDataset Creation build_validators",
                             message=f"No linked raw sheet for the sheet '{sheet}' were"
                             "found so the 'RawToCleanToLog' rule could not be run.",
-                            severity=SeverityLevel.WARNING,
+                            severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                         )
                     )
@@ -210,7 +210,7 @@ class DynamicDataset(BaseDataset):
                             message=f"No linked sheets for the raw data sheet '{sheet}'"
                             "were found so the 'CrossSheetRowSumCheck' rule could"
                             "not be run.",
-                            severity=SeverityLevel.WARNING,
+                            severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                         )
                     )
@@ -235,7 +235,7 @@ class DynamicDataset(BaseDataset):
                             message="No linked clean sheet for the raw data sheet"
                             f"'{sheet}' was found so the 'CrossSheetIdCheck' rule"
                             "could not be run.",
-                            severity=SeverityLevel.WARNING,
+                            severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                         )
                     )
@@ -249,7 +249,7 @@ class DynamicDataset(BaseDataset):
                         message="No linked clean sheet for the raw data sheet"
                         f"'{consent_sheet}' was found so the 'ConsentCheck' rule"
                         "could not be run.",
-                        severity=SeverityLevel.WARNING,
+                        severity=SeverityLevel.ERROR,
                         sheet_name=consent_sheet,
                     )
                 )
@@ -266,7 +266,7 @@ class DynamicDataset(BaseDataset):
                 ValidationResult(
                     rule="DynamicDataset Creation build_validators",
                     message="No possible sheet for 'consent' column was found.",
-                    severity=SeverityLevel.WARNING,
+                    severity=SeverityLevel.ERROR,
                 )
             )
 
@@ -319,22 +319,22 @@ class DynamicDataset(BaseDataset):
                     )
                 )
 
+                # in the rare case that a child sheet only has at most one record for each parent
+                # then the id column found could accidentially also be the foreign key column
+                # i dont think this matters as far as the validation goes(?) but it should
+                # be the first column created so that the unique flag is set
+                if details.id_column is not None:
+                    self.schema.add_mandatory_column_to_sheet(
+                        sheet,
+                        SchemaColumnMap(standard_name=details.id_column, is_unique=True),
+                    )
+
                 if details.parent_linking_column is not None:
                     self.schema.add_mandatory_column_to_sheet(
                         sheet,
                         SchemaColumnMap(standard_name=details.parent_linking_column),
                     )
 
-                if details.id_column is not None:
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet,
-                        SchemaColumnMap(standard_name=details.id_column, is_unique=True),
-                    )
-                if details.parent_linking_column is not None:
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet,
-                        SchemaColumnMap(standard_name=details.parent_linking_column),
-                    )
                 if details.classification == "raw":
                     if details.parent_sheet is None:
                         consent_sheet = sheet
@@ -483,7 +483,7 @@ class DynamicDataset(BaseDataset):
                             rule="DynamicDataset Creation",
                             message="Could not find a single unique ID column for sheet"
                             f"'{sheet.data_sheet_name}'.",
-                            severity=SeverityLevel.INFO,
+                            severity=SeverityLevel.ERROR,
                             sheet_name=sheet.data_sheet_name,
                         )
                     )
@@ -799,7 +799,7 @@ class DynamicDataset(BaseDataset):
 
             if unique_count == total_count:
                 unique_cols.append(col_name)
-            elif unique_count / total_count > 0.98:
+            elif unique_count / total_count > 0.95:
                 # sometimes there can be a few duplicates
                 # (which there shouldnt and will cause validation errors later)
                 # but still try to find the correct column if no unique ones are found
