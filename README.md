@@ -9,10 +9,8 @@
 ## Project structure
 
 ```bash
-├── config.py
 ├── Dockerfile
 ├── .dockerignore
-├── .env
 ├── .github
 ├── .gitignore
 ├── main.py
@@ -26,11 +24,12 @@
 │   │   │   ├── file_export.py
 │   │   │   ├── list_matching.py
 │   │   │   └── schema_matching.py
+│   │   ├── config.py
 │   │   ├── __init__.py
 │   │   ├── loaders
+│   │   │   ├── base_excel_loader.py
 │   │   │   ├── base.py
 │   │   │   ├── excel_loader.py
-│   │   │   ├── helpers.py
 │   │   │   └── __init__.py
 │   │   ├── models
 │   │   │   ├── base_dataset.py
@@ -72,8 +71,13 @@
 │   │           └── unexpected_sheets_validator.py
 │   └── tests
 └── uv.lock
-
 ```
+
+**models**: contains the schemas for the datasets. This includes the dynamic schema generator for datasets that are not yet standardised. \
+**loaders**: handles the loading of excel files and some of the matching to the schema.\
+**orchestrator**: runs all the steps of the validation process.\
+**validators**: contains logic for all the validation rules.
+
 
 ## Setup
 1. Clone the repository
@@ -104,14 +108,15 @@ The process follows these steps for the provided dataset:
 
 If there are any errors at this stage the process will end. 
 
-Currently, from this point onwards all errors are accumulated and the process will not stop
+Currently, from this point onwards all errors are accumulated and the process will not stop.
 
 2. Load the Excel file  
     - Excel sheets and columns are mapped to the schema for sheets that have to be loaded
     - Sheet names for sheets that do not have to be loaded
     - This optionally includes fuzzy matching of sheets/columns by setting the config values in `.env`.
-3. Perform all the validation steps.
-4. Errors are output to the user.
+3. If dataset-type == 'other', then a schema is dynamically created.
+4. Perform all the validation steps.
+5. Errors are output to the user.
 
 There are several error types:
 - **Admin errors**: these are either Python errors or errors with the schema from step 1.
@@ -149,6 +154,8 @@ As this dataset is somewhat standardised it has its own schema and validation ru
 
 **Other Datasets**
 
+This is an overview of the requirements. For more detailed requirements see [datasest requirements](dataset_requirements.md).
+
 For all other datasets a schema is built from two sources:
 - a list of expexted sheets. These include:
     - Deletion Log
@@ -183,35 +190,31 @@ Validation rules are split between different categories. Each of these are desig
 
 A structured list of validation errors is produced (errors, warnings) for each rule.
 
-These rules are currently based on the minimum standars checklist (1.2)
+These rules are currently based on the minimum standars checklist (1.2) and some requirments for the dynamic schema generation process.
 
 
 ### Rules currently implemented
 **Data Validation Rules**
-- Unique column values (uuids): checks if a column does not contain unique values
-- Pii columns: checks if any of the columns contain possible pii data
-- Dataset sum check: checks if clean data + deleted data = raw data
-- NAN check: Checks columns for invalid numeric values like NaN and -999
-- Cross sheet id check: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
-- Cleaning log to Clean: Checks that all records in the cleaning log are reflected in the clean_data sheet
-- Raw to Clean to cleaning log: Compares raw data and clean data sheets and makes sure any differences are reflected in the cleaning log
-- Column data types: checks columns in clean data have correct data types based on kobo survey
-- Survey choices: checks clean data contains valid values based on kobo choices
-- Consent check: checks that raw data records that did not provide consent are not present in clean data
+- **Unique column values**: checks if a column does not contain unique values
+- **Pii data**: checks if any of the columns contain possible pii data
+- **Dataset sum check**: checks if clean data + deleted data = raw data
+- **NAN check**: Checks columns for invalid numeric values like NaN and -999
+- **Cross sheet id check**: checks if ids in child sheets are not present in a parent sheet. For example, between raw_data and clean_data
+- **Cleaning log to Clean**: Checks that all records in the cleaning log are reflected in the clean_data sheet
+- **Raw to Clean to cleaning log**: Compares raw data and clean data sheets and makes sure any differences are reflected in the cleaning log
+- **Column data types**: checks columns in clean data have correct data types based on kobo survey
+- **Survey choices**: checks clean data contains valid values based on kobo choices
+- **Consent check**: checks that raw data records that did not provide consent are not present in clean data
 
 **Schema Validation Rules**
-- Missing sheets: checks if mandatory sheets are not present
-- Unexpected sheets: checks if there are any unexpcedted sheets
-- Multiple sheet matches: checks if multiple excel sheets are matched to the same schema sheet
-- Mandatory columns: checks if mandatory columns are not present in a sheet
-- Column names - Checks column names are variables instead of labels
+- **Missing sheets**: checks if mandatory sheets are not present
+- **Unexpected sheets**: checks if there are any unexpcedted sheets or hidden sheets
+- **Multiple sheet matches**: checks if multiple excel sheets are matched to the same schema sheet
+- **Mandatory columns**: checks if mandatory columns are not present in a sheet
+- **Column names**: checks column names are variables instead of labels
 
     
 ## TODO: 
 - clean validation results based on requirements 
 - add other datasets and validation rules
-
-- jira api integration
-- impact repository integration
 - logging and error reporting.
-- adjust for infrastructure requirements
