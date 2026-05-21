@@ -14,8 +14,6 @@ class DataSheetMap:
     schema_sheet_name: str
     data_sheet_name: str
     data: pl.DataFrame = field(default_factory=pl.DataFrame)
-    # this operation is ran numerous times so might as well store it once here
-    data_columns: list[str] = field(default_factory=list)
     column_map: list[DataColumnMap] = field(default_factory=list)
     auto_loaded: bool = False
 

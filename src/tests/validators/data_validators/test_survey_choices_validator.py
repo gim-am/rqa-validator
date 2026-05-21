@@ -102,14 +102,12 @@ def valid_excel_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -119,7 +117,6 @@ def valid_excel_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -162,14 +159,12 @@ def missing_sheet_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_surveyXXX",
             data_sheet_name="kobo_surveyXXX",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -179,7 +174,6 @@ def missing_sheet_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -222,14 +216,12 @@ def missing_column_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -239,7 +231,6 @@ def missing_column_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_nameXXX", data_column_name="list_nameXXX"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -282,14 +273,12 @@ def missing_id_column_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuidXXX", data_column_name="uuidXXX")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -299,7 +288,6 @@ def missing_id_column_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -342,14 +330,12 @@ def invalid_select_one_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -359,7 +345,6 @@ def invalid_select_one_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -402,14 +387,12 @@ def invalid_select_multiple_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -419,7 +402,6 @@ def invalid_select_multiple_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -462,14 +444,12 @@ def invalid_choice_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -479,7 +459,6 @@ def invalid_choice_data():
             schema_sheet_name="kobo_choices",
             data_sheet_name="kobo_choices",
             data=df_choices,
-            data_columns=["list_name", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="list_name", data_column_name="list_name"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),

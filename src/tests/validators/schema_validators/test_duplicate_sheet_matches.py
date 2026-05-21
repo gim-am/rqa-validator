@@ -48,7 +48,6 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -73,13 +72,11 @@ def invalid_excel_data():
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data2",
             data=df2,
-            data_columns=["uuid"],
         ),
     ]
 

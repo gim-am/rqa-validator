@@ -5,8 +5,8 @@ import polars as pl
 from rqa_validator.config import settings
 
 from ..common.list_matching import filter_list, get_set_overlap, match_list
+from ..loaders.base_excel_loader import BaseExcelLoader
 from ..loaders.excel_loader import ExcelLoaderData
-from ..loaders.helpers import match_excel_columns_to_schema
 from ..models.base import (
     DynamicSheetMatching,
     ProcessValueMap,
@@ -308,6 +308,7 @@ class DynamicDataset(BaseDataset):
     def build_schema(self) -> tuple[list[ValidationResult], str | None]:
         """Builds a schema based on the matched dataset data."""
         consent_sheet = None
+        loader = BaseExcelLoader()
         results: list[ValidationResult] = []
         for sheet, details in self.sheet_matching.items():
             if details.classification in ["log", "clean", "raw"]:
@@ -407,7 +408,9 @@ class DynamicDataset(BaseDataset):
                     )
                 new_sheet = self.schema.get_schema_loaded_sheet(sheet)
                 assert new_sheet is not None  # added above
-                result, column_map = match_excel_columns_to_schema(details.data.columns, new_sheet)
+                result, column_map = loader.match_excel_columns_to_schema(
+                    details.data.columns, new_sheet
+                )
                 if result is not None:
                     results.extend(result)
 

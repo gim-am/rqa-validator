@@ -374,14 +374,12 @@ def valid_excel_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -424,14 +422,12 @@ def missing_sheet():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_surveyxxx",
             data_sheet_name="kobo_surveyxxx",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -474,14 +470,12 @@ def missing_sheet2():
             schema_sheet_name="clean_dataxxx",
             data_sheet_name="clean_dataxxx",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -524,14 +518,12 @@ def missing_column1():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuidxxx", data_column_name="uuidxxx")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -574,14 +566,12 @@ def missing_column2():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="typexxx", data_column_name="typexxx"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -624,14 +614,12 @@ def missing_column3():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="namexxx", data_column_name="namexxx"),
@@ -674,14 +662,12 @@ def invalid_excel_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -724,14 +710,12 @@ def invalid_excel_data2():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),
@@ -774,14 +758,12 @@ def invalid_excel_data3():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid", "question1", "question2", "question3", "other"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="kobo_survey",
             data_sheet_name="kobo_survey",
             data=df_survey,
-            data_columns=["type", "name"],
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
                 DataColumnMap(schema_column_name="name", data_column_name="name"),

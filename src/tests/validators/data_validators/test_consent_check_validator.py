@@ -267,14 +267,12 @@ def valid_excel_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid", "consent"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="consent", data_column_name="consent"),
@@ -307,14 +305,12 @@ def invalid_excel_data():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid", "consent"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="consent", data_column_name="consent"),
@@ -347,14 +343,12 @@ def invalid_excel_data2():
             schema_sheet_name="clean_dataxx",
             data_sheet_name="clean_dataxx",
             data=df_clean,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid", "consent"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="consent", data_column_name="consent"),
@@ -387,14 +381,12 @@ def invalid_excel_data3():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_dataxx",
             data_sheet_name="raw_dataxx",
             data=df_raw,
-            data_columns=["uuid", "consent"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="consent", data_column_name="consent"),
@@ -427,14 +419,12 @@ def invalid_excel_data4():
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid", "consent"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
     ]

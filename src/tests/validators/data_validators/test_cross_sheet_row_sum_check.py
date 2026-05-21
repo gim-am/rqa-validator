@@ -146,19 +146,16 @@ def valid_excel_data():
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
-            data_columns=["uuid"],
         ),
     ]
 
@@ -191,19 +188,16 @@ def missing_deleted_data():
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
-            data_columns=["uuid"],
         ),
     ]
 
@@ -236,19 +230,16 @@ def missing_clean_data():
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data",
             data_sheet_name="clean_data",
             data=df_clean,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
-            data_columns=["uuid"],
         ),
     ]
 
@@ -281,19 +272,16 @@ def missing_sheet_data():
             schema_sheet_name="bla",
             data_sheet_name="bla",
             data=df_raw,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="blo",
             data_sheet_name="blo",
             data=df_clean,
-            data_columns=["uuid"],
         ),
         DataSheetMap(
             schema_sheet_name="ble",
             data_sheet_name="ble",
             data=df_deleted,
-            data_columns=["uuid"],
         ),
     ]
 
@@ -333,7 +321,6 @@ def valid_excel_data_child():
             schema_sheet_name="raw_data_child",
             data_sheet_name="raw_data_child",
             data=df_raw_child,
-            data_columns=["uuid"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="person_id", data_column_name="person_id"),
@@ -343,21 +330,18 @@ def valid_excel_data_child():
             schema_sheet_name="raw_data",
             data_sheet_name="raw_data",
             data=df_raw_parent,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="deletion_log",
             data_sheet_name="deletion_log",
             data=df_deleted,
-            data_columns=["uuid"],
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
             schema_sheet_name="clean_data_child",
             data_sheet_name="clean_data_child",
             data=df_clean_child,
-            data_columns=["uuid"],
             column_map=[
                 DataColumnMap(schema_column_name="uuid", data_column_name="uuid"),
                 DataColumnMap(schema_column_name="person_id", data_column_name="person_id"),

@@ -31,7 +31,6 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid", "some_column", "some.column", "SomeColumn"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -46,7 +45,6 @@ def invalid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid", "some column"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -61,7 +59,6 @@ def invalid_excel_data2():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid", "some column"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])

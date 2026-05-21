@@ -84,7 +84,6 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
         column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
     )
 

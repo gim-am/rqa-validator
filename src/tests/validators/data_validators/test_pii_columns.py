@@ -51,7 +51,6 @@ def valid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -70,7 +69,6 @@ def invalid_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["phone_number"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -89,7 +87,6 @@ def invalid_fuzzy_excel_data():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["phone_number1"],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -110,8 +107,7 @@ def invalid_excel_data2():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
-        column_map=[DataColumnMap(schema_column_name='uuid', data_column_name='uuid')]
+        column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
     )
 
     return ExcelLoaderData(loaded_sheets=[loaded_sheet])
@@ -132,7 +128,6 @@ def invalid_excel_data3():
         schema_sheet_name="raw_data",
         data_sheet_name="raw_data",
         data=df,
-        data_columns=["uuid"],
         column_map=[DataColumnMap(data_column_name="uuid", schema_column_name="uuid")],
     )
 

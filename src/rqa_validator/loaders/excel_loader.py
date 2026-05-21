@@ -6,12 +6,11 @@ import polars as pl
 
 from ..models.base_dataset import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
-from .base import DataColumnMap, DataSheetMap
-from .helpers import (
-    check_duplicate_columns,
-    match_excel_columns_to_schema,
-    match_excel_sheet_to_schema,
+from .base import (
+    DataColumnMap,
+    DataSheetMap,
 )
+from .base_excel_loader import BaseExcelLoader
 
 
 @dataclass
@@ -98,7 +97,7 @@ class ExcelLoaderData:
         return sheets
 
 
-class ExcelLoader:
+class ExcelLoader(BaseExcelLoader):
     def __init__(self, schema_config: BaseDatasetSchema):
         self.schema = schema_config
 
@@ -116,14 +115,6 @@ class ExcelLoader:
             class that contains the loaded data, sheets etc,
             list of validation warnings
 
-        TODO
-        Current Issues:
-        when there is an empty column at the start of a sheet, fastexcel
-        cant determine a datatype and throws an error:
-            calamine cell error...could not determine dtype for column...
-        currently there is no way to skip empty columns when loading an
-        excel sheet
-
         """
         results: list[ValidationResult] = []
         # get a list of excel sheet names
@@ -134,7 +125,9 @@ class ExcelLoader:
 
         data = ExcelLoaderData()
 
-        def _load_excel_sheet(excel_file: fastexcel.ExcelReader, sheet_name: str) -> pl.DataFrame:
+        def _load_excel_sheet(
+            excel_file: fastexcel.ExcelReader, sheet_name: str, schema_sheet_name: str | None = None
+        ) -> bool:
             excel_sheet = excel_file.load_sheet(
                 sheet_name, whitespace_as_null=True, skip_whitespace_tail_rows=True
             )
@@ -142,14 +135,56 @@ class ExcelLoader:
             if excel_sheet.visible != "visible":
                 data.hidden_sheets.append(sheet_name)
             data_df: pl.DataFrame = excel_sheet.to_polars()
+            result = self.check_duplicate_columns(data_df.columns, excel_sheet_name)
+            # if there are duplicates then the rename function below will fail
+            if result is not None:
+                results.append(result)
+                return False
 
-            return data_df
+            data_df = data_df.rename(str.lower)
+            if schema_sheet_name is not None:
+                schema_sheet = self.schema.get_schema_loaded_sheet(schema_sheet_name)
+                if schema_sheet is not None:
+                    column_results, column_matches = self.match_excel_columns_to_schema(
+                        data_df.columns, schema_sheet
+                    )
+                    data.loaded_sheets.append(
+                        DataSheetMap(
+                            schema_sheet_name=l_mapped_name,
+                            data_sheet_name=excel_sheet_name,
+                            data=data_df,
+                            column_map=column_matches,
+                        )
+                    )
+                    results.extend(l_results)
+                    results.extend(column_results)
+
+                else:
+                    results.append(
+                        ValidationResult(
+                            rule="Getting Schema Sheet",
+                            message=f"The schema sheet {l_mapped_name} was not found.",
+                            severity=SeverityLevel.ERROR,
+                            sheet_name=l_mapped_name,
+                        )
+                    )
+                    return False
+            else:
+                data.loaded_sheets.append(
+                    DataSheetMap(
+                        schema_sheet_name=excel_sheet_name,
+                        data_sheet_name=excel_sheet_name,
+                        data=data_df,
+                        auto_loaded=True,
+                    )
+                )
+            return True
 
         for excel_sheet_name in all_sheets:
-            l_mapped_name, l_results = match_excel_sheet_to_schema(
+            l_mapped_name, l_results = self.match_excel_sheet_to_schema(
                 excel_sheet_name, self.schema.schema_loaded_sheets
             )
-            u_mapped_name, u_results = match_excel_sheet_to_schema(
+            u_mapped_name, u_results = self.match_excel_sheet_to_schema(
                 excel_sheet_name, self.schema.schema_unloaded_sheets
             )
 
@@ -192,41 +227,8 @@ class ExcelLoader:
                 or (l_results and (not (u_mapped_name and not u_results) or not u_mapped_name))
             ):
                 # sheets that are expected and loaded for further data validation
-                df = _load_excel_sheet(excel_file, excel_sheet_name)
-                # dont lower the columns as the caseing is needed for validation checks
-                df_columns = df.columns
-                result = check_duplicate_columns(df_columns, excel_sheet_name)
-                if result is not None:
-                    results.append(result)
-                    continue
-
-                df = df.rename(str.lower)
-                schema_sheet = self.schema.get_schema_loaded_sheet(l_mapped_name)
-                if schema_sheet is not None:
-                    # it should not be none as it was just matched.
-                    column_results, column_matches = match_excel_columns_to_schema(
-                        df_columns, schema_sheet
-                    )
-                    data.loaded_sheets.append(
-                        DataSheetMap(
-                            schema_sheet_name=l_mapped_name,
-                            data_sheet_name=excel_sheet_name,
-                            data=df,
-                            data_columns=df_columns,
-                            column_map=column_matches,
-                        )
-                    )
-                    results.extend(l_results)
-                    results.extend(column_results)
-                else:
-                    results.append(
-                        ValidationResult(
-                            rule="Getting Schema Sheet",
-                            message=f"The schema sheet {l_mapped_name} was not found.",
-                            severity=SeverityLevel.ERROR,
-                            sheet_name=l_mapped_name,
-                        )
-                    )
+                result = _load_excel_sheet(excel_file, excel_sheet_name, l_mapped_name)
+                if not result:
                     continue
 
             # 2, 4
@@ -241,23 +243,9 @@ class ExcelLoader:
                 results.extend(u_results)
             else:
                 if load_all_sheets:
-                    df = _load_excel_sheet(excel_file, excel_sheet_name)
-                    # dont lower the columns as the caseing is needed for validation checks
-                    df_columns = df.columns
-                    result = check_duplicate_columns(df_columns, excel_sheet_name)
-                    if result is not None:
-                        results.append(result)
+                    result = _load_excel_sheet(excel_file, excel_sheet_name, None)
+                    if not result:
                         continue
-                    df = df.rename(str.lower)
-                    data.loaded_sheets.append(
-                        DataSheetMap(
-                            schema_sheet_name=excel_sheet_name,
-                            data_sheet_name=excel_sheet_name,
-                            data=df,
-                            data_columns=df_columns,
-                            auto_loaded=True,
-                        )
-                    )
                 else:
                     # 7
                     data.unexpected_sheets.append(excel_sheet_name)

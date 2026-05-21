@@ -28,7 +28,6 @@ def unexpected_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        data_columns=["uuid"],
     )
     unexpected_sheets = ["somesheet", "anothersheet"]
 
@@ -36,6 +35,7 @@ def unexpected_excel_data():
     data.unexpected_sheets = unexpected_sheets
 
     return data
+
 
 @pytest.fixture
 def hidden_excel_data():
@@ -50,7 +50,6 @@ def hidden_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        data_columns=["uuid"],
     )
     hidden_excel_data = ["somesheet", "anothersheet"]
 
@@ -73,7 +72,6 @@ def expected_excel_data():
         schema_sheet_name="raw_datax",
         data_sheet_name="raw_datax",
         data=df,
-        data_columns=["uuid"],
     )
     unexpected_sheets = []
 
