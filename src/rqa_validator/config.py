@@ -31,6 +31,9 @@ class Settings(BaseSettings):
         "instance_name",
         "row_index",
     ]
+
+    ID_FILTER_NAMES: list[str] = ["start", "end"]
+
     COMMON_ID_COLUMN_NAMES: list[str] = ["uuid", "x_uuid", "person_id"]
 
     # for dynamic model creation

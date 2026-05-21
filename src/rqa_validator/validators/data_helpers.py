@@ -3,6 +3,7 @@ from ..common.schema_matching import get_matching_unique_columns
 from ..loaders.base import DataColumnMap, DataSheetMap
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base_dataset import BaseDatasetSchema
+from ..validators.schema_helpers import get_schema_loaded_sheet
 from .base import SeverityLevel, ValidationResult
 
 
@@ -83,7 +84,7 @@ def get_data_loaded_column(
     if column is None:
         result = ValidationResult(
             rule=rule,
-            message=f"A column for '{column_name}' in sheet {loaded_sheet.data_sheet_name}"
+            message=f"A column for '{column_name}' in sheet '{loaded_sheet.data_sheet_name}'"
             " is expected.",
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
@@ -291,9 +292,14 @@ def get_id_linking_columns(
     """Trys to find linkable id columns between two sheets.
 
     This follows the following process:
+    - checks if the source sheet has a parent and if the target sheet
+    is that parent.
+        if so, use the parent id column from source
+        and the id column from the target if found
+    else
     - checks if both sheets have a unique column
        If they both have one then these columns are used
-    - If only one or none of the sheets have a unique column
+    - If only one or none of the sheets have a column from the above steps
         name matching is performed
 
     if possible linking columns are found then the intersection
@@ -304,6 +310,8 @@ def get_id_linking_columns(
     Note: if one sheet is likely to contain only a subset of the ids of
     the other sheet (cleaning log vs clean or clean vs raw) then the source
     sheet should always be the sheet that contains the subset of values.
+    This is also the case when checking parent-child ids - the child sheet
+    should be the source.
 
     Args:
         schema (BaseDatasetSchema): dataset schema
@@ -318,14 +326,35 @@ def get_id_linking_columns(
     """
     results: list[ValidationResult] = []
 
-    # check if both sheets have an ID column
-    result_source, source_sheet_id_column = get_data_sheet_id(
-        schema=schema,
-        sheet_name=source_sheet,
-        loaded_sheet=data_loaded_sheets[source_sheet],
-        rule=rule,
-        expected=1,
-    )
+    result, child_schema_loaded_sheet = get_schema_loaded_sheet(schema, source_sheet, rule)
+    if result is not None:
+        results.append(result)
+        return results, None, None
+    assert child_schema_loaded_sheet is not None
+
+    if (
+        child_schema_loaded_sheet.parent_linking_column is not None
+        and child_schema_loaded_sheet.parent_sheet == target_sheet
+    ):
+        # if checking parent-child links
+        result_source, source_sheet_id_column = get_data_loaded_column(
+            data_loaded_sheets[source_sheet], child_schema_loaded_sheet.parent_linking_column, rule
+        )
+        if result_source is not None:
+            results.append(result_source)
+            return results, None, None
+        else:
+            assert source_sheet_id_column is not None
+            source_sheet_id_column = [source_sheet_id_column]
+    else:
+        # check if there is an id column
+        result_source, source_sheet_id_column = get_data_sheet_id(
+            schema=schema,
+            sheet_name=source_sheet,
+            loaded_sheet=data_loaded_sheets[source_sheet],
+            rule=rule,
+            expected=1,
+        )
 
     result_target, target_sheet_id_column = get_data_sheet_id(
         schema=schema,

@@ -4,7 +4,7 @@ import polars as pl
 
 from rqa_validator.config import settings
 
-from ..common.list_matching import filter_list, get_set_overlap, match_list
+from ..common.list_matching import filter_list, get_set_overlap, match_list, unique_list
 from ..loaders.base_excel_loader import BaseExcelLoader
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base import (
@@ -179,6 +179,14 @@ class DynamicDataset(BaseDataset):
                             sheet_name=sheet,
                         )
                     )
+                if details.parent_sheet is not None:
+                    self.validators.append(
+                        CrossSheetIdCheck(
+                            schema=self.schema,
+                            master_sheet=details.parent_sheet,
+                            child_sheets=[sheet],
+                        )
+                    )
 
             elif details.classification == "raw":
                 rowsum_sheets = []
@@ -212,6 +220,15 @@ class DynamicDataset(BaseDataset):
                             "not be run.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
+                        )
+                    )
+
+                if details.parent_sheet is not None:
+                    self.validators.append(
+                        CrossSheetIdCheck(
+                            schema=self.schema,
+                            master_sheet=details.parent_sheet,
+                            child_sheets=[sheet],
                         )
                     )
 
@@ -514,25 +531,26 @@ class DynamicDataset(BaseDataset):
                     continue
 
                 # find a linking column
-                linking_log_column = self._find_linking_column(
+                linking_log_columns = self._find_linking_column(
                     match_log_sheet.data.columns, match_clean_sheet.id_column, True
                 )
                 # compare names and overlapping id values
-                if linking_log_column is not None:
-                    log_set = set(
-                        match_log_sheet.data.select(linking_log_column)
-                        .to_series()
-                        .unique()
-                        .to_list()
-                    )
-                    combined_score = self._get_similarity_score(
-                        log_sheet, log_set, clean_sheet, match_clean_sheet.id_column_set
-                    )
+                if linking_log_columns is not None:
+                    for linking_log_column in linking_log_columns:
+                        log_set = set(
+                            match_log_sheet.data.select(linking_log_column)
+                            .to_series()
+                            .unique()
+                            .to_list()
+                        )
+                        combined_score = self._get_similarity_score(
+                            log_sheet, log_set, clean_sheet, match_clean_sheet.id_column_set
+                        )
 
-                    if combined_score > best_score:
-                        best_score = combined_score
-                        best_parent = clean_sheet
-                        best_linking_log_column = linking_log_column
+                        if combined_score > best_score:
+                            best_score = combined_score
+                            best_parent = clean_sheet
+                            best_linking_log_column = linking_log_column
             # if there was a good enough score then assume its a parent
             if best_score > min_matching_score and best_parent is not None:
                 self.sheet_matching[best_parent].linked_cleaning_log = log_sheet
@@ -681,7 +699,7 @@ class DynamicDataset(BaseDataset):
 
     def _find_linking_column(
         self, child_cols: list[str], parent_id_col: str, allow_common_names: bool = False
-    ) -> str | None:
+    ) -> list | None:
         """Attempts to find name matches between a parent id column and a list of
                child columns.
 
@@ -696,21 +714,26 @@ class DynamicDataset(BaseDataset):
         Returns:
             str | None: returns a name match if found. otherwise None
         """
-
+        possible_columns = []
         #  Exact match
         if parent_id_col in child_cols:
-            return parent_id_col
+            possible_columns.append(parent_id_col)
+            # return parent_id_col
 
         # Partial match
         alt_matches = [col for col in child_cols if parent_id_col in col]
-        if len(alt_matches) == 1:
-            return alt_matches[0]
+        if alt_matches:
+            possible_columns.extend(alt_matches)
 
         # check common names
         if allow_common_names:
             matching_columns: list[str] = match_list(child_cols, settings.COMMON_ID_COLUMN_NAMES)
-            if len(matching_columns) == 1:
-                return matching_columns[0]
+            if matching_columns:
+                possible_columns.extend(matching_columns)
+
+        if possible_columns:
+            possible_columns = unique_list(possible_columns)
+            return possible_columns
 
         return None
 
@@ -740,23 +763,24 @@ class DynamicDataset(BaseDataset):
                 # Find FK column in child that matches parent's primary ID
                 if parent_match_sheet.id_column is not None:
                     # try to find an id column match
-                    linking_column = self._find_linking_column(
+                    linking_columns = self._find_linking_column(
                         child_match_sheet.data.columns, parent_match_sheet.id_column
                     )
                     # see what the overlap of id values is
-                    if linking_column is not None:
-                        child_set = set(
-                            child_match_sheet.data.select(linking_column)
-                            .to_series()
-                            .unique()
-                            .to_list()
-                        )
-                        overlap = get_set_overlap(child_set, parent_match_sheet.id_column_set)
+                    if linking_columns is not None:
+                        for linking_column in linking_columns:
+                            child_set = set(
+                                child_match_sheet.data.select(linking_column)
+                                .to_series()
+                                .unique()
+                                .to_list()
+                            )
+                            overlap = get_set_overlap(child_set, parent_match_sheet.id_column_set)
 
-                        if overlap > best_score:
-                            best_score = overlap
-                            best_parent = parent_sheet
-                            best_fk_column = linking_column
+                            if overlap > best_score:
+                                best_score = overlap
+                                best_parent = parent_sheet
+                                best_fk_column = linking_column
 
             if best_score > 0.8:
                 assert best_parent is not None
@@ -782,12 +806,18 @@ class DynamicDataset(BaseDataset):
             if len(matching_columns) == 1:
                 return matching_columns[0]
 
+            # look for modified columns from ID_FILTER_NAMES that are often renamed
+            # that should be ignored
+            filter_columns = [
+                item for item in columns if any(term in item for term in settings.ID_FILTER_NAMES)
+            ]
+            matching_columns = filter_list(columns, filter_columns)
+            if len(matching_columns) == 1:
+                return matching_columns[0]
+
             alt_matches: list[str] = []
             # child sheets often have a unique column like person
-            for column in columns:
-                if "person" in column:
-                    alt_matches.append(column)
-
+            alt_matches = [column for column in columns if "person" in column]
             if len(alt_matches) == 1:
                 return alt_matches[0]
 
