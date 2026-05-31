@@ -7,8 +7,8 @@ from ...loaders.base import DataColumnMap
 from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
-from ...validators.config import get_pii_columns
 from ..data_helpers import get_data_sheet_id
+from ..options import get_pii_columns
 
 
 class PiiDataCheck(BaseValidator):
