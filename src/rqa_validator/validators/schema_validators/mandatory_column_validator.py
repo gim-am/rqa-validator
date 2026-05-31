@@ -46,7 +46,7 @@ class MandatoryColumns(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message="Some excel sheets were expected but not found."
+                    message=f"{len(result)} excel sheets were expected but not found."
                     " See output for details.",
                     severity=SeverityLevel.ERROR,
                     details=sheet_df,
@@ -75,7 +75,8 @@ class MandatoryColumns(BaseValidator):
             ).to_dict(as_series=False)
             result = ValidationResult(
                 rule=self.name,
-                message="Some excel columns were expected but not found. See output for details.",
+                message=f"{len(results)} excel columns were expected but not found."
+                " See output for details.",
                 severity=SeverityLevel.ERROR,
                 details=column_df,
             )

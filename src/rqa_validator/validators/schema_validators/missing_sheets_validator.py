@@ -53,7 +53,8 @@ class MissingSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message="Some sheets were expected but not found. See the output for details.",
+                    message=f"{len(missing_sheets)} additional sheets were expected but not found."
+                    " See the output for details.",
                     severity=SeverityLevel.ERROR,
                     details={"missing_sheets": missing_sheets},
                 )
@@ -75,8 +76,9 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message="Some optional sheets were not found. Check if these sheets"
-                        " are required or not for this dataset.",
+                        message=f"{len(optional_missing_sheets)} optional sheets were not found."
+                        " Check if these sheets are required or not for this dataset."
+                        " See the output for details.",
                         severity=SeverityLevel.WARNING,
                         details={"optional_sheets": optional_missing_sheets},
                     )

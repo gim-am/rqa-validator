@@ -214,8 +214,8 @@ class DataTypeCheck(BaseValidator):
                         results.append(
                             ValidationResult(
                                 rule=self.name,
-                                message=f"Non-numeric values were found in '{sheet}' "
-                                "when numeric values were expected."
+                                message=f"{incorrect_values_df.height} non-numeric values were"
+                                f" found in '{sheet}' when numeric values were expected."
                                 " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
@@ -268,8 +268,8 @@ class DataTypeCheck(BaseValidator):
                         results.append(
                             ValidationResult(
                                 rule=self.name,
-                                message=f"Non-temporal values were found in '{sheet}'"
-                                " when temporal values were expected."
+                                message=f"{incorrect_values_df.height} non-temporal values were"
+                                f" found in '{sheet}' when temporal values were expected."
                                 " Check the output for details.",
                                 severity=SeverityLevel.ERROR,
                                 sheet_name=sheet,
