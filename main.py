@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 from rqa_validator.config import settings
+from rqa_validator.validators.base import SeverityLevel
 from src.rqa_validator.orchestrator.validation_pipeline import ValidationPipeline
 
 
@@ -23,17 +24,17 @@ def main():
     pipeline = ValidationPipeline(dataset_type=args.dataset_type)
     results = pipeline.run(args.input_file)
 
-    print(f"Admin Errors: {results['summary']['admin_errors']}")
-    print(f"Errors: {results['summary']['errors']}")
-    print(f"Warnings: {results['summary']['warnings']}")
-    print(f"info: {results['summary']['info']}")
-    print(f"admin_info: {results['summary']['admin_info']}")
-    print(f"passed: {results['summary']['passed']}")
-    print(results["admin_errors"])
-    print(results["errors"])
-    print(results["warnings"])
-    print(results["info"])
-    print(results["admin_info"])
+    print(f"Admin Errors: {results['summary'][SeverityLevel.ADMIN_ERROR.value]}")
+    print(f"Errors: {results['summary'][SeverityLevel.ERROR.value]}")
+    print(f"Warnings: {results['summary'][SeverityLevel.WARNING.value]}")
+    print(f"info: {results['summary'][SeverityLevel.INFO.value]}")
+    print(f"admin_info: {results['summary'][SeverityLevel.ADMIN_INFO.value]}")
+    print(f"passed: {results['summary'][SeverityLevel.PASSED.value]}")
+    print(results[SeverityLevel.ADMIN_ERROR.value])
+    print(results[SeverityLevel.ERROR.value])
+    print(results[SeverityLevel.WARNING.value])
+    print(results[SeverityLevel.INFO.value])
+    print(results[SeverityLevel.ADMIN_INFO.value])
 
 
 if __name__ == "__main__":
