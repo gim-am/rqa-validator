@@ -12,7 +12,7 @@ from ..loaders.base import DataColumnMap, DataSheetMap
 @dataclass
 class FuzzMatch:
     standard_name: str
-    matches: dict = field(default_factory=dict)
+    matches: dict[Any, Any] = field(default_factory=dict)
 
 
 def match_list_to_list(
@@ -77,20 +77,20 @@ def lower_list_items(source: list[str]):
     return list(map(str.lower, source))
 
 
-def match_list(source: list, target: list) -> list:
+def match_list(source: list[Any], target: list[Any]) -> list[Any]:
     """Returns items in source that are in target"""
     set_target = set(target)
     return [item for item in source if item in set_target]
 
 
-def unique_list(source: list) -> list[Any]:
+def unique_list(source: list[Any]) -> list[Any]:
     """returns a list of unique items"""
     return list(set(source))
 
 
-def filter_list(source: list, target: list) -> list:
+def filter_list(source: list[Any], target: list[Any]) -> list[Any]:
     """Returns items in source that are not in target"""
-    set_target = set(target)
+    set_target: set[Any] = set[Any](target)
     return [item for item in source if item not in set_target]
 
 
@@ -118,7 +118,7 @@ def filter_list_with_tolerance(
     return [item for item in target if _check_length_tolerance(source, item)]
 
 
-def duplicate_list_items(source: list) -> list[Any]:
+def duplicate_list_items(source: list[Any]) -> list[Any]:
     """returns a list of items that appear in a list multiple times.
 
     Args:
@@ -131,9 +131,9 @@ def duplicate_list_items(source: list) -> list[Any]:
     return [item for item in set(source) if item_counts[item] > 1]
 
 
-def combine_lists(source: list | None, target: list | None, unique_list: bool = True):
+def combine_lists(source: list[Any] | None, target: list[Any] | None, unique_list: bool = True):
     """Combines two lists returning a unique list"""
-    combined_list: list = []
+    combined_list: list[Any] = []
 
     if source is not None:
         combined_list.extend(source)
@@ -147,9 +147,9 @@ def combine_lists(source: list | None, target: list | None, unique_list: bool = 
         return combined_list
 
 
-def add_to_list(item: str | None, target: list | None) -> list:
+def add_to_list(item: str | None, target: list[Any] | None) -> list[Any]:
     """Adds item and list. returns a unique list."""
-    combined_list: list = []
+    combined_list: list[Any] = []
 
     if item is not None:
         combined_list.append(item)
@@ -160,7 +160,7 @@ def add_to_list(item: str | None, target: list | None) -> list:
     return list(set(combined_list))
 
 
-def is_in_list(item: str, target: list) -> bool:
+def is_in_list(item: str, target: list[Any]) -> bool:
     """Checks if an item is in a list"""
     return item in target
 
@@ -244,7 +244,7 @@ def filter_loaded_sheets(
     return {key: loaded_sheets[key] for key in sheets}
 
 
-def get_set_overlap(source_data: set, target_data: set) -> float:
+def get_set_overlap(source_data: set[Any], target_data: set[Any]) -> float:
     """Gets the overlap of two sets by calculating the intersection \
      of both sets
 

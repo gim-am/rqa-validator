@@ -13,7 +13,7 @@ from rqa_validator.validators.base import SeverityLevel, ValidationResult
 
 class BaseExcelLoader:
     def match_excel_columns_to_schema(
-        self, excel_columns: list, schema_sheet: SchemaSheetMap
+        self, excel_columns: list[str], schema_sheet: SchemaSheetMap
     ) -> tuple[list[ValidationResult], list[DataColumnMap]]:
         """trys to match an excel column to a schema column.
 

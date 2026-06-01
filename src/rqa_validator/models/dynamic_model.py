@@ -1,4 +1,5 @@
 from difflib import SequenceMatcher
+from typing import Any
 
 import polars as pl
 
@@ -189,8 +190,8 @@ class DynamicDataset(BaseDataset):
                     )
 
             elif details.classification == "raw":
-                rowsum_sheets = []
-                id_check_sheets = []
+                rowsum_sheets: list[str] = []
+                id_check_sheets: list[str] = []
                 clean_sheet = None
                 master_deletion_log = None
                 if details.linked_clean_sheet is not None:
@@ -428,7 +429,7 @@ class DynamicDataset(BaseDataset):
                 result, column_map = loader.match_excel_columns_to_schema(
                     details.data.columns, new_sheet
                 )
-                if result is not None:
+                if result:
                     results.extend(result)
 
                 if column_map:
@@ -490,10 +491,11 @@ class DynamicDataset(BaseDataset):
             # some cleaning logs contain columns that could be unique but ignore these
             # as they probably wont be the columns needed for validation processes
             if self.sheet_matching[sheet.data_sheet_name].log_type != "cleaning":
-                unique_col = self._find_unique_column(sheet.data)
-                id_set = None
+                unique_col: str | None = self._find_unique_column(sheet.data)
                 if unique_col is not None:
-                    id_set = set(sheet.data.select(unique_col).to_series().unique().to_list())
+                    id_set: set[Any] = set[Any](
+                        sheet.data.select(unique_col).to_series().unique().to_list()
+                    )
                     self.sheet_matching[sheet.data_sheet_name].id_column_set = id_set
                     self.sheet_matching[sheet.data_sheet_name].id_column = unique_col
                 elif self.sheet_matching[sheet.data_sheet_name].classification != "unknown":
@@ -512,8 +514,12 @@ class DynamicDataset(BaseDataset):
             for k, v in self.sheet_matching.items()
             if v.classification == "log" and v.log_type == "cleaning"
         ]
-        clean_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "clean"]
-        raw_sheets = [k for k, v in self.sheet_matching.items() if v.classification == "raw"]
+        clean_sheets: list[str] = [
+            k for k, v in self.sheet_matching.items() if v.classification == "clean"
+        ]
+        raw_sheets: list[str] = [
+            k for k, v in self.sheet_matching.items() if v.classification == "raw"
+        ]
 
         # try to  link the cleaning logs to another sheet
         for log_sheet in cleaning_log_sheets:
@@ -669,9 +675,9 @@ class DynamicDataset(BaseDataset):
     def _get_similarity_score(
         self,
         source_name: str,
-        source_data: set,
+        source_data: set[Any],
         target_name: str,
-        target_data: set,
+        target_data: set[Any],
         name_scaler: float = 0.4,
         overlap_scaler: float = 0.6,
     ) -> float:
@@ -699,7 +705,7 @@ class DynamicDataset(BaseDataset):
 
     def _find_linking_column(
         self, child_cols: list[str], parent_id_col: str, allow_common_names: bool = False
-    ) -> list | None:
+    ) -> list[str] | None:
         """Attempts to find name matches between a parent id column and a list of
                child columns.
 
@@ -714,7 +720,7 @@ class DynamicDataset(BaseDataset):
         Returns:
             str | None: returns a name match if found. otherwise None
         """
-        possible_columns = []
+        possible_columns: list[str] = []
         #  Exact match
         if parent_id_col in child_cols:
             possible_columns.append(parent_id_col)
@@ -797,8 +803,8 @@ class DynamicDataset(BaseDataset):
         Returns:
             str | None: return column if one match is found, otherwise None
         """
-        unique_cols = []
-        majority_unique_cols = []
+        unique_cols: list[str] = []
+        majority_unique_cols: list[str] = []
 
         def _additional_matching(columns: list[str]) -> str | None:
             """Perform some additional checks to find possible unique columns"""

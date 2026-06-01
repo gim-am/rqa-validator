@@ -26,7 +26,7 @@ class SurveyChoicesCheck(BaseValidator):
         choices_sheet: str = "kobo_choices",
         choices_name_column: str = "name",
         choices_list_name_column: str = "list_name",
-        check_sheets: list = ["clean_data"],
+        check_sheets: list[str] = ["clean_data"],
         select_multiple_value_separator: str = " ",
     ) -> None:
         """
@@ -239,7 +239,7 @@ class SurveyChoicesCheck(BaseValidator):
             )
             filtered_questions = filtered_questions_select_one + filtered_questions_select_multiple
 
-            difference_expressions = []
+            difference_expressions: list[pl.Expr] = []
 
             # build an expression to find values that dont match
             # for each question, compare the values in the survey choices

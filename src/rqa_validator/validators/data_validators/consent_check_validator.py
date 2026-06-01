@@ -24,7 +24,7 @@ class ConsentCheck(BaseValidator):
         schema: BaseDatasetSchema,
         raw_data_sheet: str = "raw_data",
         clean_data_sheet: str = "clean_data",
-        schema_consent_column="consent",
+        schema_consent_column: str = "consent",
     ) -> None:
         """
         Args:

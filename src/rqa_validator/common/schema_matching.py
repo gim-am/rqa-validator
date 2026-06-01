@@ -21,7 +21,7 @@ def get_matching_unique_columns(
     if sheet is not None:
         unique_columns = sheet.get_unique_columns()
 
-        if unique_columns is not None:
+        if unique_columns:
             for column in unique_columns:
                 column_map = loaded_data.get_column_map(column.standard_name)
                 if column_map is not None:

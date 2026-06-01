@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 import polars as pl
 
@@ -9,7 +10,7 @@ from ..common.list_matching import add_to_list, is_in_list, unique_list
 class DynamicSheetMatching:
     data: pl.DataFrame
     id_column: str | None
-    id_column_set: set | None
+    id_column_set: set[Any] | None
     classification: str | None = None
     log_type: str | None = None
     parent_sheet: str | None = None
@@ -26,7 +27,7 @@ class ProcessValueMap:
     """Values expected in a column required for a validation process"""
 
     process_name: str
-    values: list = field(default_factory=list)
+    values: list[Any] = field(default_factory=list)
 
 
 @dataclass

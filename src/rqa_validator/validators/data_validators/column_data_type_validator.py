@@ -26,7 +26,7 @@ class DataTypeCheck(BaseValidator):
         survey_sheet: str = "kobo_survey",
         survey_type_column: str = "type",
         survey_name_column: str = "name",
-        check_sheets: list = ["clean_data"],
+        check_sheets: list[str] = ["clean_data"],
     ) -> None:
         """
 

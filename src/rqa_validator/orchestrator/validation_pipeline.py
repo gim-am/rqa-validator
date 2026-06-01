@@ -218,10 +218,10 @@ class ValidationPipeline:
         """Get validator paramaters for logs but exclude schema."""
         return {k: v for k, v in vars(validator).items() if not isinstance(v, BaseDatasetSchema)}
 
-    def _excel_loader_to_dict(self, excel_loader: ExcelLoaderData) -> dict:
+    def _excel_loader_to_dict(self, excel_loader: ExcelLoaderData) -> dict[str, Any]:
         """Convert ExcelLoaderData to dict, excluding data and column fields."""
 
-        def data_sheet_map_to_dict(data_sheet: DataSheetMap) -> dict:
+        def data_sheet_map_to_dict(data_sheet: DataSheetMap) -> dict[str, Any]:
             return {
                 "schema_sheet_name": data_sheet.schema_sheet_name,
                 "data_sheet_name": data_sheet.data_sheet_name,

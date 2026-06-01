@@ -1,5 +1,6 @@
 # from ...common.file_export import df_to_csv
 
+
 import polars as pl
 
 from ...common.expression_builder import create_column_difference_expression
@@ -131,7 +132,7 @@ class RawToCleanToLog(BaseValidator):
                 rule=self.name,
             )
             results.extend(result)
-            if raw_data_id_columns is None or clean_data_id_columns is None:
+            if clean_log_id_columns is None or clean_data_id_columns is None:
                 return results
             assert clean_data_id_columns is not None
             assert clean_log_id_columns is not None
@@ -246,7 +247,7 @@ class RawToCleanToLog(BaseValidator):
             how="inner",
         )
 
-        difference_expressions = []
+        difference_expressions: list[pl.Expr] = []
 
         # build expressions to compare the columns of both dataframes
         for question in clean_data_columns:
