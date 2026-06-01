@@ -204,7 +204,6 @@ class CleaningLogToClean(BaseValidator):
         )
 
         if multiple_change_df.height > 0:
-            # df_to_csv(data=multiple_change_df, filename=multiple_changes_filename)
             results.append(
                 ValidationResult(
                     rule=self.name,
@@ -452,7 +451,6 @@ class CleaningLogToClean(BaseValidator):
 
             # if there are differences found log them
             if difference_df.height > 0:
-                # df_to_csv(data=difference_df, filename=validation_results_filename)
                 results.append(
                     ValidationResult(
                         rule=self.name,

@@ -1,6 +1,3 @@
-# from ...common.file_export import df_to_csv
-
-
 import polars as pl
 
 from ...common.expression_builder import create_column_difference_expression
@@ -349,7 +346,6 @@ class RawToCleanToLog(BaseValidator):
                 )
 
                 if difference_df.height > 0:
-                    # df_to_csv(data=difference_df, filename=validation_results_filename)
                     results.append(
                         ValidationResult(
                             rule=self.name,

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .utils.logging import JIVELogger
@@ -32,7 +30,7 @@ class Settings(BaseSettings):
         "row_index",
     ]
 
-    ID_FILTER_NAMES: list[str] = ["start", "end"]
+    ID_FILTER_NAMES: list[str] = ["start", "end"]  # , "_index"
 
     COMMON_ID_COLUMN_NAMES: list[str] = ["uuid", "x_uuid", "person_id"]
 
@@ -42,8 +40,8 @@ class Settings(BaseSettings):
     RAW_DATA_SHEET_SEARCH_TERMS: list[str] = ["raw"]
 
     # for the NaNCheck validator
-    NANCHECK_NUMERIC_VALUES: list = [-999, -99, 99, 999, -88, -888, 88, 888]
-    NANCHECK_STRING_VALUES: list = [
+    NANCHECK_NUMERIC_VALUES: list[int] = [-999, -99, 99, 999, -88, -888, 88, 888]
+    NANCHECK_STRING_VALUES: list[str] = [
         "-999",
         "-99",
         "99",
@@ -53,8 +51,6 @@ class Settings(BaseSettings):
         "88",
         "888",
     ]
-
-    VALIDATION_LOG_DIRECTORY: Path = Path("../validation_logs")
 
     logger: JIVELogger = JIVELogger()
 
