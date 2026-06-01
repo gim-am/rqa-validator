@@ -491,20 +491,20 @@ class DynamicDataset(BaseDataset):
             # some cleaning logs contain columns that could be unique but ignore these
             # as they probably wont be the columns needed for validation processes
             if self.sheet_matching[sheet.data_sheet_name].log_type != "cleaning":
-                unique_col: str | None = self._find_unique_column(sheet.data)
-                if unique_col is not None:
+                unique_col: list[str] = self._find_unique_column(sheet.data)
+                if len(unique_col) == 1:
                     id_set: set[Any] = set[Any](
-                        sheet.data.select(unique_col).to_series().unique().to_list()
+                        sheet.data.select(unique_col[0]).to_series().unique().to_list()
                     )
                     self.sheet_matching[sheet.data_sheet_name].id_column_set = id_set
-                    self.sheet_matching[sheet.data_sheet_name].id_column = unique_col
+                    self.sheet_matching[sheet.data_sheet_name].id_column = unique_col[0]
                 elif self.sheet_matching[sheet.data_sheet_name].classification != "unknown":
                     # only log this for sheets we are expecting an id for
                     results.append(
                         ValidationResult(
                             rule="DynamicDataset Creation",
-                            message="Could not find a single unique ID column for sheet"
-                            f" '{sheet.data_sheet_name}'.",
+                            message="Expected one unique ID column for sheet"
+                            f" '{sheet.data_sheet_name}' but {len(unique_col)} were found.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet.data_sheet_name,
                         )
@@ -794,7 +794,7 @@ class DynamicDataset(BaseDataset):
                 self.sheet_matching[child_sheet].parent_linking_column = best_fk_column
                 self.sheet_matching[best_parent].children.append(child_sheet)
 
-    def _find_unique_column(self, df: pl.DataFrame):
+    def _find_unique_column(self, df: pl.DataFrame) -> list[str]:
         """Attempts to find a unique column in a dataframe
 
         Args:
@@ -806,11 +806,11 @@ class DynamicDataset(BaseDataset):
         unique_cols: list[str] = []
         majority_unique_cols: list[str] = []
 
-        def _additional_matching(columns: list[str]) -> str | None:
+        def _additional_matching(columns: list[str]) -> list[str] | None:
             """Perform some additional checks to find possible unique columns"""
             matching_columns: list[str] = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
             if len(matching_columns) == 1:
-                return matching_columns[0]
+                return matching_columns
 
             # look for modified columns from ID_FILTER_NAMES that are often renamed
             # that should be ignored
@@ -819,18 +819,20 @@ class DynamicDataset(BaseDataset):
             ]
             matching_columns = filter_list(columns, filter_columns)
             if len(matching_columns) == 1:
-                return matching_columns[0]
+                return matching_columns
 
             alt_matches: list[str] = []
             # child sheets often have a unique column like person
             alt_matches = [column for column in columns if "person" in column]
             if len(alt_matches) == 1:
-                return alt_matches[0]
+                return alt_matches
 
             return None
 
         for col_name in df.columns:
             if col_name in settings.IGNORE_COLUMNS_FOR_VALIDATION:
+                # some other columns, often from kobo, will show as unique
+                # but these are not wanted
                 continue
             # Check if the number of unique values equals the total row count
             unique_count = df[col_name].n_unique()
@@ -844,23 +846,20 @@ class DynamicDataset(BaseDataset):
                 # but still try to find the correct column if no unique ones are found
                 majority_unique_cols.append(col_name)
 
-        # some other columns, often from kobo, will show as unique
-        # but these are not wanted
-        # unique_cols = filter_list(unique_cols, settings.IGNORE_COLUMNS_FOR_VALIDATION)
         unique_cols_len = len(unique_cols)
         majority_unique_cols_len = len(majority_unique_cols)
         if unique_cols_len == 1:
-            return unique_cols[0]
+            return unique_cols
         elif unique_cols_len > 1:
             # try to match to common names if more than one match
             alt_match = _additional_matching(unique_cols)
             if alt_match is not None:
                 return alt_match
         elif majority_unique_cols_len == 1:
-            return majority_unique_cols[0]
+            return majority_unique_cols
         elif majority_unique_cols_len > 1:
             alt_match = _additional_matching(majority_unique_cols)
             if alt_match is not None:
                 return alt_match
 
-        return None
+        return unique_cols
