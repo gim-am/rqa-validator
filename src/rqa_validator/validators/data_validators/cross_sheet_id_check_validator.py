@@ -15,7 +15,7 @@ class CrossSheetIdCheck(BaseValidator):
         self,
         schema: BaseDatasetSchema,
         master_sheet: str = "raw_data",
-        child_sheets: list[str] = ["clean_data", "deletion_log", "cleaning_log"],
+        child_sheets: list[str] | None = None,
         is_in: bool = True,
     ):
         """Checks to see if ids from child sheet/s are present in a master/parent sheet
@@ -30,7 +30,11 @@ class CrossSheetIdCheck(BaseValidator):
                 should not (false) be in the matser sheet
         """
         self.master_sheet = master_sheet
-        self.child_sheets = child_sheets
+        self.child_sheets = (
+            child_sheets
+            if child_sheets is not None
+            else ["clean_data", "deletion_log", "cleaning_log"]
+        )
         self.schema = schema
         self.is_in = is_in
 
@@ -53,10 +57,7 @@ class CrossSheetIdCheck(BaseValidator):
         """
         results: list[ValidationResult] = []
 
-        if self.is_in:
-            join_type = "anti"
-        else:
-            join_type = "semi"
+        join_type = "anti" if self.is_in else "semi"
 
         result, data_loaded_sheets = get_data_loaded_sheets(
             data=data, sheet_names=[self.master_sheet], rule=self.name

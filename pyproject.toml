@@ -25,7 +25,7 @@ exclude = [
 ]
 line-length = 100
 [tool.ruff.lint]
-select = ["UP", "E", "F", "I"]
+select = ["UP", "E", "F", "I", "B", "SIM"]
 
 [build-system]
 requires = ["uv_build>=0.6.6,<0.7"]

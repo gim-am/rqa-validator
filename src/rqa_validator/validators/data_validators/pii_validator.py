@@ -126,13 +126,13 @@ class PiiDataCheck(BaseValidator):
             # add expression columns
             melted_df = melted_df.with_columns(expressions)
             # build match conditions
-            match_conditions = [pl.col(name=f"match_{t}").is_not_null() for t in patterns.keys()]
+            match_conditions = [pl.col(name=f"match_{t}").is_not_null() for t in patterns]
 
             # apply conditions and filter the data
             any_match_condition = pl.any_horizontal(match_conditions)
             filtered_df = melted_df.filter(any_match_condition)
 
-            match_cols = [f"match_{t}" for t in patterns.keys()]
+            match_cols = [f"match_{t}" for t in patterns]
 
             # format results for output
             final_df = filtered_df.unpivot(

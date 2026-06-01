@@ -355,22 +355,21 @@ class DynamicDataset(BaseDataset):
                         SchemaColumnMap(standard_name=details.parent_linking_column),
                     )
 
-                if details.classification == "raw":
-                    if details.parent_sheet is None:
-                        consent_sheet = sheet
-                        self.schema.add_mandatory_column_to_sheet(
-                            sheet,
-                            SchemaColumnMap(
-                                standard_name="consent",
-                                alternate_names=[],
-                                process_values=[
-                                    ProcessValueMap(
-                                        process_name="consent_check_validation",
-                                        values=["yes", "oui"],
-                                    )
-                                ],
-                            ),
-                        )
+                if details.classification == "raw" and details.parent_sheet is None:
+                    consent_sheet = sheet
+                    self.schema.add_mandatory_column_to_sheet(
+                        sheet,
+                        SchemaColumnMap(
+                            standard_name="consent",
+                            alternate_names=[],
+                            process_values=[
+                                ProcessValueMap(
+                                    process_name="consent_check_validation",
+                                    values=["yes", "oui"],
+                                )
+                            ],
+                        ),
+                    )
                 if details.log_type == "cleaning":
                     # parts of this may seem repetitive
                     # if there are multiple clean data sheets (from loops) and they

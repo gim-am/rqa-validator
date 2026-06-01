@@ -76,7 +76,7 @@ class ValidationPipeline:
             loader = ExcelLoader(self.schema)
             data, excel_results = loader.load(
                 filepath,
-                load_all_sheets=True if self.dataset_type == "other" else False,
+                load_all_sheets=self.dataset_type == "other",
             )
 
             if excel_results:

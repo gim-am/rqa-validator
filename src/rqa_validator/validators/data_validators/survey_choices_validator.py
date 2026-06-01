@@ -26,7 +26,7 @@ class SurveyChoicesCheck(BaseValidator):
         choices_sheet: str = "kobo_choices",
         choices_name_column: str = "name",
         choices_list_name_column: str = "list_name",
-        check_sheets: list[str] = ["clean_data"],
+        check_sheets: list[str] | None = None,
         select_multiple_value_separator: str = " ",
     ) -> None:
         """
@@ -52,7 +52,7 @@ class SurveyChoicesCheck(BaseValidator):
         """
         self.schema = schema
         self.survey_sheet = survey_sheet
-        self.check_sheets = check_sheets
+        self.check_sheets = check_sheets if check_sheets is not None else ["clean_data"]
         self.survey_type_column = survey_type_column
         self.survey_name_column = survey_name_column
         self.choices_sheet = choices_sheet

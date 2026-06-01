@@ -15,14 +15,14 @@ class NaNDataCheck(BaseValidator):
 
     """
 
-    def __init__(self, schema: BaseDatasetSchema, check_sheets: list[str] = ["clean_data"]) -> None:
+    def __init__(self, schema: BaseDatasetSchema, check_sheets: list[str] | None = None) -> None:
         """
         Args:
             schema (BaseDatasetSchema): schema for the dataset
             sheets (List[str], optional): list of sheets to be checked.
                 Defaults to ['clean_data'].
         """
-        self.check_sheets = check_sheets
+        self.check_sheets = check_sheets if check_sheets is not None else ["clean_data"]
         self.schema = schema
 
     @property

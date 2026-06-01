@@ -259,9 +259,6 @@ def get_set_overlap(source_data: set[Any], target_data: set[Any]) -> float:
     """
     intersection = source_data.intersection(target_data)
 
-    if len(intersection) > 0:
-        overlap = len(intersection) / len(source_data)
-    else:
-        overlap = 0.0
+    overlap = len(intersection) / len(source_data) if len(intersection) > 0 else 0.0
 
     return overlap
