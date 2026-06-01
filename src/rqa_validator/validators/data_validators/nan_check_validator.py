@@ -99,11 +99,11 @@ class NaNDataCheck(BaseValidator):
             # transform data from a wide format to a long format and join to flags.
             # this allows for filtering nan values in a single operation
             if not nan_only_df.is_empty():
-                id_col = sheet_ids[sheet][0].data_column_name
+                id_column = sheet_ids[sheet][0].data_column_name
 
                 # unvpvot values
                 values_df = nan_only_df.unpivot(
-                    index=[id_col],
+                    index=[id_column],
                     on=filtered_columns,
                     variable_name="column",
                     value_name="value",
@@ -111,12 +111,12 @@ class NaNDataCheck(BaseValidator):
 
                 # unpivot flags. Extract question name from flag column name
                 flags_df = nan_only_df.unpivot(
-                    index=[id_col],
+                    index=[id_column],
                     on=[f"is_{c}_nan_value" for c in filtered_columns],
-                    variable_name="flag_col_name",
+                    variable_name="flag_column_name",
                     value_name="is_changed",
                 ).with_columns(
-                    pl.col("flag_col_name")
+                    pl.col("flag_column_name")
                     .str.replace("^is_", "", literal=False)
                     .str.replace("_nan_value$", "", literal=False)
                     .alias("column")
@@ -124,14 +124,14 @@ class NaNDataCheck(BaseValidator):
 
                 # join all together
                 # Filter only rows where the NaN flag is True
-                merged_df = values_df.join(flags_df, on=[id_col, "column"], how="inner").filter(
+                merged_df = values_df.join(flags_df, on=[id_column, "column"], how="inner").filter(
                     pl.col("is_changed")
                 )
 
                 # get the valies
                 output_df = merged_df.select(
                     [
-                        pl.col(id_col).alias("uuid"),
+                        pl.col(id_column).alias("uuid"),
                         pl.lit(sheet).alias("sheet"),
                         pl.col("column"),
                         pl.col("value").cast(pl.Utf8).alias("value"),

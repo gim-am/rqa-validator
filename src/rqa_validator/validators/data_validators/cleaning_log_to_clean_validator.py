@@ -352,7 +352,7 @@ class CleaningLogToClean(BaseValidator):
         # build expressions to check for differences in the two dataframes
         difference_expressions = []
         for question in questions:
-            col_has_update = f"{question}_has_update"
+            column_has_update = f"{question}_has_update"
             # Check if the new value exists AND is different from the old value
 
             difference_expression = (
@@ -365,9 +365,9 @@ class CleaningLogToClean(BaseValidator):
             ).alias(f"is_{question}_changed")
 
             difference_expression = (
-                pl.when(pl.col(col_has_update).is_not_null())
+                pl.when(pl.col(column_has_update).is_not_null())
                 .then(difference_expression)
-                .otherwise(pl.col(col_has_update).is_not_null())
+                .otherwise(pl.col(column_has_update).is_not_null())
             )
 
             difference_expressions.append(difference_expression)
@@ -414,10 +414,10 @@ class CleaningLogToClean(BaseValidator):
             flags_long_df = changes_only.unpivot(
                 index=[clean_log_id_columns.data_column_name],
                 on=[f"is_{q}_changed" for q in questions],
-                variable_name="flag_col_name",
+                variable_name="flag_column_name",
                 value_name="is_changed",
             ).with_columns(
-                pl.col("flag_col_name")
+                pl.col("flag_column_name")
                 .str.replace("^is_", "", literal=False)
                 .str.replace("_changed$", "", literal=False)
                 .alias(self.cleaning_log_question_column)

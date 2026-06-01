@@ -103,20 +103,20 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
 
         process_list(sheet.alternate_names)
 
-        for col in sheet.mandatory_columns:
-            process_column_mapping(col)
+        for column in sheet.mandatory_columns:
+            process_column_mapping(column)
 
-    def process_column_mapping(col: SchemaColumnMap | None) -> None:
-        if col is None:
+    def process_column_mapping(column: SchemaColumnMap | None) -> None:
+        if column is None:
             return
 
-        if col.standard_name:
-            col.standard_name = col.standard_name.lower()
+        if column.standard_name:
+            column.standard_name = column.standard_name.lower()
 
-        process_list(col.alternate_names)
+        process_list(column.alternate_names)
 
-        if col.process_values:
-            for process in col.process_values:
+        if column.process_values:
+            for process in column.process_values:
                 process.process_name = process.process_name.lower()
                 process_list(process.values)
 

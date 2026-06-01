@@ -29,7 +29,7 @@ def normalise_list(items: list[str], dtype: DataType) -> list[str]:
 
 
 def create_column_difference_expression(
-    column_1: str, column_2: str, dtype1: DataType, dtype2: DataType
+    column_1: str, column_2: str, data_type_1: DataType, data_type_2: DataType
 ) -> Expr:
     """Builds an expression that compares the values between two dataframe columns.
 
@@ -46,19 +46,21 @@ def create_column_difference_expression(
     Args:
         column_1 (str): name of first column to compare
         column_2 (str): name of second column to compare
-        dtype1 (DataType): data type of first column
-        dtype2 (DataType): data type of second column
+        data_type_1 (DataType): data type of first column
+        data_type_2 (DataType): data type of second column
     """
 
-    def normalize_to_null_if_empty(expr: Expr, dtype: DataType) -> Expr:
+    def normalize_to_null_if_empty(expression: Expr, data_type: DataType) -> Expr:
         """Convert empty strings to null for consistent comparison."""
         return (
-            pl.when(dtype == pl.String)
-            .then(pl.when(expr.str.strip_chars() == "").then(None).otherwise(expr))
-            .otherwise(expr)
+            pl.when(data_type == pl.String)
+            .then(pl.when(expression.str.strip_chars() == "").then(None).otherwise(expression))
+            .otherwise(expression)
         )
 
-    def handle_nulls_and_empty(expr_result: Expr, col1_normalized: Expr, col2_normalized: Expr):
+    def handle_nulls_and_empty(
+        expression_result: Expr, column_1_normalized: Expr, column_2_normalized: Expr
+    ):
         """Handle null/empty string equivalence in comparison results.
 
         When expr_result is null (meaning at least one input was null/empty):
@@ -66,20 +68,20 @@ def create_column_difference_expression(
         - If only one is null/empty → they are different → return True
         """
         return (
-            pl.when(expr_result.is_null())
+            pl.when(expression_result.is_null())
             .then(
-                pl.when(col1_normalized.is_null() & col2_normalized.is_null())
+                pl.when(column_1_normalized.is_null() & column_2_normalized.is_null())
                 .then(False)
                 .otherwise(
-                    pl.when(col1_normalized.is_null() | col2_normalized.is_null())
+                    pl.when(column_1_normalized.is_null() | column_2_normalized.is_null())
                     .then(True)
-                    .otherwise(expr_result)
+                    .otherwise(expression_result)
                 )
             )
-            .otherwise(expr_result)
+            .otherwise(expression_result)
         )
 
-    if dtype1.is_temporal() or dtype2.is_temporal():
+    if data_type_1.is_temporal() or data_type_2.is_temporal():
         # Normalize to Datetime
         # use the str.to_datetime logic here if strings are involved
         def to_dt(column_expr: Expr, column_dtype: DataType):
@@ -91,8 +93,8 @@ def create_column_difference_expression(
                 # if a float (possibly utc) or other is returned
                 return pl.lit(None).cast(pl.Datetime)
 
-        column_1_normalised = to_dt(pl.col(column_1), dtype1)
-        column_2_normalised = to_dt(pl.col(column_2), dtype2)
+        column_1_normalised = to_dt(pl.col(column_1), data_type_1)
+        column_2_normalised = to_dt(pl.col(column_2), data_type_2)
 
         # Check if both conversions were successful
         both_valid = ~column_1_normalised.is_null() & ~column_2_normalised.is_null()
@@ -108,8 +110,12 @@ def create_column_difference_expression(
         # Combine logic
         raw_diff = pl.when(both_valid).then(temporal_diff).otherwise(str_diff)
 
-        norm_c1_final = normalize_to_null_if_empty(pl.col(column_1), dtype1).cast(pl.Utf8)
-        norm_c2_final = normalize_to_null_if_empty(pl.col(column_2), dtype2).cast(pl.Utf8)
+        column_1_normalised_final = normalize_to_null_if_empty(pl.col(column_1), data_type_1).cast(
+            pl.Utf8
+        )
+        column_2_normalised_final = normalize_to_null_if_empty(pl.col(column_2), data_type_2).cast(
+            pl.Utf8
+        )
 
         # Check if columns are effectively null
 
@@ -131,7 +137,7 @@ def create_column_difference_expression(
 
         return final_result
 
-    elif dtype1.is_numeric() or dtype2.is_numeric():
+    elif data_type_1.is_numeric() or data_type_2.is_numeric():
         # Cast to Float64 to handle Int vs Float
         # Note: If one is string and not numeric, this cast might fail or return null.
         def cast_to_float(column: str, dtype: DataType):
@@ -146,8 +152,8 @@ def create_column_difference_expression(
                 .otherwise(pl.col(column).cast(pl.Float64, strict=False))
             )
 
-        column_1_normalised = cast_to_float(column_1, dtype1)
-        column_2_normalised = cast_to_float(column_2, dtype2)
+        column_1_normalised = cast_to_float(column_1, data_type_1)
+        column_2_normalised = cast_to_float(column_2, data_type_2)
 
         # Check if both conversions were successful
         both_numeric = ~column_1_normalised.is_null() & ~column_2_normalised.is_null()
@@ -161,14 +167,16 @@ def create_column_difference_expression(
         raw_diff = pl.when(both_numeric).then(numeric_diff).otherwise(str_diff)
         # We pass the original columns (normalized for empty strings) to the null handler
         # to ensure empty strings are treated as nulls correctly
-        norm_c1_final = normalize_to_null_if_empty(pl.col(column_1), dtype1)
-        norm_c2_final = normalize_to_null_if_empty(pl.col(column_2), dtype2)
+        column_1_normalised_final = normalize_to_null_if_empty(pl.col(column_1), data_type_1)
+        column_2_normalised_final = normalize_to_null_if_empty(pl.col(column_2), data_type_2)
 
-        return handle_nulls_and_empty(raw_diff, norm_c1_final, norm_c2_final)
+        return handle_nulls_and_empty(
+            raw_diff, column_1_normalised_final, column_2_normalised_final
+        )
 
     else:
-        column_1_normalised = normalize_to_null_if_empty(pl.col(column_1), dtype1)
-        column_2_normalised = normalize_to_null_if_empty(pl.col(column_2), dtype2)
+        column_1_normalised = normalize_to_null_if_empty(pl.col(column_1), data_type_1)
+        column_2_normalised = normalize_to_null_if_empty(pl.col(column_2), data_type_2)
 
         raw_diff = column_1_normalised.cast(pl.Utf8) != column_2_normalised.cast(pl.Utf8)
         return handle_nulls_and_empty(raw_diff, column_1_normalised, column_2_normalised)

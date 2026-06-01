@@ -181,7 +181,9 @@ def match_sheet_columns(
         List[tuple[DataColumnMap, DataColumnMap]]:matched columns from source and target
     """
 
-    target_names = {col.schema_column_name: col for col in target}
+    target_names: dict[Any, DataColumnMap] = {
+        column.schema_column_name: column for column in target
+    }
 
     matches: list[tuple[DataColumnMap, DataColumnMap]] = []
     for s_item in source:

@@ -1,3 +1,9 @@
+from rqa_validator.models.base_dataset import DynamicDatasetSchema
+
+
+from rqa_validator.loaders.excel_loader import ExcelLoaderData
+
+
 from difflib import SequenceMatcher
 from typing import Any
 
@@ -65,8 +71,8 @@ class DynamicDataset(BaseDataset):
     """
 
     def __init__(self, data: ExcelLoaderData) -> None:
-        self.data = data
-        self.schema = DynamicDatasetSchema()
+        self.data: ExcelLoaderData = data
+        self.schema: DynamicDatasetSchema = DynamicDatasetSchema()
         self.sheet_matching: dict[str, DynamicSheetMatching] = {}
         self.validators: list[BaseValidator] = []
 
@@ -493,22 +499,23 @@ class DynamicDataset(BaseDataset):
             # some cleaning logs contain columns that could be unique but ignore these
             # as they probably wont be the columns needed for validation processes
             if self.sheet_matching[sheet.data_sheet_name].log_type != "cleaning":
-                unique_col: list[str] = self._find_unique_column(sheet.data)
-                if len(unique_col) == 1:
+                unique_columns: list[str] = self._find_unique_column(sheet.data)
+                if len(unique_columns) == 1:
                     id_set: set[Any] = set[Any](
-                        sheet.data.select(unique_col[0]).to_series().unique().to_list()
+                        sheet.data.select(unique_columns[0]).to_series().unique().to_list()
                     )
                     self.sheet_matching[sheet.data_sheet_name].id_column_set = id_set
-                    self.sheet_matching[sheet.data_sheet_name].id_column = unique_col[0]
+                    self.sheet_matching[sheet.data_sheet_name].id_column = unique_columns[0]
                 elif self.sheet_matching[sheet.data_sheet_name].classification != "unknown":
                     # only log this for sheets we are expecting an id for
                     results.append(
                         ValidationResult(
                             rule=rule,
                             message="Expected one unique ID column for sheet"
-                            f" '{sheet.data_sheet_name}' but {len(unique_col)} were found.",
+                            f" '{sheet.data_sheet_name}' but {len(unique_columns)} were found.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet.data_sheet_name,
+                            details={"unique_columns": unique_columns},
                         )
                     )
         cleaning_log_sheets = [
@@ -704,7 +711,7 @@ class DynamicDataset(BaseDataset):
         return (name_similarity * name_scaler) + (overlap * overlap_scaler)
 
     def _find_linking_column(
-        self, child_cols: list[str], parent_id_col: str, allow_common_names: bool = False
+        self, child_columns: list[str], parent_id_column: str, allow_common_names: bool = False
     ) -> list[str]:
         """Attempts to find name matches between a parent id column and a list of
                child columns.
@@ -712,8 +719,8 @@ class DynamicDataset(BaseDataset):
                Optionaly also checks a list of common names if no match was found.
 
         Args:
-            child_cols (list[str]): list of child columns to search
-            parent_id_col (str): name of parent column
+            child_columns (list[str]): list of child columns to search
+            parent_id_column (str): name of parent column
             allow_common_names (bool, optional): Option to check for common names.
                 Defaults to False.
 
@@ -722,18 +729,18 @@ class DynamicDataset(BaseDataset):
         """
         possible_columns: list[str] = []
         #  Exact match
-        if parent_id_col in child_cols:
-            possible_columns.append(parent_id_col)
+        if parent_id_column in child_columns:
+            possible_columns.append(parent_id_column)
             # return parent_id_col
 
         # Partial match
-        alt_matches = [col for col in child_cols if parent_id_col in col]
+        alt_matches = [column for column in child_columns if parent_id_column in column]
         if alt_matches:
             possible_columns.extend(alt_matches)
 
         # check common names
         if allow_common_names:
-            matching_columns: list[str] = match_list(child_cols, settings.COMMON_ID_COLUMN_NAMES)
+            matching_columns: list[str] = match_list(child_columns, settings.COMMON_ID_COLUMN_NAMES)
             if matching_columns:
                 possible_columns.extend(matching_columns)
 
@@ -793,17 +800,17 @@ class DynamicDataset(BaseDataset):
                 self.sheet_matching[child_sheet].parent_linking_column = best_fk_column
                 self.sheet_matching[best_parent].children.append(child_sheet)
 
-    def _find_unique_column(self, df: pl.DataFrame) -> list[str]:
+    def _find_unique_column(self, data: pl.DataFrame) -> list[str]:
         """Attempts to find unique columns in a dataframe
 
         Args:
-            df (pl.DataFrame): dataframe to check
+            data (pl.DataFrame): dataframe to check
 
         Returns:
             list[str] : returns unique columns if found
         """
-        unique_cols: list[str] = []
-        majority_unique_cols: list[str] = []
+        unique_columns: list[str] = []
+        majority_unique_columns: list[str] = []
 
         def _additional_matching(columns: list[str]) -> list[str]:
             """Perform some additional checks to find possible unique columns"""
@@ -827,37 +834,37 @@ class DynamicDataset(BaseDataset):
 
             return matching_columns
 
-        for col_name in df.columns:
-            if col_name in settings.IGNORE_COLUMNS_FOR_VALIDATION:
+        for column in data.columns:
+            if column in settings.IGNORE_COLUMNS_FOR_VALIDATION:
                 # some other columns, often from kobo, will show as unique
                 # but these are not wanted
                 continue
             # Check if the number of unique values equals the total row count
-            unique_count = df[col_name].n_unique()
-            total_count = len(df)
+            unique_count = data[column].n_unique()
+            total_count = len(data)
 
             if unique_count == total_count:
-                unique_cols.append(col_name)
+                unique_columns.append(column)
             elif unique_count / total_count > 0.95:
                 # sometimes there can be a few duplicates
                 # (which there shouldnt and will cause validation errors later)
                 # but still try to find the correct column if no unique ones are found
-                majority_unique_cols.append(col_name)
+                majority_unique_columns.append(column)
 
-        unique_cols_len = len(unique_cols)
-        majority_unique_cols_len = len(majority_unique_cols)
-        if unique_cols_len == 1:
-            return unique_cols
-        elif unique_cols_len > 1:
+        unique_columns_len = len(unique_columns)
+        majority_unique_columns_len = len(majority_unique_columns)
+        if unique_columns_len == 1:
+            return unique_columns
+        elif unique_columns_len > 1:
             # try to match to common names if more than one match
-            alt_match = _additional_matching(unique_cols)
+            alt_match = _additional_matching(unique_columns)
             if alt_match:
                 return alt_match
-        elif majority_unique_cols_len == 1:
-            return majority_unique_cols
-        elif majority_unique_cols_len > 1:
-            alt_match = _additional_matching(majority_unique_cols)
+        elif majority_unique_columns_len == 1:
+            return majority_unique_columns
+        elif majority_unique_columns_len > 1:
+            alt_match = _additional_matching(majority_unique_columns)
             if alt_match:
                 return alt_match
 
-        return unique_cols
+        return unique_columns

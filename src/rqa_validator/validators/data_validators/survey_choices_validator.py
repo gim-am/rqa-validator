@@ -253,7 +253,7 @@ class SurveyChoicesCheck(BaseValidator):
             # will throw an error for the value being checked
 
             for question in filtered_questions_select_multiple:
-                col_has_difference = f"{question}_has_difference"
+                column_has_difference = f"{question}_has_difference"
 
                 valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
 
@@ -278,7 +278,7 @@ class SurveyChoicesCheck(BaseValidator):
                         .list.any()
                     )
                     .otherwise(False)
-                    .alias(col_has_difference)
+                    .alias(column_has_difference)
                 )
 
                 difference_expressions.append(difference_expression)
@@ -291,7 +291,7 @@ class SurveyChoicesCheck(BaseValidator):
             # choice values with spaces should not cause errors in this check
 
             for question in filtered_questions_select_one:
-                col_has_difference = f"{question}_has_difference"
+                column_has_difference = f"{question}_has_difference"
                 valid_choices: list[str] = choices_dict[survey_question_choices_dict[question]]
                 question_data_type = data_loaded_sheets[sheet].data.schema.get(question)
                 if question_data_type is not None:
@@ -309,7 +309,7 @@ class SurveyChoicesCheck(BaseValidator):
                         .not_()
                     )
                     .otherwise(False)
-                    .alias(col_has_difference)
+                    .alias(column_has_difference)
                 )
 
                 difference_expressions.append(difference_expression)
@@ -337,10 +337,10 @@ class SurveyChoicesCheck(BaseValidator):
                 flags_df = changes_only.unpivot(
                     index=[check_sheet_id_column.data_column_name],
                     on=[f"{c}_has_difference" for c in filtered_questions],
-                    variable_name="flag_col_name",
+                    variable_name="flag_column_name",
                     value_name="is_changed",
                 ).with_columns(
-                    pl.col("flag_col_name")
+                    pl.col("flag_column_name")
                     .str.replace("^is_", "", literal=False)
                     .str.replace("_has_difference$", "", literal=False)
                     .alias("question")
