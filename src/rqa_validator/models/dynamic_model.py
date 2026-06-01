@@ -115,6 +115,7 @@ class DynamicDataset(BaseDataset):
 
         """
         results: list[ValidationResult] = []
+        rule = "DynamicSchemaCreation_build_validators"
         clean_sheets = [
             item for item, value in self.sheet_matching.items() if value.classification == "clean"
         ]
@@ -152,9 +153,9 @@ class DynamicDataset(BaseDataset):
                 else:
                     results.append(
                         ValidationResult(
-                            rule="DynamicDataset Creation build_validators",
+                            rule=rule,
                             message=f"No linked cleaning log data sheet for the sheet"
-                            f" '{sheet}' were found so the 'CleaningLogToClean' and"
+                            f" '{sheet}' was found so the 'CleaningLogToClean' and"
                             " 'CrossSheetIdCheck' rules could not be run.",
                             sheet_name=sheet,
                             severity=SeverityLevel.ERROR,
@@ -173,8 +174,8 @@ class DynamicDataset(BaseDataset):
                 else:
                     results.append(
                         ValidationResult(
-                            rule="DynamicDataset Creation build_validators",
-                            message=f"No linked raw sheet for the sheet '{sheet}' were"
+                            rule=rule,
+                            message=f"No linked raw sheet for the sheet '{sheet}' was"
                             " found so the 'RawToCleanToLog' rule could not be run.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
@@ -215,9 +216,9 @@ class DynamicDataset(BaseDataset):
                 else:
                     results.append(
                         ValidationResult(
-                            rule="DynamicDataset Creation build_validators",
+                            rule=rule,
                             message=f"No linked sheets for the raw data sheet '{sheet}'"
-                            " were found so the 'CrossSheetRowSumCheck' rule could"
+                            " was found so the 'CrossSheetRowSumCheck' rule could"
                             " not be run.",
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
@@ -249,7 +250,7 @@ class DynamicDataset(BaseDataset):
                 else:
                     results.append(
                         ValidationResult(
-                            rule="DynamicDataset Creation build_validators",
+                            rule=rule,
                             message="No linked clean sheet for the raw data sheet"
                             f" '{sheet}' was found so the 'CrossSheetIdCheck' rule"
                             " could not be run.",
@@ -263,7 +264,7 @@ class DynamicDataset(BaseDataset):
             if consent_linked_clean_sheet is None:
                 results.append(
                     ValidationResult(
-                        rule="DynamicDataset Creation build_validators",
+                        rule=rule,
                         message="No linked clean sheet for the raw data sheet"
                         f" '{consent_sheet}' was found so the 'ConsentCheck' rule"
                         " could not be run.",
@@ -282,7 +283,7 @@ class DynamicDataset(BaseDataset):
         else:
             results.append(
                 ValidationResult(
-                    rule="DynamicDataset Creation build_validators",
+                    rule=rule,
                     message="No possible sheet for 'consent' column was found.",
                     severity=SeverityLevel.ERROR,
                 )
@@ -298,7 +299,7 @@ class DynamicDataset(BaseDataset):
         else:
             results.append(
                 ValidationResult(
-                    rule="DynamicDataset Creation build_validators",
+                    rule=rule,
                     message="No possible sheets for 'clean_data' were found.",
                     severity=SeverityLevel.ERROR,
                 )
@@ -307,7 +308,7 @@ class DynamicDataset(BaseDataset):
         if not raw_sheets:
             results.append(
                 ValidationResult(
-                    rule="DynamicDataset Creation build_validators",
+                    rule=rule,
                     message="No possible sheets for 'raw_data' were found.",
                     severity=SeverityLevel.ERROR,
                 )
@@ -315,7 +316,7 @@ class DynamicDataset(BaseDataset):
         if not cleaning_log_sheets:
             results.append(
                 ValidationResult(
-                    rule="DynamicDataset Creation build_validators",
+                    rule=rule,
                     message="No possible sheets for 'cleaning_log' were found.",
                     severity=SeverityLevel.ERROR,
                 )
@@ -450,6 +451,7 @@ class DynamicDataset(BaseDataset):
 
         """
         results: list[ValidationResult] = []
+        rule = "DynamicSchemaCreation_match_data"
 
         min_matching_score: float = 0.8
         # get schema sheet names and already matched excel sheet names
@@ -502,7 +504,7 @@ class DynamicDataset(BaseDataset):
                     # only log this for sheets we are expecting an id for
                     results.append(
                         ValidationResult(
-                            rule="DynamicDataset Creation",
+                            rule=rule,
                             message="Expected one unique ID column for sheet"
                             f" '{sheet.data_sheet_name}' but {len(unique_col)} were found.",
                             severity=SeverityLevel.ERROR,
@@ -541,7 +543,7 @@ class DynamicDataset(BaseDataset):
                     match_log_sheet.data.columns, match_clean_sheet.id_column, True
                 )
                 # compare names and overlapping id values
-                if linking_log_columns is not None:
+                if linking_log_columns:
                     for linking_log_column in linking_log_columns:
                         log_set = set(
                             match_log_sheet.data.select(linking_log_column)
@@ -617,12 +619,11 @@ class DynamicDataset(BaseDataset):
             if len(clean_parent_sheets) > 1:
                 results.append(
                     ValidationResult(
-                        rule="DynamicDataset Creation",
-                        message=f"There are unmatched clean sheets. {len(clean_parent_sheets)}"
-                        " clean data sheets did not match to a parent."
-                        " There should only be 1 clean sheet without a parent.",
+                        rule=rule,
+                        message=f"{len(clean_parent_sheets)} clean data sheets did not match to a"
+                        " parent. There should only be 1 clean data sheet without a parent.",
                         severity=SeverityLevel.ERROR,
-                        details={"Unmatched clean sheets": clean_parent_sheets},
+                        details={"Unmatched clean data sheets": clean_parent_sheets},
                     )
                 )
 
@@ -635,18 +636,17 @@ class DynamicDataset(BaseDataset):
             if len(raw_parent_sheets) > 1:
                 results.append(
                     ValidationResult(
-                        rule="DynamicDataset Creation",
-                        message=f"There are unmatched raw sheets. {len(raw_parent_sheets)} raw data"
-                        " sheets did not match to a parent."
-                        " There should only be 1 raw sheet without a parent.",
+                        rule=rule,
+                        message=f"{len(raw_parent_sheets)} raw data sheets did not match to a"
+                        " parent. There should only be 1 raw data sheet without a parent.",
                         severity=SeverityLevel.ERROR,
-                        details={"Unmatched raw sheets": raw_parent_sheets},
+                        details={"Unmatched raw data sheets": raw_parent_sheets},
                     )
                 )
 
         results.append(
             ValidationResult(
-                rule="DynamicDataset Creation",
+                rule=rule,
                 message="Sheet matching results.",
                 severity=SeverityLevel.ADMIN_INFO,
                 details=pl.DataFrame(
@@ -705,7 +705,7 @@ class DynamicDataset(BaseDataset):
 
     def _find_linking_column(
         self, child_cols: list[str], parent_id_col: str, allow_common_names: bool = False
-    ) -> list[str] | None:
+    ) -> list[str]:
         """Attempts to find name matches between a parent id column and a list of
                child columns.
 
@@ -718,7 +718,7 @@ class DynamicDataset(BaseDataset):
                 Defaults to False.
 
         Returns:
-            str | None: returns a name match if found. otherwise None
+            list[str] : returns possible name matches if found
         """
         possible_columns: list[str] = []
         #  Exact match
@@ -739,9 +739,8 @@ class DynamicDataset(BaseDataset):
 
         if possible_columns:
             possible_columns = unique_list(possible_columns)
-            return possible_columns
 
-        return None
+        return possible_columns
 
     def _match_child_parent(self, sheets: list[str]):
         """Attempt to match child parent sheets based on finding possible
@@ -773,7 +772,7 @@ class DynamicDataset(BaseDataset):
                         child_match_sheet.data.columns, parent_match_sheet.id_column
                     )
                     # see what the overlap of id values is
-                    if linking_columns is not None:
+                    if linking_columns:
                         for linking_column in linking_columns:
                             child_set = set(
                                 child_match_sheet.data.select(linking_column)
@@ -795,18 +794,18 @@ class DynamicDataset(BaseDataset):
                 self.sheet_matching[best_parent].children.append(child_sheet)
 
     def _find_unique_column(self, df: pl.DataFrame) -> list[str]:
-        """Attempts to find a unique column in a dataframe
+        """Attempts to find unique columns in a dataframe
 
         Args:
             df (pl.DataFrame): dataframe to check
 
         Returns:
-            str | None: return column if one match is found, otherwise None
+            list[str] : returns unique columns if found
         """
         unique_cols: list[str] = []
         majority_unique_cols: list[str] = []
 
-        def _additional_matching(columns: list[str]) -> list[str] | None:
+        def _additional_matching(columns: list[str]) -> list[str]:
             """Perform some additional checks to find possible unique columns"""
             matching_columns: list[str] = match_list(columns, settings.COMMON_ID_COLUMN_NAMES)
             if len(matching_columns) == 1:
@@ -821,13 +820,12 @@ class DynamicDataset(BaseDataset):
             if len(matching_columns) == 1:
                 return matching_columns
 
-            alt_matches: list[str] = []
             # child sheets often have a unique column like person
-            alt_matches = [column for column in columns if "person" in column]
-            if len(alt_matches) == 1:
-                return alt_matches
+            matching_columns = [column for column in columns if "person" in column]
+            if len(matching_columns) == 1:
+                return matching_columns
 
-            return None
+            return matching_columns
 
         for col_name in df.columns:
             if col_name in settings.IGNORE_COLUMNS_FOR_VALIDATION:
@@ -853,13 +851,13 @@ class DynamicDataset(BaseDataset):
         elif unique_cols_len > 1:
             # try to match to common names if more than one match
             alt_match = _additional_matching(unique_cols)
-            if alt_match is not None:
+            if alt_match:
                 return alt_match
         elif majority_unique_cols_len == 1:
             return majority_unique_cols
         elif majority_unique_cols_len > 1:
             alt_match = _additional_matching(majority_unique_cols)
-            if alt_match is not None:
+            if alt_match:
                 return alt_match
 
         return unique_cols
