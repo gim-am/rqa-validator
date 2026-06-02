@@ -77,10 +77,19 @@ def lower_list_items(source: list[str]):
     return list(map(str.lower, source))
 
 
-def match_list(source: list[Any], target: list[Any]) -> list[Any]:
+def match_list(source: list[Any] | set[Any], target: list[Any] | set[Any]) -> list[Any]:
     """Returns items in source that are in target"""
-    set_target = set(target)
-    return [item for item in source if item in set_target]
+    if isinstance(source, list):
+        set_source: set[Any] = set[Any](source)
+    else:
+        set_source = source
+
+    if isinstance(target, list):
+        set_target: set[Any] = set[Any](target)
+    else:
+        set_target = target
+
+    return [item for item in set_source if item in set_target]
 
 
 def unique_list(source: list[Any]) -> list[Any]:
@@ -88,9 +97,12 @@ def unique_list(source: list[Any]) -> list[Any]:
     return list(set(source))
 
 
-def filter_list(source: list[Any], target: list[Any]) -> list[Any]:
+def filter_list(source: list[Any], target: list[Any] | set[Any]) -> list[Any]:
     """Returns items in source that are not in target"""
-    set_target: set[Any] = set[Any](target)
+    if isinstance(target, list):
+        set_target: set[Any] = set[Any](target)
+    else:
+        set_target = target
     return [item for item in source if item not in set_target]
 
 
@@ -217,14 +229,17 @@ def match_sheet_columns_ids(
     target_len = len(target)
     filtered_source = []
     filtered_target = []
-    common_id_set = set(settings.COMMON_ID_COLUMN_NAMES)
 
     if source_len > 1:
-        filtered_source = [item for item in source if item.data_column_name in common_id_set]
+        filtered_source = [
+            item for item in source if item.data_column_name in settings.COMMON_ID_COLUMN_NAMES
+        ]
     elif source_len == 1:
         filtered_source = source
     if target_len > 1:
-        filtered_target = [item for item in target if item.data_column_name in common_id_set]
+        filtered_target = [
+            item for item in target if item.data_column_name in settings.COMMON_ID_COLUMN_NAMES
+        ]
     elif target_len == 1:
         filtered_target = target
 

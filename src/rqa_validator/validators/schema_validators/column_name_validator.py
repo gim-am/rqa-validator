@@ -1,9 +1,8 @@
-import re
-
 import polars as pl
 
 from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
+from ...validators.options import COLUMN_NAME_VALIDATOR_PATTERN
 
 
 class ColumnNameCheck(BaseValidator):
@@ -30,21 +29,24 @@ class ColumnNameCheck(BaseValidator):
             List[ValidationResult]: list of validation errors
         """
         results: list[ValidationResult] = []
-        pattern = re.compile(r"[^a-zA-Z_./\-\\\d:]")
-        column_match_df = pl.DataFrame(
-            [pl.Series("sheet", [], dtype=pl.String), pl.Series("columns", [], dtype=pl.String)]
-        )
+
+        match_records = []
 
         for sheet in data.loaded_sheets:
-            matches = list(filter(pattern.search, sheet.data.columns))
+            matches = list(filter(COLUMN_NAME_VALIDATOR_PATTERN.search, sheet.data.columns))
             if matches:
-                column_match_df = column_match_df.vstack(
-                    pl.DataFrame(
-                        {"sheet": sheet.data_sheet_name, "columns": match} for match in matches
-                    )
+                match_records.extend(
+                    [
+                        {
+                            "sheet": sheet.data_sheet_name,
+                            "columns": item,
+                        }
+                        for item in matches
+                    ]
                 )
 
-        if column_match_df.height > 0:
+        if match_records:
+            column_match_df = pl.DataFrame(match_records)
             results.append(
                 ValidationResult(
                     rule=self.name,

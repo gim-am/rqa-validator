@@ -8,7 +8,7 @@ from ...loaders.excel_loader import ExcelLoaderData
 from ...models.base_dataset import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import get_data_sheet_id
-from ..options import get_pii_columns
+from ..options import PII_PATTERN_EXPRESSIONS, PII_PATTERNS, get_pii_columns
 
 
 class PiiDataCheck(BaseValidator):
@@ -43,26 +43,7 @@ class PiiDataCheck(BaseValidator):
         results: list[ValidationResult] = []
         pii_columns = get_pii_columns()
 
-        patterns = {
-            "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-            # This is limited. Currently looking for numbers starting
-            # with a + or 0. Does not match decimals
-            "phone": r"^(\+|0)[\d\s\-\(\)\+]+$",
-        }
-
-        column_match_df = pl.DataFrame(
-            [
-                pl.Series("sheet", [], dtype=pl.String),
-                pl.Series("column", [], dtype=pl.String),
-                pl.Series("match_type", [], dtype=pl.String),
-                pl.Series("match_values", [], dtype=pl.String),
-            ]
-        )
-
-        expressions = [
-            pl.col("value").cast(pl.Utf8).str.extract(pattern, 0).alias(f"match_{type}")
-            for type, pattern in patterns.items()
-        ]
+        match_records = []
 
         for sheet in data.loaded_sheets:
             filtered_df = sheet.data.select(
@@ -74,22 +55,21 @@ class PiiDataCheck(BaseValidator):
             )
 
             if literal_matches:
-                column_match_df = column_match_df.vstack(
-                    pl.DataFrame(
-                        (
-                            {
-                                "sheet": sheet.data_sheet_name,
-                                "column": item,
-                                "match_type": "literal",
-                                "match_values": item,
-                            }
-                            for item in literal_matches
-                        ),
-                    )
+                match_records.extend(
+                    [
+                        {
+                            "sheet": sheet.data_sheet_name,
+                            "column": item,
+                            "match_type": "literal",
+                            "match_values": item,
+                        }
+                        for item in literal_matches
+                    ]
                 )
+
             if fuzzy_matched_values:
-                column_match_df = column_match_df.vstack(
-                    pl.DataFrame(
+                match_records.extend(
+                    [
                         {
                             "sheet": sheet.data_sheet_name,
                             "column": item.standard_name,
@@ -97,7 +77,7 @@ class PiiDataCheck(BaseValidator):
                             "match_values": str(item.matches),
                         }
                         for item in fuzzy_matched_values
-                    )
+                    ]
                 )
 
             # scan column data
@@ -124,15 +104,15 @@ class PiiDataCheck(BaseValidator):
                 )
 
             # add expression columns
-            melted_df = melted_df.with_columns(expressions)
+            melted_df = melted_df.with_columns(PII_PATTERN_EXPRESSIONS)
             # build match conditions
-            match_conditions = [pl.col(name=f"match_{t}").is_not_null() for t in patterns]
+            match_conditions = [pl.col(name=f"match_{t}").is_not_null() for t in PII_PATTERNS]
 
             # apply conditions and filter the data
             any_match_condition = pl.any_horizontal(match_conditions)
             filtered_df = melted_df.filter(any_match_condition)
 
-            match_cols = [f"match_{t}" for t in patterns]
+            match_cols = [f"match_{t}" for t in PII_PATTERNS]
 
             # format results for output
             final_df = filtered_df.unpivot(
@@ -159,13 +139,13 @@ class PiiDataCheck(BaseValidator):
                         details=final_df.to_dict(),
                     )
                 )
-        if column_match_df.height > 0:
+        if match_records:
             results.append(
                 ValidationResult(
                     rule=self.name,
                     message="Possible Pii columns were found. Check the output for details.",
                     severity=SeverityLevel.WARNING,
-                    details=column_match_df.to_dict(as_series=False),
+                    details=pl.DataFrame(match_records).to_dict(as_series=False),
                 )
             )
 

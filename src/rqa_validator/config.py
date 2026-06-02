@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     FUZZY_MATCH_STRING_LENGTH_RATIO: float = 0.7
 
     # for some validation rules and dynamic model creation
-    IGNORE_COLUMNS_FOR_VALIDATION: list[str] = [
+    IGNORE_COLUMNS_FOR_VALIDATION: set[str] = {
         "enum_id",
         "_index",
         "index",
@@ -28,11 +28,11 @@ class Settings(BaseSettings):
         "_id",
         "instance_name",
         "row_index",
-    ]
+    }
 
-    ID_FILTER_NAMES: list[str] = ["start", "end"]  # , "_index"
+    ID_FILTER_NAMES: set[str] = {"start", "end"}  # , "_index"
 
-    COMMON_ID_COLUMN_NAMES: list[str] = ["uuid", "x_uuid", "person_id"]
+    COMMON_ID_COLUMN_NAMES: set[str] = {"uuid", "x_uuid", "person_id"}
 
     # for dynamic model creation
     CLEAN_DATA_SHEET_SEARCH_TERMS: list[str] = ["clean", "clog_logbook"]

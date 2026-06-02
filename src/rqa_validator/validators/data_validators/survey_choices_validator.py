@@ -133,7 +133,7 @@ class SurveyChoicesCheck(BaseValidator):
                     ).str.strip_chars(" "),
                     pl.col(data_loaded_columns[self.choices_name_column].data_column_name)
                     .str.to_lowercase()
-                    .str.replace(r"_", "", n=-1)
+                    .str.replace("_", "", literal=True)
                     .str.strip_chars(" "),
                 ]
             )
@@ -270,7 +270,7 @@ class SurveyChoicesCheck(BaseValidator):
                         .list.eval(
                             pl.element()
                             .str.to_lowercase()
-                            .str.replace(r"_", "", n=-1)
+                            .str.replace("_", "", literal=True)
                             .str.strip_chars(" ")
                             .is_in(valid_choices)
                             .not_()
@@ -303,7 +303,7 @@ class SurveyChoicesCheck(BaseValidator):
                         pl.col(question)
                         .cast(pl.Utf8)
                         .str.to_lowercase()
-                        .str.replace(r"_", "", n=-1)
+                        .str.replace("_", "", literal=True)
                         .str.strip_chars(" ")
                         .is_in(valid_choices)
                         .not_()

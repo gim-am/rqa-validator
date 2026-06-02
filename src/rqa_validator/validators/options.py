@@ -1,3 +1,22 @@
+import re
+
+import polars as pl
+
+# put regex here so its only compiled once
+COLUMN_NAME_VALIDATOR_PATTERN = re.compile(r"[^a-zA-Z_./\-\\\d:]")
+
+PII_PATTERNS = {
+    "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
+    # This is limited. Currently looking for numbers starting
+    # with a + or 0. Does not match decimals
+    "phone": r"^(\+|0)[\d\s\-\(\)\+]+$",
+}
+
+PII_PATTERN_EXPRESSIONS = [
+    pl.col("value").cast(pl.Utf8).str.extract(pattern, 0).alias(f"match_{type}")
+    for type, pattern in PII_PATTERNS.items()
+]
+
 # pii columns that are searched for when checking if sheets contain pii data
 # keep these lowercase.
 PII_COLUMN_NAMES = [
