@@ -7,11 +7,19 @@
 - other datasets through dynamic schema generation - see below.
 
 ## Project structure
+**models**: contains the schemas for the datasets. This includes the dynamic schema generator for datasets that are not yet standardised. \
+**loaders**: handles the loading of excel files and some of the matching to the schema.\
+**orchestrator**: runs all the steps of the validation process.\
+**validators**: contains logic for all the validation rules.
 
 ```bash
+├── dataset_requirements.md
 ├── Dockerfile
 ├── .dockerignore
 ├── .github
+│   └── workflows
+│       ├── pytest.yml
+│       └── ruff.yml
 ├── .gitignore
 ├── main.py
 ├── pyproject.toml
@@ -21,7 +29,6 @@
 │   ├── rqa_validator
 │   │   ├── common
 │   │   │   ├── expression_builder.py
-│   │   │   ├── file_export.py
 │   │   │   ├── list_matching.py
 │   │   │   └── schema_matching.py
 │   │   ├── config.py
@@ -46,7 +53,6 @@
 │   │   │   └── logging.py
 │   │   └── validators
 │   │       ├── base.py
-│   │       ├── config.py
 │   │       ├── data_helpers.py
 │   │       ├── data_validators
 │   │       │   ├── cleaning_log_to_clean_validator.py
@@ -61,6 +67,7 @@
 │   │       │   ├── survey_choices_validator.py
 │   │       │   └── unique_column_validator.py
 │   │       ├── __init__.py
+│   │       ├── options.py
 │   │       ├── schema_helpers.py
 │   │       └── schema_validators
 │   │           ├── column_name_validator.py
@@ -72,12 +79,6 @@
 │   └── tests
 └── uv.lock
 ```
-
-**models**: contains the schemas for the datasets. This includes the dynamic schema generator for datasets that are not yet standardised. \
-**loaders**: handles the loading of excel files and some of the matching to the schema.\
-**orchestrator**: runs all the steps of the validation process.\
-**validators**: contains logic for all the validation rules.
-
 
 ## Setup
 1. Clone the repository
@@ -112,19 +113,65 @@ Currently, from this point onwards all errors are accumulated and the process wi
 
 2. Load the Excel file  
     - Excel sheets and columns are mapped to the schema for sheets that have to be loaded
-    - Sheet names for sheets that do not have to be loaded
+    - Sheet names for sheets that do not have to be loaded are recorded
     - This optionally includes fuzzy matching of sheets/columns by setting the config values in `.env`.
-3. If dataset-type == 'other', then a schema is dynamically created.
+3. If dataset-type == 'other', then the remainder of the schema is dynamically created.
 4. Perform all the validation steps.
-5. Errors are output to the user.
+5. Errors and validation results are output to the user.
 
+### Validation Message Types
 There are several error types:
 - **Admin errors**: these are either Python errors or errors with the schema from step 1.
+- **Admin info**: Information about dynamic schema generation and other information that could be useful for debugging.
 - **Errors**: critical errors from the validation process. Eg: a missing sheet etc
 - **Warnings**: warnings from the validation process. Eg: an optional sheet is missing, possible Pii column found
 - **Info**: information for user awareness. Eg: if fuzzy matching was used to match a column.
 - **Passed**: validation rules that passed without any errors or warnings.
-   
+
+### Running Rules Individually
+If testing or debugging, it is possible to run individual rules. To do this, first load the data setting the appropriate filepath and then run the required rule. For JMMI:
+
+```python
+from src.rqa_validator.models.preprocess import lowercase_schema_mappings
+from src.rqa_validator.models.jmmi import JMMIDataset
+from src.rqa_validator.loaders.excel_loader import ExcelLoader
+# use whichever rule is required
+from src.rqa_validator.validators.data_validators import RawToCleanToLog
+
+
+schema = JMMIDataset().get_schema()
+lowercase_schema_mappings(schema)
+loader = ExcelLoader(schema)
+# set FILEPATHHERE
+data, results = loader.load(FILEPATHHERE)
+
+# run the required rule setting the appropriate parmaters
+RawToCleanToLog(schema=schema).validate(data=data)
+
+
+```
+or for other datasets:
+```python
+from src.rqa_validator.models.base_dataset import DynamicDatasetSchema
+from src.rqa_validator.models.dynamic_model import DynamicDataset
+from src.rqa_validator.loaders.excel_loader import ExcelLoader
+# Use whichever rule is required
+from src.rqa_validator.validators.data_validators import CrossSheetIdCheck
+
+schema = DynamicDatasetSchema()
+loader = ExcelLoader(schema)
+
+# set FILEPATHHERE
+data, excel_results = loader.load(FILEPATHHERE,
+                                    load_all_sheets= True  )
+dataset = DynamicDataset(data)
+schema = dataset.get_schema()
+results = dataset.process_data()
+
+# run the required rule setting the appropriate parmaters
+CrossSheetIdCheck(schema).validate(dataset.data)
+```
+
 ## Dataset Definitions
 A dataset will have a schema and a list of validation rules that need to be run.
 
@@ -192,6 +239,8 @@ A structured list of validation errors is produced (errors, warnings) for each r
 
 These rules are currently based on the minimum standars checklist (1.2) and some requirments for the dynamic schema generation process.
 
+For some datasets, these rules could be run multiple times for different sheets. Results for each of these are returned individually for each run.
+
 
 ### Rules currently implemented
 **Data Validation Rules**
@@ -215,6 +264,5 @@ These rules are currently based on the minimum standars checklist (1.2) and some
 
     
 ## TODO: 
-- clean validation results based on requirements 
 - add other datasets and validation rules
 - logging and error reporting.
