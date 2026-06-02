@@ -19,6 +19,7 @@ class ValidationPipeline:
     def __init__(self, dataset_type: str):
         self.dataset_type = dataset_type.lower()
         self._setup_schema()
+        self.set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR])
 
     def _setup_schema(self):
         """Initialise schema and validators based on dataset type.
@@ -50,7 +51,7 @@ class ValidationPipeline:
 
         """
         all_results: list[ValidationResult] = []
-        set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR])
+
         # pre-validate the schema. checks for duplicate sheet/column
         # names etc
         try:
@@ -150,7 +151,7 @@ class ValidationPipeline:
                 if results:
                     all_results.extend(results)
 
-                if not [item for item in results if item.severity in set_errors]:
+                if not [item for item in results if item.severity in self.set_errors]:
                     all_results.append(
                         ValidationResult(
                             rule=validator.name,
@@ -175,43 +176,53 @@ class ValidationPipeline:
 
     def _compile_results(self, results: list[ValidationResult]) -> dict[str, Any]:
         """Compile validation results into structured output."""
-        errors = [r for r in results if r.severity == SeverityLevel.ERROR]
-        admin_errors = [r for r in results if r.severity == SeverityLevel.ADMIN_ERROR]
-        warnings = [r for r in results if r.severity == SeverityLevel.WARNING]
-        info = [r for r in results if r.severity == SeverityLevel.INFO]
-        admin_info = [r for r in results if r.severity == SeverityLevel.ADMIN_INFO]
-        passed = [r for r in results if r.severity == SeverityLevel.PASSED]
+        buckets: dict[str, list[dict[str, Any]]] = {level.value: [] for level in SeverityLevel}
+        counts: dict[str, int] = {level.value: 0 for level in SeverityLevel}
+        error_count: int = 0
+
+        for result in results:
+            was_truncated = False
+            if result.details and settings.LIMIT_DETAILS_THRESHOLD > 0:
+                # if the number of details needs to be lmited
+                for key, value in result.details.items():
+                    # checks to see if the value is a list and if it has too many items.
+                    if isinstance(value, list) and len(value) > settings.LIMIT_DETAILS_THRESHOLD:
+                        # truncate the list
+                        result.details[key] = value[: settings.LIMIT_DETAILS_THRESHOLD]
+                        was_truncated = True
+
+                # update message
+                if was_truncated:
+                    result.message = (
+                        f"{result.message} (Details limited to "
+                        f"{settings.LIMIT_DETAILS_THRESHOLD} records.)"
+                    )
+
+            counts[result.severity.value] += 1
+
+            if result.severity in self.set_errors:
+                error_count += 1
+
+            buckets[result.severity.value].append(
+                {
+                    "rule": result.rule,
+                    "message": result.message,
+                    "severity": result.severity.value,
+                    "sheet_name": result.sheet_name,
+                    "column_name": result.column_name,
+                    "details": result.details,
+                }
+            )
+
+        success = error_count == 0
 
         return {
-            "success": len(errors) == 0 and len(admin_errors) == 0,
-            "summary": {
-                SeverityLevel.PASSED.value: len(passed),
-                SeverityLevel.ADMIN_ERROR.value: len(admin_errors),
-                SeverityLevel.ERROR.value: len(errors),
-                SeverityLevel.WARNING.value: len(warnings),
-                SeverityLevel.INFO.value: len(info),
-                SeverityLevel.ADMIN_INFO.value: len(admin_info),
-            },
-            SeverityLevel.ADMIN_ERROR.value: [self._result_to_dict(r) for r in admin_errors],
-            SeverityLevel.ERROR.value: [self._result_to_dict(r) for r in errors],
-            SeverityLevel.WARNING.value: [self._result_to_dict(r) for r in warnings],
-            SeverityLevel.INFO.value: [self._result_to_dict(r) for r in info],
-            SeverityLevel.ADMIN_INFO.value: [self._result_to_dict(r) for r in admin_info],
-            SeverityLevel.PASSED.value: [self._result_to_dict(r) for r in passed],
+            "success": success,
+            "summary": counts,
+            **{key: buckets[key] for key in buckets},
             "metadata": {
                 "dataset_type": self.dataset_type,
             },
-        }
-
-    def _result_to_dict(self, result: ValidationResult) -> dict[str, Any]:
-        """Convert ValidationResult to dictionary for JSON export."""
-        return {
-            "rule": result.rule,
-            "message": result.message,
-            "severity": result.severity.value,
-            "sheet_name": result.sheet_name,
-            "column_name": result.column_name,
-            "details": result.details,
         }
 
     def _get_validator_params(self, validator: BaseValidator) -> dict[str, Any]:
