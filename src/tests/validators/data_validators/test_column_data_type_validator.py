@@ -75,7 +75,7 @@ def valid_schema():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -116,7 +116,7 @@ def schema_missing_sheet1():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -157,7 +157,7 @@ def schema_missing_sheet2():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_surveyxxx",
+                standard_name="surveyxxx",
                 alternate_names=["surveyxxx"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -198,7 +198,7 @@ def schema_missing_column1():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -239,7 +239,7 @@ def schema_missing_column2():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -280,7 +280,7 @@ def schema_missing_process1():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -321,7 +321,7 @@ def schema_missing_process2():
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
+                standard_name="survey",
                 alternate_names=["survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
@@ -377,8 +377,8 @@ def valid_excel_data():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -425,8 +425,8 @@ def missing_sheet():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_surveyxxx",
-            data_sheet_name="kobo_surveyxxx",
+            schema_sheet_name="surveyxxx",
+            data_sheet_name="surveyxxx",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -473,8 +473,8 @@ def missing_sheet2():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -521,8 +521,8 @@ def missing_column1():
             column_map=[DataColumnMap(schema_column_name="uuidxxx", data_column_name="uuidxxx")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -569,8 +569,8 @@ def missing_column2():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="typexxx", data_column_name="typexxx"),
@@ -617,8 +617,8 @@ def missing_column3():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -665,8 +665,8 @@ def invalid_excel_data():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -713,8 +713,8 @@ def invalid_excel_data2():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
@@ -761,8 +761,8 @@ def invalid_excel_data3():
             column_map=[DataColumnMap(schema_column_name="uuid", data_column_name="uuid")],
         ),
         DataSheetMap(
-            schema_sheet_name="kobo_survey",
-            data_sheet_name="kobo_survey",
+            schema_sheet_name="survey",
+            data_sheet_name="survey",
             data=df_survey,
             column_map=[
                 DataColumnMap(schema_column_name="type", data_column_name="type"),
