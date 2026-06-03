@@ -53,8 +53,9 @@ class MissingSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{len(missing_sheets)} additional sheets were expected but not found."
-                    " See the output for details.",
+                    message=self._(
+                        key="missing_sheets_validator.missing_sheets", count=len(missing_sheets)
+                    ),
                     severity=SeverityLevel.ERROR,
                     details={"missing_sheets": missing_sheets},
                 )
@@ -65,8 +66,7 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message="A sheet for 'sampling_info' is expected when weights are"
-                        " added to the clean data. Add this sheet if required.",
+                        message=self._("missing_sheets_validator.sampling_info"),
                         sheet_name="sampling_info",
                         severity=SeverityLevel.WARNING,
                     )
@@ -76,9 +76,10 @@ class MissingSheetsCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"{len(optional_missing_sheets)} optional sheets were not found."
-                        " Check if these sheets are required or not for this dataset."
-                        " See the output for details.",
+                        message=self._(
+                            key="missing_sheets_validator.optional_missing_sheets",
+                            count=len(optional_missing_sheets),
+                        ),
                         severity=SeverityLevel.WARNING,
                         details={"optional_sheets": optional_missing_sheets},
                     )

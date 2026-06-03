@@ -161,6 +161,9 @@ class CleaningLogToClean(BaseValidator):
 
         # TRANSFORMATION: transforms data in preparation for comparison
         # dataframe of actual changes made
+        clean_log_id_columns_filter = (
+            pl.col(clean_log_id_columns.data_column_name).cast(pl.Utf8).str.strip_chars(" ")
+        )
         modified_rows_df = (
             data_loaded_sheets[self.cleaning_log_sheet]
             .data.filter(
@@ -169,16 +172,7 @@ class CleaningLogToClean(BaseValidator):
                 .is_in(schema_change_type_values.values)
             )
             .filter(
-                (
-                    pl.col(clean_log_id_columns.data_column_name)
-                    .cast(pl.Utf8)
-                    .str.strip_chars(" ")
-                    .is_not_null()
-                )
-                & (
-                    pl.col(clean_log_id_columns.data_column_name).cast(pl.Utf8).str.strip_chars(" ")
-                    != ""
-                )
+                (clean_log_id_columns_filter.is_not_null()) & (clean_log_id_columns_filter != "")
             )
             .select(
                 [
@@ -207,10 +201,12 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{
-                        multiple_change_df.select(clean_log_id_columns.data_column_name).n_unique()
-                    } Ids had multiple changes for the same question. "
-                    "These were not validated. Check the output for details.",
+                    message=self._(
+                        "cleaning_log_to_clean_validator.multiple_changes",
+                        count=multiple_change_df.select(
+                            clean_log_id_columns.data_column_name
+                        ).n_unique(),
+                    ),
                     severity=SeverityLevel.WARNING,
                     details=multiple_change_df.to_dict(as_series=False),
                 )
@@ -234,11 +230,16 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{same_value_df.height} row/s had"
-                    f"'{data_loaded_columns[self.cleaning_log_old_value_column].data_column_name}'"
-                    " equal "
-                    f"'{data_loaded_columns[self.cleaning_log_new_value_column].data_column_name}'."
-                    " Check the output for details.",
+                    message=self._(
+                        "cleaning_log_to_clean_validator.same_value",
+                        count=same_value_df.height,
+                        old_value_column=data_loaded_columns[
+                            self.cleaning_log_old_value_column
+                        ].data_column_name,
+                        new_value_column=data_loaded_columns[
+                            self.cleaning_log_new_value_column
+                        ].data_column_name,
+                    ),
                     severity=SeverityLevel.WARNING,
                     details=same_value_df.to_dict(as_series=False),
                 )
@@ -279,11 +280,13 @@ class CleaningLogToClean(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message="There are questions listed in "
-                    f"'{data_loaded_sheets[self.cleaning_log_sheet].data_sheet_name}'"
-                    " that were not found in "
-                    f"'{data_loaded_sheets[self.clean_data_sheet].data_sheet_name}'."
-                    " See output for details.",
+                    message=self._(
+                        "cleaning_log_to_clean_validator.missing_questions",
+                        cleaning_log_sheet=data_loaded_sheets[
+                            self.cleaning_log_sheet
+                        ].data_sheet_name,
+                        clean_data_sheet=data_loaded_sheets[self.clean_data_sheet].data_sheet_name,
+                    ),
                     severity=SeverityLevel.WARNING,
                     details={"missing_questions": missing_quesitons},
                 )
@@ -454,10 +457,12 @@ class CleaningLogToClean(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_df.height} differences found"
-                        f" in the '{self.cleaning_log_sheet}' sheet that were not"
-                        f" reflected in the '{self.clean_data_sheet}' sheet."
-                        f" Check the output for details.",
+                        message=self._(
+                            "cleaning_log_to_clean_validator.differences",
+                            count=difference_df.height,
+                            cleaning_log_sheet=self.cleaning_log_sheet,
+                            clean_data_sheet=self.clean_data_sheet,
+                        ),
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_df.to_dict(as_series=False),

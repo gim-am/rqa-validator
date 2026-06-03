@@ -35,6 +35,8 @@ class MandatoryColumns(BaseValidator):
         )
 
         if result:
+            # this is done to consolidate results 
+            # TODO: do this for all get_data_loaded_sheets/columns calls?
             sheet_df = pl.DataFrame(
                 [
                     {
@@ -46,8 +48,7 @@ class MandatoryColumns(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{len(result)} excel sheets were expected but not found."
-                    " See output for details.",
+                    message=self._("mandatory_column_validator.missing_sheets", count=len(result)),
                     severity=SeverityLevel.ERROR,
                     details=sheet_df,
                 )
@@ -75,8 +76,7 @@ class MandatoryColumns(BaseValidator):
             ).to_dict(as_series=False)
             result = ValidationResult(
                 rule=self.name,
-                message=f"{len(results)} excel columns were expected but not found."
-                " See output for details.",
+                message=self._("mandatory_column_validator.mandatory_columns", count=len(results)),
                 severity=SeverityLevel.ERROR,
                 details=column_df,
             )

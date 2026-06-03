@@ -24,9 +24,10 @@ class UnexpectedSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{len(data.unexpected_sheets)} unexpected sheets were found in the"
-                    " dataset. Check to see if these are required to be published/archived."
-                    " Check output for details.",
+                    message=self._(
+                        "unexpected_sheets_validator.unexpected_sheets",
+                        count=len(data.unexpected_sheets),
+                    ),
                     severity=SeverityLevel.WARNING,
                     details={"unexpected_sheets": data.unexpected_sheets},
                 )
@@ -36,9 +37,9 @@ class UnexpectedSheetsCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There are {len(data.hidden_sheets)} hidden sheets in the dataset."
-                    " Check to see if these should be shown or removed before the dataset is"
-                    " published/archived. Check output for details.",
+                    message=self._(
+                        "unexpected_sheets_validator.hidden_sheets", count=len(data.hidden_sheets)
+                    ),
                     severity=SeverityLevel.ERROR,
                     details={"hidden_sheets": data.hidden_sheets},
                 )

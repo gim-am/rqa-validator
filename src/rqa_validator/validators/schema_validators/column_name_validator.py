@@ -50,9 +50,10 @@ class ColumnNameCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"{column_match_df.select(pl.col('sheet')).unique().height} sheets had"
-                    " column names that appear to be labels instead of variables."
-                    " Check the output for details.",
+                    message=self._(
+                        "column_name_validator.labels",
+                        count=column_match_df.select(pl.col("sheet")).unique().height,
+                    ),
                     severity=SeverityLevel.ERROR,
                     details=column_match_df.to_dict(as_series=False),
                 )

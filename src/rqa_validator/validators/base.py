@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from ..utils.il8n import _
+
 
 class SeverityLevel(Enum):
     INFO = "info"
@@ -34,3 +36,6 @@ class BaseValidator(ABC):
     @abstractmethod
     def name(self) -> str:
         pass
+
+    def _(self, key: str, **kwargs):
+        return _(key, **kwargs)

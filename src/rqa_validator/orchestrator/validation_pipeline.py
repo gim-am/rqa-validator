@@ -12,6 +12,7 @@ from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
 from ..models.dynamic_model import DynamicDataset
 from ..models.jmmi import JMMIDataset
 from ..models.preprocess import lowercase_schema_mappings, validate_schema
+from ..utils.il8n import i18n
 from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
@@ -39,7 +40,13 @@ class ValidationPipeline:
         # to make comparison easier later
         lowercase_schema_mappings(self.schema)
 
-    def run(self, filepath: Path) -> dict[str, Any]:
+    def run_all(self, filepath: Path, locale: str = "en") -> dict[str, Any]:
+        token = i18n.set_locale(locale)
+        results = self.run(filepath)
+        i18n.reset_locale(token)
+        return self._compile_results(results)
+
+    def run(self, filepath: Path) -> list[ValidationResult]:
         """Orchestrator for the dataset validation pipeline.
 
         Args:
@@ -59,7 +66,7 @@ class ValidationPipeline:
 
             if validation_errors:
                 all_results.extend(validation_errors)
-                return self._compile_results(all_results)
+                return all_results
         except Exception as e:
             all_results.append(
                 ValidationResult(
@@ -70,7 +77,7 @@ class ValidationPipeline:
                 )
             )
             settings.logger.log_exception(e)
-            return self._compile_results(all_results)
+            return all_results
 
         # load the excel data
         try:
@@ -91,7 +98,7 @@ class ValidationPipeline:
                         severity=SeverityLevel.ADMIN_ERROR,
                     )
                 )
-                return self._compile_results(all_results)
+                return all_results
 
             all_results.append(
                 ValidationResult(
@@ -112,7 +119,7 @@ class ValidationPipeline:
                 )
             )
             settings.logger.log_exception(ce)
-            return self._compile_results(all_results)
+            return all_results
         except Exception as e:
             all_results.append(
                 ValidationResult(
@@ -123,7 +130,7 @@ class ValidationPipeline:
                 )
             )
             settings.logger.log_exception(e)
-            return self._compile_results(all_results)
+            return all_results
 
         if self.dataset_type == "other":
             dataset = DynamicDataset(data)
@@ -172,7 +179,7 @@ class ValidationPipeline:
                 )
                 settings.logger.log_exception(e)
 
-        return self._compile_results(all_results)
+        return all_results
 
     def _compile_results(self, results: list[ValidationResult]) -> dict[str, Any]:
         """Compile validation results into structured output."""

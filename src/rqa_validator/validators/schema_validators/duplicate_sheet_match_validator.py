@@ -1,3 +1,5 @@
+import polars as pl
+
 from ...common.list_matching import duplicate_list_items
 from ...loaders.excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
@@ -23,20 +25,25 @@ class DuplicateSheetMatches(BaseValidator):
         provided_sheets.extend(data.get_unloaded_sheet_mapped_names())
         # duplicates should be a unique list
         duplicates = duplicate_list_items(provided_sheets)
+        matches = []
 
         if duplicates:
             for item in duplicates:
                 matched_sheets = data.get_sheet_matches(item)
                 sheet_names = [name.data_sheet_name for name in matched_sheets]
-                results.append(
-                    ValidationResult(
-                        rule=self.name,
-                        message=f"Multiple excel sheets, '{sheet_names}', were mapped"
-                        f" to the same schema sheet {item}. There should be at"
-                        " most a 1-1 mapping for each sheet.",
-                        severity=SeverityLevel.ERROR,
-                        sheet_name=item,
-                    )
+                matches.extend([{"sheet": item, "matches": sheet_names}])
+
+            matches_df = pl.DataFrame(matches)
+            results.append(
+                ValidationResult(
+                    rule=self.name,
+                    message=self._(
+                        "duplicate_sheet_match_validator.duplicate_sheets",
+                        count=matches_df.select(pl.col("sheet")).unique().height,
+                    ),
+                    severity=SeverityLevel.ERROR,
+                    details=matches_df.to_dict(),
                 )
+            )
 
         return results
