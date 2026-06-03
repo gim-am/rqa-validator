@@ -140,7 +140,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                 mandatory_columns=[
                     SchemaColumnMap(
                         standard_name="uuid",
-                        alternate_names=["uuid", "X_uuid"],
+                        alternate_names=["_uuid"],
                         is_unique=True,
                     ),
                     SchemaColumnMap(
@@ -160,7 +160,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                 mandatory_columns=[
                     SchemaColumnMap(
                         standard_name="uuid",
-                        alternate_names=["uuid", "X_uuid"],
+                        alternate_names=["_uuid"],
                         is_unique=True,
                     ),
                     #  SchemaColumnMap(standard_name="pop_group",
@@ -173,18 +173,18 @@ class DefaultDatasetSchema(BaseDatasetSchema):
             ),
             SchemaSheetMap(
                 standard_name="deletion_log",
-                alternate_names=["deletion_log"],
+                alternate_names=[],
                 mandatory_columns=[
                     SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["X_uuid"], is_unique=True
+                        standard_name="uuid", alternate_names=["_uuid"], is_unique=True
                     ),
                 ],
             ),
             SchemaSheetMap(
                 standard_name="cleaning_log",
-                alternate_names=["clog_logbook"],
+                alternate_names=[],
                 mandatory_columns=[
-                    SchemaColumnMap(standard_name="uuid", alternate_names=["x_uuid"]),
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["_uuid"]),
                     SchemaColumnMap(standard_name="old_value"),
                     SchemaColumnMap(standard_name="new_value"),
                     SchemaColumnMap(
@@ -197,12 +197,14 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                             )
                         ],
                     ),
-                    SchemaColumnMap(standard_name="question"),
+                    SchemaColumnMap(
+                        standard_name="question", alternate_names=["variable", "question.name"]
+                    ),
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
-                alternate_names=["survey"],
+                standard_name="survey",
+                alternate_names=["kobo_survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
                         standard_name="type",
@@ -220,8 +222,8 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_choices",
-                alternate_names=["choices"],
+                standard_name="choices",
+                alternate_names=["kobo_choices"],
                 mandatory_columns=[
                     SchemaColumnMap(standard_name="list_name"),
                     SchemaColumnMap(standard_name="name"),
@@ -253,16 +255,14 @@ class DynamicDatasetSchema(BaseDatasetSchema):
         default_factory=lambda: [
             SchemaSheetMap(
                 standard_name="deletion_log",
-                alternate_names=["deletion_log"],
+                alternate_names=[],
                 mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["X_uuid"], is_unique=True
-                    )
+                    SchemaColumnMap(standard_name="uuid", alternate_names=["_uuid"], is_unique=True)
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_survey",
-                alternate_names=["survey"],
+                standard_name="survey",
+                alternate_names=["kobo_survey"],
                 mandatory_columns=[
                     SchemaColumnMap(
                         standard_name="type",
@@ -280,8 +280,8 @@ class DynamicDatasetSchema(BaseDatasetSchema):
                 ],
             ),
             SchemaSheetMap(
-                standard_name="kobo_choices",
-                alternate_names=["choices"],
+                standard_name="choices",
+                alternate_names=["kobo_choices"],
                 mandatory_columns=[
                     SchemaColumnMap(standard_name="list_name"),
                     SchemaColumnMap(standard_name="name"),

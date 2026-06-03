@@ -408,7 +408,8 @@ class DynamicDataset(BaseDataset):
                     self.schema.add_mandatory_column_to_sheet(
                         sheet,
                         SchemaColumnMap(
-                            standard_name="question", alternate_names=["question_name"]
+                            standard_name="question",
+                            alternate_names=["question_name", "variable", "question.name"],
                         ),
                     )
                     self.schema.add_mandatory_column_to_sheet(

@@ -23,7 +23,7 @@ class DataTypeCheck(BaseValidator):
     def __init__(
         self,
         schema: BaseDatasetSchema,
-        survey_sheet: str = "kobo_survey",
+        survey_sheet: str = "survey",
         survey_type_column: str = "type",
         survey_name_column: str = "name",
         check_sheets: list[str] | None = None,
@@ -33,7 +33,7 @@ class DataTypeCheck(BaseValidator):
         Args:
             schema (BaseDatasetSchema): dataset schema
             survey_sheet (str, optional): name of the kobo survey sheet in excel.
-                Defaults to 'kobo_survey'.
+                Defaults to 'survey'.
             survey_type_column (str, optional): name of the type column in the
                 kobo survey sheet. Defaults to 'type'.
             survey_name_column (str, optional): name of the name column in the

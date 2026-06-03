@@ -20,10 +20,10 @@ class SurveyChoicesCheck(BaseValidator):
     def __init__(
         self,
         schema: BaseDatasetSchema,
-        survey_sheet: str = "kobo_survey",
+        survey_sheet: str = "survey",
         survey_type_column: str = "type",
         survey_name_column: str = "name",
-        choices_sheet: str = "kobo_choices",
+        choices_sheet: str = "choices",
         choices_name_column: str = "name",
         choices_list_name_column: str = "list_name",
         check_sheets: list[str] | None = None,
@@ -34,13 +34,13 @@ class SurveyChoicesCheck(BaseValidator):
         Args:
             schema (BaseDatasetSchema): dataset schema
             survey_sheet (str, optional): name of the kobo survey sheet in excel.
-                Defaults to 'kobo_survey'.
+                Defaults to 'survey'.
             survey_type_column (str, optional): name of the type column in the
                 kobo survey sheet. Defaults to 'type'.
             survey_name_column (str, optional): name of the name column in the
                 kobo survey sheet. Defaults to 'name'.
             choices_sheet (str, optional): name of the kobo choices sheet in excel.
-                Defaults to 'kobo_choices'.
+                Defaults to 'choices'.
             choices_name_column (str, optional): name of the name column in the
                 kobo choices sheet. Defaults to 'name'.
             choices_list_name_column (str, optional): name of the list_name column in
