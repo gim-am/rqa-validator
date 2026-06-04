@@ -99,6 +99,13 @@ or
 uv run main.py --dataset-type other Step3DatasetPath
 ```
 
+Note: if incorporating this into another project its probably easier to use the orchestrator directly
+```python
+from src.rqa_validator.orchestrator.validation_pipeline import ValidationPipeline
+
+results = ValidationPipeline().run_all(filepath=Step3DatasetPath, dataset_type="other") #or jmmi
+```
+
 5. Any validation errors will be output to the terminal.
 
 ### Running process

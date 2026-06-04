@@ -21,8 +21,8 @@ def main():
 
     args = parser.parse_args()
 
-    pipeline = ValidationPipeline(dataset_type=args.dataset_type)
-    results = pipeline.run(args.input_file)
+    pipeline = ValidationPipeline()
+    results = pipeline.run_all(args.input_file, dataset_type=args.dataset_type)
 
     print(f"Admin Errors: {results['summary'][SeverityLevel.ADMIN_ERROR.value]}")
     print(f"Errors: {results['summary'][SeverityLevel.ERROR.value]}")
