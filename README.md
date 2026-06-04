@@ -128,6 +128,11 @@ There are several error types:
 - **Info**: information for user awareness. Eg: if fuzzy matching was used to match a column.
 - **Passed**: validation rules that passed without any errors or warnings.
 
+### Validation Message Translations
+Most user intended messages (Error, Warnings, Info, Passed) support translations into other languages. This is a work in progress. If a message is not available for a specific language, the message will default to English. 
+
+See [translations](locales/translations.md) for details on managing/expanding these.
+
 ### Running Rules Individually
 If testing or debugging, it is possible to run individual rules. To do this, first load the data setting the appropriate filepath and then run the required rule. For JMMI:
 

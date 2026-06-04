@@ -167,3 +167,11 @@ msgstr "Column '{source_column}' in sheet '{source_sheet}' was linked to column 
 #: src/rqa_validator/validators/data_helpers.py:510
 msgid "data_helpers.check_id_column_overlap"
 msgstr "Column '{source_column}' in sheet '{source_sheet}' had an overlap of {overlap} with column '{target_column}' in sheet '{target_sheet}'. A minimum of {min_overlap} is required for these columns to be considered linkable id columns."
+
+#: src/rqa_validator/orchestrator/validation_pipeline.py:131
+msgid "validation_pipeline.calamine_cell_error"
+msgstr "Loading of the excel file '{file}' encountered an error. Check that the excel sheets do not contain empty columns without headers: {error}"
+
+#: src/rqa_validator/orchestrator/validation_pipeline.py:184
+msgid "validation_pipeline.passed"
+msgstr "Validator '{name}' passed."

@@ -12,57 +12,73 @@ from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
 from ..models.dynamic_model import DynamicDataset
 from ..models.jmmi import JMMIDataset
 from ..models.preprocess import lowercase_schema_mappings, validate_schema
-from ..utils.il8n import i18n
+from ..utils.il8n import _, i18n
 from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
+
+FULLY_SUPPORTED_DATASETS: list[str] = ["jmmi"]
 
 
 class ValidationPipeline:
-    def __init__(self, dataset_type: str):
-        self.dataset_type = dataset_type.lower()
-        self._setup_schema()
+    def __init__(self):
         self.set_errors = set([SeverityLevel.ADMIN_ERROR, SeverityLevel.ERROR])
 
-    def _setup_schema(self):
+    def _setup_schema(self, dataset_type: str):
         """Initialise schema and validators based on dataset type.
 
         Raises:
             ValueError: if dataset type not found.
         """
-        if self.dataset_type == "jmmi":
-            self.schema = JMMIDataset.get_schema()
-            self.validators = JMMIDataset.get_validators(schema=self.schema)
-        elif self.dataset_type == "other":
-            self.schema = DynamicDatasetSchema()
+        validators: list[BaseValidator] = []
+        if dataset_type == "jmmi":
+            schema = JMMIDataset.get_schema()
+            validators = JMMIDataset.get_validators(schema=schema)
         else:
-            raise ValueError(f"Unknown dataset type: {self.dataset_type}")
+            # uses dynamic schema generation
+            schema = DynamicDatasetSchema()
+        # else:
+        #     raise ValueError(f"Unknown dataset type: {dataset_type}")
 
         # make sure all the sheet and column names in the shema are lower
         # to make comparison easier later
-        lowercase_schema_mappings(self.schema)
+        lowercase_schema_mappings(schema)
 
-    def run_all(self, filepath: Path, locale: str = "en") -> dict[str, Any]:
+        return schema, validators
+
+    def run_all(self, filepath: Path, dataset_type: str, locale: str = "en") -> dict[str, Any]:
+        """_summary_
+
+        Args:
+            filepath (Path): The excel filepath.
+            dataset_type (str): dataset type: jmmi, other
+            locale (str, optional): language to use for validation messages, if supported.
+                Defaults to "en".
+
+        Returns:
+            dict[str, Any]: json results
+        """
         token = i18n.set_locale(locale)
-        results = self.run(filepath)
+        dataset_type = dataset_type.lower()
+        results = self._run(filepath, dataset_type)
         i18n.reset_locale(token)
-        return self._compile_results(results)
+        return self._compile_results(results, dataset_type)
 
-    def run(self, filepath: Path) -> list[ValidationResult]:
+    def _run(self, filepath: Path, dataset_type: str) -> list[ValidationResult]:
         """Orchestrator for the dataset validation pipeline.
 
         Args:
-            filepath (Path): Currently the excel filepath. Probably change to api
-            call later.
+            filepath (Path): The excel filepath.
 
         Returns:
-            Dict[str, Any]: JSON results.
+            list[ValidationResult]: validation results.
 
         """
         all_results: list[ValidationResult] = []
 
         # pre-validate the schema. checks for duplicate sheet/column
         # names etc
+        schema, validators = self._setup_schema(dataset_type)
         try:
-            validation_errors = validate_schema(self.schema)
+            validation_errors = validate_schema(schema)
 
             if validation_errors:
                 all_results.extend(validation_errors)
@@ -73,7 +89,7 @@ class ValidationPipeline:
                     rule="SchemaValidation",
                     message=f"Schema validation encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
-                    details=vars(self.schema),
+                    details=vars(schema),
                 )
             )
             settings.logger.log_exception(e)
@@ -81,10 +97,10 @@ class ValidationPipeline:
 
         # load the excel data
         try:
-            loader = ExcelLoader(self.schema)
+            loader = ExcelLoader(schema)
             data, excel_results = loader.load(
                 filepath,
-                load_all_sheets=self.dataset_type == "other",
+                load_all_sheets=dataset_type not in FULLY_SUPPORTED_DATASETS,
             )
 
             if excel_results:
@@ -112,9 +128,9 @@ class ValidationPipeline:
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",
-                    message=f"Loading of the excel file '{filepath.name}'"
-                    f" encountered an error. Check that the excel sheets do not contain"
-                    f" empty columns without headers: {str(ce)}",
+                    message=_(
+                        "validation_pipeline.calamine_cell_error", file=filepath.name, error=str(ce)
+                    ),
                     severity=SeverityLevel.ERROR,
                 )
             )
@@ -132,27 +148,27 @@ class ValidationPipeline:
             settings.logger.log_exception(e)
             return all_results
 
-        if self.dataset_type == "other":
+        if dataset_type not in FULLY_SUPPORTED_DATASETS:
             dataset = DynamicDataset(data)
             results = dataset.process_data()
             if results:
                 all_results.extend(results)
 
-            self.validators = dataset.get_validators()
-            self.schema = dataset.get_schema()
+            validators = dataset.get_validators()
+            schema = dataset.get_schema()
             data = dataset.data
 
         all_results.append(
             ValidationResult(
                 rule="Schema Details",
-                message=f"Schema for dataset '{self.dataset_type}' and file '{filepath}'",
+                message=f"Schema for dataset '{dataset_type}' and file '{filepath}'",
                 severity=SeverityLevel.ADMIN_INFO,
-                details=vars(self.schema),
+                details=vars(schema),
             )
         )
 
         # run each of the validators for the dataset.
-        for validator in self.validators:
+        for validator in validators:
             try:
                 results = validator.validate(data)
                 if results:
@@ -162,7 +178,7 @@ class ValidationPipeline:
                     all_results.append(
                         ValidationResult(
                             rule=validator.name,
-                            message=f"Validator '{validator.name}' passed.",
+                            message=_("validation_pipeline.passed", name=validator.name),
                             severity=SeverityLevel.PASSED,
                             details=self._get_validator_params(validator),
                         )
@@ -181,7 +197,9 @@ class ValidationPipeline:
 
         return all_results
 
-    def _compile_results(self, results: list[ValidationResult]) -> dict[str, Any]:
+    def _compile_results(
+        self, results: list[ValidationResult], dataset_type: str
+    ) -> dict[str, Any]:
         """Compile validation results into structured output."""
         buckets: dict[str, list[dict[str, Any]]] = {level.value: [] for level in SeverityLevel}
         counts: dict[str, int] = {level.value: 0 for level in SeverityLevel}
@@ -228,7 +246,7 @@ class ValidationPipeline:
             "summary": counts,
             **{key: buckets[key] for key in buckets},
             "metadata": {
-                "dataset_type": self.dataset_type,
+                "dataset_type": dataset_type,
             },
         }
 

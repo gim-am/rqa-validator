@@ -29,11 +29,10 @@ class I18nService:
                     self.domain,
                     localedir=self.localedir,
                     languages=[locale],
-                    fallback=False,  # Falls back to 'en' if file missing
+                    fallback=True,  # Falls back to 'en' if file missing
                 )
                 self._cache[locale] = trans
-            except Exception as e:
-                print(str(e))
+            except Exception:
                 # Fallback to default if specific locale fails
                 self._cache[locale] = self._cache.get("en", gettext.NullTranslations())
 
@@ -50,8 +49,9 @@ class I18nService:
 
     def _(self, key: str, **kwargs) -> str:
         """
-        Lookup message by KEY and format.
+        Lookup message by key and format it.
         The 'key' passed here must match the 'msgid' in the .po file.
+        if a key is not found for a given locale it falls back to the default locale (en)
         """
         current_locale = _current_locale.get()
         trans = self._get_translator(current_locale)
@@ -79,4 +79,5 @@ i18n = I18nService()
 
 
 def _(key: str, **kwargs) -> str:
+    """Lookup message by key and format it."""
     return i18n._(key, **kwargs)
