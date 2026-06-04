@@ -147,9 +147,13 @@ class CrossSheetRowSumCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"Sum of row counts for sheets {child_message} does not"
-                    f" equal {self.master_sheet} rows ({master_data_count})."
-                    f" The difference is {missing_rows}.",
+                    message=self._(
+                        "cross_sheet_row_sum_check_validator.row_sum",
+                        child_sheets=child_message,
+                        master_sheet=self.master_sheet,
+                        count_master=master_data_count,
+                        count_diff=missing_rows,
+                    ),
                     severity=SeverityLevel.ERROR,
                 )
             )

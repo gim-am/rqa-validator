@@ -67,3 +67,103 @@ msgstr "There are questions listed in '{cleaning_log_sheet}' that were not found
 #: src/rqa_validator/validators/data_validators/cleaning_log_to_clean_validator.py:459
 msgid "cleaning_log_to_clean_validator.differences"
 msgstr "There were {count} differences found in the '{cleaning_log_sheet}' sheet that were not reflected in the '{clean_data_sheet}' sheet. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/column_data_type_validator.py:217
+msgid "column_data_type_validator.numeric_check"
+msgstr "{count} non-numeric values were found in '{sheet}' when numeric values were expected. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/column_data_type_validator.py:274
+msgid "column_data_type_validator.temporal_check"
+msgstr "{count} non-temporal values were found in '{sheet}' when temporal values were expected. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/consent_check_validator.py:155
+msgid "consent_check_validator.consent_check"
+msgstr "There were {count} row/s in '{sheet}'that did not provide consent. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/cross_sheet_id_check_validator.py:130
+msgid "cross_sheet_id_check_validator.id_check"
+msgstr "{count} Id values for sheet'{child_sheet}' and column '{child_column}' were not found in sheet '{master_sheet}' column '{master_column}'. Check output for details."
+
+#: src/rqa_validator/validators/data_validators/cross_sheet_row_sum_check_validator.py:150
+msgid "cross_sheet_row_sum_check_validator.row_sum"
+msgstr "Sum of row counts for sheets {child_sheets} does not equal {master_sheet} rows ({count_master}). The difference is {count_diff}."
+
+#: src/rqa_validator/validators/data_validators/nan_check_validator.py:147
+msgid "nan_check_validator.nan_values"
+msgstr "There were {count} possible invalid values found. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/pii_validator.py:135
+msgid "pii_validator.pii_data"
+msgstr "The sheet '{sheet}' contains possible pii data. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/pii_validator.py:148
+msgid "pii_validator.pii_columns"
+msgstr "Possible Pii columns were found. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/raw_clean_cleaning_log_validator.py:346
+msgid "raw_clean_cleaning_log_validator.cleaning_log_diff"
+msgstr "There were {count} differences found in the '{clean_sheet}' sheet that were not reflected in the '{log_sheet}' sheet. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/raw_clean_cleaning_log_validator.py:363
+msgid "raw_clean_cleaning_log_validator.diff_no_cleaning_log"
+msgstr "There were {count} differences found between the '{clean_sheet}' sheet and the '{raw_sheet}' but no cleaning log was found. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/survey_choices_validator.py:368
+msgid "survey_choices_validator.invalid_values"
+msgstr "There were {count} values found in the {data_sheet} sheet that were not reflected in the {choices_sheet} sheet. Check the output for details."
+
+#: src/rqa_validator/validators/data_validators/unique_column_validator.py:72
+msgid "unique_column_validator.non_unique"
+msgstr "For column  '{column}' in sheet '{sheet}' {count} non unique values were found. This column should contain unique values. Check the output for details."
+
+#: src/rqa_validator/validators/schema_helpers.py:25
+msgid "schema_helpers.get_schema_id_column"
+msgstr "Expected 1 ID column for sheet '{sheet}' but {count} were found."
+
+#: src/rqa_validator/validators/schema_helpers.py:64
+msgid "schema_helpers.get_schema_process_value"
+msgstr "process_values were expected for column '{column}' for process '{process}' but were not found."
+
+#: src/rqa_validator/validators/schema_helpers.py:132
+msgid "schema_helpers.get_schema_loaded_column"
+msgstr "A column for '{column}' in schema sheet '{sheet}' is expected."
+
+#: src/rqa_validator/validators/schema_helpers.py:192
+msgid "schema_helpers.get_schema_loaded_sheet"
+msgstr "A schema sheet for '{sheet}' is expected."
+
+#: src/rqa_validator/validators/data_helpers.py:30
+msgid "data_helpers.get_data_loaded_sheet"
+msgstr "An excel sheet for '{sheet}' is expected."
+
+#: src/rqa_validator/validators/data_helpers.py:88
+msgid "data_helpers.get_data_loaded_column"
+msgstr "A column for '{column}' in sheet '{sheet}' is expected."
+
+#: src/rqa_validator/validators/data_helpers.py:156
+msgid "data_helpers.get_data_sheet_id.no_unique"
+msgstr "A unique id column for '{sheet}' is expected but none were found."
+
+#: src/rqa_validator/validators/data_helpers.py:166
+msgid "data_helpers.get_data_sheet_id.count_invalid"
+msgstr "{count} unique columns for schema sheet '{sheet}' and matching excel sheet '{excel_sheet}' was expected."
+
+#: src/rqa_validator/validators/data_helpers.py:240
+msgid "data_helpers.get_matching_columns"
+msgstr "Expected 1 linkable ID column for sheets '{source_sheet}' and '{target_sheet}' but {count} were found."
+
+#: src/rqa_validator/validators/data_helpers.py:284
+msgid "data_helpers.get_matching_columns_alt"
+msgstr "Expected 1 linkable ID column for sheets '{source_sheet}' and '{target_sheet}' but '{source_sheet}' had {source_count} and '{target_sheet}' had {target_count}."
+
+#: src/rqa_validator/validators/data_helpers.py:419
+msgid "data_helpers.get_id_linking_columns.no_columns"
+msgstr "Unable to find possible linkable ID columns for sheet '{source_sheet}' and sheet '{target_sheet}'"
+
+#: src/rqa_validator/validators/data_helpers.py:456
+msgid "data_helpers.get_id_linking_columns.linked_columns"
+msgstr "Column '{source_column}' in sheet '{source_sheet}' was linked to column '{target_column}' in sheet '{target_sheet}'."
+
+#: src/rqa_validator/validators/data_helpers.py:510
+msgid "data_helpers.check_id_column_overlap"
+msgstr "Column '{source_column}' in sheet '{source_sheet}' had an overlap of {overlap} with column '{target_column}' in sheet '{target_sheet}'. A minimum of {min_overlap} is required for these columns to be considered linkable id columns."

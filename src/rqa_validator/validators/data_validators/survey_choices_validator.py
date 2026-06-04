@@ -365,10 +365,12 @@ class SurveyChoicesCheck(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} values found in"
-                            f" the {sheet} sheet that were not reflected in the"
-                            f" {self.choices_sheet} sheet. "
-                            "Check the output for details.",
+                            message=self._(
+                                "survey_choices_validator.invalid_values",
+                                count=difference_df.height,
+                                data_sheet=sheet,
+                                choices_sheet=self.choices_sheet,
+                            ),
                             severity=SeverityLevel.ERROR,
                             sheet_name=sheet,
                             details=difference_df.to_dict(as_series=False),

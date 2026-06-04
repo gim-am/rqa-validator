@@ -3,6 +3,7 @@ from ..common.schema_matching import get_matching_unique_columns
 from ..loaders.base import DataColumnMap, DataSheetMap
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base_dataset import BaseDatasetSchema
+from ..utils.il8n import _
 from ..validators.schema_helpers import get_schema_loaded_sheet
 from .base import SeverityLevel, ValidationResult
 
@@ -27,7 +28,7 @@ def get_data_loaded_sheet(
     if loaded_sheet is None:
         result = ValidationResult(
             rule=rule,
-            message=f"An excel sheet for '{sheet_name}' is expected.",
+            message=_("data_helpers.get_data_loaded_sheet", sheet=sheet_name),
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
@@ -84,8 +85,11 @@ def get_data_loaded_column(
     if column is None:
         result = ValidationResult(
             rule=rule,
-            message=f"A column for '{column_name}' in sheet '{loaded_sheet.data_sheet_name}'"
-            " is expected.",
+            message=_(
+                "data_helpers.get_data_loaded_column",
+                column=column_name,
+                sheet=loaded_sheet.data_sheet_name,
+            ),
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
             column_name=column_name,
@@ -149,16 +153,21 @@ def get_data_sheet_id(
     if not ids:
         result = ValidationResult(
             rule=rule,
-            message=f"A unique id column for '{loaded_sheet.data_sheet_name}' is"
-            " expected but none were found.",
+            message=_(
+                "data_helpers.get_data_sheet_id.no_unique", sheet=loaded_sheet.data_sheet_name
+            ),
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.data_sheet_name,
         )
     elif len(ids) != expected:
         result = ValidationResult(
             rule=rule,
-            message=f"A single unique column for schema sheet '{sheet_name}' and matching"
-            f" excel sheet '{loaded_sheet.data_sheet_name}' was expected.",
+            message=_(
+                "data_helpers.get_data_sheet_id.count_invalid",
+                count=expected,
+                sheet=sheet_name,
+                excel_sheet=loaded_sheet.data_sheet_name,
+            ),
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
@@ -227,8 +236,12 @@ def get_matching_columns(
     if len(matching_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 linkable ID column for sheets '{source_sheet}' and "
-            f" '{target_sheet}' but {len(matching_columns)} were found.",
+            message=_(
+                "data_helpers.get_matching_columns",
+                source_sheet=source_sheet,
+                target_sheet=target_sheet,
+                count=len(matching_columns),
+            ),
             severity=SeverityLevel.ERROR,
         )
 
@@ -267,9 +280,13 @@ def get_matching_columns_alt(
     if len(source_columns) != 1 or len(target_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 linkable ID column for sheets '{source_sheet}' and"
-            f" '{target_sheet}' but '{source_sheet}' had {len(source_columns)} and"
-            f" '{target_sheet}' had {len(target_columns)}.",
+            message=_(
+                "data_helpers.get_matching_columns_alt",
+                source_sheet=source_sheet,
+                target_sheet=target_sheet,
+                source_count=len(source_columns),
+                target_count=len(target_columns),
+            ),
             severity=SeverityLevel.ERROR,
         )
     if result is None:
@@ -397,8 +414,11 @@ def get_id_linking_columns(
                 results.append(
                     ValidationResult(
                         rule=rule,
-                        message=f"Unable to find possible linkable ID columns for sheet"
-                        f" '{source_sheet}' and sheet '{target_sheet}'",
+                        message=_(
+                            "data_helpers.get_id_linking_columns.no_columns",
+                            source_sheet=source_sheet,
+                            target_sheet=target_sheet,
+                        ),
                         severity=SeverityLevel.ERROR,
                     )
                 )
@@ -431,9 +451,13 @@ def get_id_linking_columns(
     results.append(
         ValidationResult(
             rule=rule,
-            message=f"Column '{source_sheet_id_column.data_column_name}'"
-            f" in sheet '{source_sheet}' was linked to"
-            f" column '{target_sheet_id_column.data_column_name}' in sheet '{target_sheet}'.",
+            message=_(
+                "data_helpers.get_id_linking_columns.linked_columns",
+                source_sheet=source_sheet,
+                source_column=source_sheet_id_column.data_column_name,
+                target_sheet=target_sheet,
+                target_column=target_sheet_id_column.data_column_name,
+            ),
             severity=SeverityLevel.INFO,
         )
     )
@@ -480,10 +504,15 @@ def check_id_column_overlap(
     if overlap < min_overlap:
         result = ValidationResult(
             rule=rule,
-            message=f"Column '{source_column}' in sheet '{source_sheet}' had an overlap of"
-            f" {overlap} with column '{target_column}' in sheet '{target_sheet}'. A minimum of"
-            f" {min_overlap} is required for these columns to be considered linkable"
-            " id columns.",
+            message=_(
+                "data_helpers.check_id_column_overlap",
+                source_sheet=source_sheet,
+                source_column=source_column,
+                target_sheet=target_sheet,
+                target_column=target_column,
+                overlap=overlap,
+                min_overlap=min_overlap,
+            ),
             severity=SeverityLevel.ERROR,
         )
 

@@ -181,6 +181,10 @@ class RawToCleanToLog(BaseValidator):
 
             # TRANSFORMATION: transforms data in preparation for comparison
             # dataframe of actual changes made
+            clean_log_id_columns_filter = (
+                pl.col(clean_log_id_columns.data_column_name).cast(pl.Utf8).str.strip_chars(" ")
+            )
+
             modified_rows_df = (
                 data_loaded_sheets[self.cleaning_log_sheet]
                 .data.filter(
@@ -191,18 +195,8 @@ class RawToCleanToLog(BaseValidator):
                     .is_in(schema_change_type_values.values)
                 )
                 .filter(
-                    (
-                        pl.col(clean_log_id_columns.data_column_name)
-                        .cast(pl.Utf8)
-                        .str.strip_chars(" ")
-                        .is_not_null()
-                    )
-                    & (
-                        pl.col(clean_log_id_columns.data_column_name)
-                        .cast(pl.Utf8)
-                        .str.strip_chars(" ")
-                        != ""
-                    )
+                    (clean_log_id_columns_filter.is_not_null())
+                    & (clean_log_id_columns_filter != "")
                 )
                 .select(
                     [
@@ -349,10 +343,12 @@ class RawToCleanToLog(BaseValidator):
                     results.append(
                         ValidationResult(
                             rule=self.name,
-                            message=f"There were {difference_df.height} differences"
-                            f" found in the '{self.clean_data_sheet}' sheet that"
-                            f" were not reflected in the '{self.cleaning_log_sheet}'"
-                            " sheet. Check the output for details.",
+                            message=self._(
+                                "raw_clean_cleaning_log_validator.cleaning_log_diff",
+                                count=difference_df.height,
+                                clean_sheet=self.clean_data_sheet,
+                                log_sheet=self.cleaning_log_sheet,
+                            ),
                             severity=SeverityLevel.ERROR,
                             sheet_name=self.cleaning_log_sheet,
                             details=difference_df.to_dict(as_series=False),
@@ -362,10 +358,12 @@ class RawToCleanToLog(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {difference_raw_to_clean_df.height}"
-                        f" differences found between the '{self.clean_data_sheet}'"
-                        f" sheet and the '{self.raw_data_sheet}' but no cleaning"
-                        " log was found. Check the output for details.",
+                        message=self._(
+                            "raw_clean_cleaning_log_validator.diff_no_cleaning_log",
+                            count=difference_raw_to_clean_df.height,
+                            clean_sheet=self.clean_data_sheet,
+                            raw_sheet=self.cleaning_log_sheet,
+                        ),
                         severity=SeverityLevel.ERROR,
                         sheet_name=self.cleaning_log_sheet,
                         details=difference_raw_to_clean_df.to_dict(as_series=False),

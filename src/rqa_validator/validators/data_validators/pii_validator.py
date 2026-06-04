@@ -132,8 +132,7 @@ class PiiDataCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"The sheet '{sheet.data_sheet_name}' contains possible"
-                        " pii data. Check the output for details.",
+                        message=self._("pii_validator.pii_data", sheet=sheet.data_sheet_name),
                         severity=SeverityLevel.ERROR,
                         sheet_name=sheet.data_sheet_name,
                         details=final_df.to_dict(),
@@ -143,7 +142,7 @@ class PiiDataCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message="Possible Pii columns were found. Check the output for details.",
+                    message=self._("pii_validator.pii_columns"),
                     severity=SeverityLevel.WARNING,
                     details=pl.DataFrame(match_records).to_dict(as_series=False),
                 )

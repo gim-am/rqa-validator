@@ -144,8 +144,9 @@ class NaNDataCheck(BaseValidator):
             results.append(
                 ValidationResult(
                     rule=self.name,
-                    message=f"There were {output_difference_df.height} possible invalid"
-                    " values found. Check the output for details.",
+                    message=self._(
+                        "nan_check_validator.nan_values", count=output_difference_df.height
+                    ),
                     severity=SeverityLevel.ERROR,
                     details=output_difference_df.to_dict(as_series=False),
                 )

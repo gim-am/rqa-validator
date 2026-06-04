@@ -152,10 +152,11 @@ class ConsentCheck(BaseValidator):
                 results.append(
                     ValidationResult(
                         rule=self.name,
-                        message=f"There were {clean_data_filter_df.height} row/s in"
-                        f" '{data_loaded_sheets[self.clean_data_sheet].data_sheet_name}'"
-                        " that did not provide consent."
-                        " Check the output for details.",
+                        message=self._(
+                            "consent_check_validator.consent_check",
+                            count=clean_data_filter_df.height,
+                            sheet=data_loaded_sheets[self.clean_data_sheet].data_sheet_name,
+                        ),
                         severity=SeverityLevel.ERROR,
                         details=clean_data_filter_df.select(
                             [clean_data_id_column.data_column_name]

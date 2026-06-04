@@ -8,6 +8,8 @@ wheels/
 .coverage
 .ruff_cache
 .pytest_cache
+# localisation files
+*.pot
 
 # Virtual environments
 .venv

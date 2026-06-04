@@ -1,5 +1,6 @@
 from ..models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
 from ..models.base_dataset import BaseDatasetSchema
+from ..utils.il8n import _
 from ..validators.base import SeverityLevel, ValidationResult
 
 
@@ -21,8 +22,11 @@ def get_schema_id_column(
     if len(matching_columns) != 1:
         result = ValidationResult(
             rule=rule,
-            message=f"Expected 1 ID column for sheet '{source.standard_name}' but"
-            f" {len(matching_columns)} were found.",
+            message=_(
+                "schema_helpers.get_schema_id_column",
+                sheet=source.standard_name,
+                count=len(matching_columns),
+            ),
             severity=SeverityLevel.ERROR,
         )
     if result is None:
@@ -57,8 +61,11 @@ def get_schema_process_value(
     if process_values is None or len(process_values.values) == 0:
         result = ValidationResult(
             rule=rule,
-            message="process_values were expected for column "
-            f" '{schema_column.standard_name}' for process '{process_value_map_name}'.",
+            message=_(
+                "schema_helpers.get_schema_process_value",
+                column=schema_column.standard_name,
+                process=process_value_map_name,
+            ),
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
             column_name=schema_column.standard_name,
@@ -122,8 +129,11 @@ def get_schema_loaded_column(
         # should not actually happen as its already mapped above.
         result = ValidationResult(
             rule=rule,
-            message=f"A column for '{column}' in schema sheet "
-            f" '{loaded_sheet.standard_name}' is expected.",
+            message=_(
+                "schema_helpers.get_schema_loaded_column",
+                column=column,
+                sheet=loaded_sheet.standard_name,
+            ),
             severity=SeverityLevel.ERROR,
             sheet_name=loaded_sheet.standard_name,
             column_name=column,
@@ -179,7 +189,7 @@ def get_schema_loaded_sheet(
     if not schema_sheet:
         result = ValidationResult(
             rule=rule,
-            message=f"A schema sheet for '{sheet_name}' is expected.",
+            message=_("schema_helpers.get_schema_loaded_sheet", sheet=sheet_name),
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
