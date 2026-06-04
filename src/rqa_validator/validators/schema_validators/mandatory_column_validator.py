@@ -35,7 +35,7 @@ class MandatoryColumns(BaseValidator):
         )
 
         if result:
-            # this is done to consolidate results 
+            # this is done to consolidate results
             # TODO: do this for all get_data_loaded_sheets/columns calls?
             sheet_df = pl.DataFrame(
                 [

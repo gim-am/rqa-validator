@@ -1,14 +1,15 @@
-from rqa_validator.common.list_matching import (
+from ..common.list_matching import (
     FuzzMatch,
     duplicate_list_items,
+    filter_list,
     lower_list_items,
     match_list_to_list,
     unique_list,
 )
-from rqa_validator.config import settings
-from rqa_validator.loaders.base import DataColumnMap
-from rqa_validator.models.base import SchemaSheetMap
-from rqa_validator.validators.base import SeverityLevel, ValidationResult
+from ..config import settings
+from ..loaders.base import DataColumnMap
+from ..models.base import SchemaSheetMap
+from ..validators.base import SeverityLevel, ValidationResult
 
 
 class BaseExcelLoader:
@@ -36,8 +37,11 @@ class BaseExcelLoader:
         matches: list[DataColumnMap] = []
 
         for column in schema_sheet.mandatory_columns:
+            excel_columns_filtered = filter_list(
+                excel_columns, settings.IGNORE_COLUMNS_FOR_VALIDATION
+            )
             literal_matches, fuzzy_matched_values = match_list_to_list(
-                column.combine(), excel_columns, fuzzy_match=settings.FUZZY_MATCH_SHEETS
+                column.combine(), excel_columns_filtered, fuzzy_match=settings.FUZZY_MATCH_SHEETS
             )
 
             if literal_matches:
@@ -69,10 +73,13 @@ class BaseExcelLoader:
                     )
                 continue
             elif fuzzy_matched_values:
-                if len(fuzzy_matched_values[0].matches) == 1:
+                fuzzy_matched_columns = unique_list(
+                    [key for item in fuzzy_matched_values for key in item.matches]
+                )
+                if len(fuzzy_matched_columns) == 1:
                     matches.append(
                         DataColumnMap(
-                            data_column_name=list(fuzzy_matched_values[0].matches)[0],
+                            data_column_name=fuzzy_matched_columns[0],
                             schema_column_name=column.standard_name,
                         )
                     )

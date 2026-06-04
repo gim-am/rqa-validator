@@ -4,8 +4,7 @@ from typing import Any
 
 from fastexcel import CalamineCellError
 
-from rqa_validator.config import settings
-
+from ..config import settings
 from ..loaders.base import DataSheetMap
 from ..loaders.excel_loader import ExcelLoader, ExcelLoaderData
 from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema

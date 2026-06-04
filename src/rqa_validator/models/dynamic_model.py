@@ -3,9 +3,8 @@ from typing import Any
 
 import polars as pl
 
-from rqa_validator.config import settings
-
 from ..common.list_matching import filter_list, get_set_overlap, match_list, unique_list
+from ..config import settings
 from ..loaders.base_excel_loader import BaseExcelLoader
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base import (

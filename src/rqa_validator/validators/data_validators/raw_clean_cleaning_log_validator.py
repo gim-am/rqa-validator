@@ -252,11 +252,10 @@ class RawToCleanToLog(BaseValidator):
             difference_expressions.append(difference_expression)
 
         # add the difference flags to the dataframe and checl for changes
-        comparison_df = joined_df.with_columns(difference_expressions)
         has_any_change = pl.any_horizontal(
             [pl.col(f"is_{question}_changed") for question in clean_data_columns]
         )
-        changes_only = comparison_df.filter(has_any_change)
+        changes_only = joined_df.with_columns(difference_expressions).filter(has_any_change)
 
         # The unpivot process transforms the data from a wide format into a long format.
         #  By running this separately on the new values, old values, and change flags,
