@@ -1,5 +1,5 @@
 # Prototype for validation of RQA datasets
-**Aim**: To develop a hopefully flexible framework that can handle different datasets with non-standard sheet and column names that have different validation rules.
+**Aim**: To develop a hopefully flexible framework that can perform validations on different datasets with non-standard sheet and column names that have different validation rules.
 
 ## Suported Datasets
 
@@ -7,10 +7,17 @@
 - other datasets through dynamic schema generation - see below.
 
 ## Project structure
-**models**: contains the schemas for the datasets. This includes the dynamic schema generator for datasets that are not yet standardised. \
-**loaders**: handles the loading of excel files and some of the matching to the schema.\
-**orchestrator**: runs all the steps of the validation process.\
-**validators**: contains logic for all the validation rules.
+This project is designed to allow for the validation of different excel based datasets through the construction of a dataset schema and specifying a list of validation rules that are required to be run.
+
+For standardised datasets, a schema can be specified in **models**. Each of the dataset model classes also lists what validation rules (and their required paramaters) are to be run for the dataset. This folder also includes a dynamic schema generator for datasets that are not yet standardised in **dynamic_model.py**. 
+
+Only excel files are currently supported. **loaders**: handles the loading of excel files and some of the sheet and column matching to the schema.
+
+The individual validation rules are specified in **validators**. These are modular and can be run for any dataset as long as the relevant paramters are set. The **helpers** files contain commonly used functions for getting the required sheets and columns from the schema or data. 
+
+**orchestrator** runs all the steps of the validation process. If integrating this into other projects then using the `run_all` function in the `ValidationPipeline` class would be recommended.
+
+**locales** contains translation files for validation messages. See [translations](locales/translations.md) for contributing to this.
 
 ```bash
 ├── dataset_requirements.md
@@ -21,6 +28,10 @@
 │       ├── pytest.yml
 │       └── ruff.yml
 ├── .gitignore
+├── locales
+│   ├── en
+│   ├── fr
+│   └── translations.md
 ├── main.py
 ├── pyproject.toml
 ├── .python-version
@@ -49,6 +60,7 @@
 │   │   │   ├── __init__.py
 │   │   │   └── validation_pipeline.py
 │   │   ├── utils
+│   │   │   ├── il8n.py
 │   │   │   ├── __init__.py
 │   │   │   └── logging.py
 │   │   └── validators
@@ -80,7 +92,7 @@
 └── uv.lock
 ```
 
-## Setup
+## Environment Setup
 1. Clone the repository
 2. Install dependencies with [uv](https://github.com/astral-sh/uv):
 ```bash
@@ -103,12 +115,12 @@ Note: if incorporating this into another project its probably easier to use the 
 ```python
 from src.rqa_validator.orchestrator.validation_pipeline import ValidationPipeline
 
-results = ValidationPipeline().run_all(filepath=Step3DatasetPath, dataset_type="other") #or jmmi
+results = ValidationPipeline().run_all(filepath=Step3DatasetPath, dataset_type="other", locale='en') #or jmmi
 ```
 
 5. Any validation errors will be output to the terminal.
 
-### Running process
+### Running the process
 The process follows these steps for the provided dataset:
 1. Validate the schema. This process checks:    
     - for duplicate sheet names and column names within sheets to prevent matching excel data to multiple schema sheets/columns.
@@ -278,3 +290,4 @@ For some datasets, these rules could be run multiple times for different sheets.
 ## TODO: 
 - add other datasets and validation rules
 - logging and error reporting.
+- add translations
