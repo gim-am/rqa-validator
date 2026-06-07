@@ -8,5 +8,14 @@ jobs:
       - uses: astral-sh/ruff-action@v3
       - run: ruff format .
       - run: ruff check . --fix
+      - run: ruff format .
+      - uses: EndBug/add-and-commit@v10
+        with: 
+          default_author: ${{ vars.ACTIONS_DEFAULT_AUTHOR }}
+          author_email: ${{ secrets.ACTIONS_AUTHOR_EMAIL }}
+          committer_name: Code Format Bot
+          message: 'Auto-format code'
+          push: true
+
       
       
