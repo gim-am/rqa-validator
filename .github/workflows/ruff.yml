@@ -3,6 +3,8 @@ on: [ push, pull_request ]
 jobs:
   ruff:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
@@ -12,8 +14,9 @@ jobs:
       - uses: EndBug/add-and-commit@v10
         with: 
           default_author: github_actions
-          author_email: ${{ secrets.ACTIONS_AUTHOR_EMAIL }}
-          committer_name: Code Format Bot
+          # author_email: ${{ secrets.ACTIONS_AUTHOR_EMAIL }}
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
           message: 'Auto-format code'
           push: true
 
