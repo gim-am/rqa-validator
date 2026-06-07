@@ -105,16 +105,6 @@ class ValidationPipeline:
             if excel_results:
                 all_results.extend(excel_results)
 
-            if not data:
-                all_results.append(
-                    ValidationResult(
-                        rule="ExcelFileLoading",
-                        message=f"No matching sheets found in excel file '{filepath}'.",
-                        severity=SeverityLevel.ADMIN_ERROR,
-                    )
-                )
-                return all_results
-
             all_results.append(
                 ValidationResult(
                     rule="ExcelFileLoading",

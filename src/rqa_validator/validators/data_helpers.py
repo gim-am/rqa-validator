@@ -1,3 +1,5 @@
+import polars as pl
+
 from ..common.list_matching import get_set_overlap, match_sheet_columns, match_sheet_columns_ids
 from ..common.schema_matching import get_matching_unique_columns
 from ..loaders.base import DataColumnMap, DataSheetMap
@@ -37,7 +39,7 @@ def get_data_loaded_sheet(
 
 
 def get_data_loaded_sheets(
-    data: ExcelLoaderData, sheet_names: list[str], rule: str
+    data: ExcelLoaderData, sheet_names: list[str], rule: str, check_data: bool = True
 ) -> tuple[list[ValidationResult], dict[str, DataSheetMap]]:
     """Gets a list of data loaded sheets if they exist.
 
@@ -59,6 +61,10 @@ def get_data_loaded_sheets(
         if result is None:
             assert loaded_sheet is not None
             loaded_sheets[sheet] = loaded_sheet
+            if check_data:
+                result = check_data_exists(loaded_sheet.data, sheet, rule)
+                if result is not None:
+                    results.append(result)
         else:
             results.append(result)
 
@@ -517,3 +523,25 @@ def check_id_column_overlap(
         )
 
     return result
+
+
+def check_data_exists(data: pl.DataFrame, sheet: str, rule: str) -> ValidationResult | None:
+    """Checks that a dataframe has data.
+
+    Args:
+        data (pl.DataFrame): Dataframe to check
+        sheet (str): Name of excel sheet
+        rule (str): validation Rule
+
+    Returns:
+        ValidationResult | None: error if no data in dataframe, else None
+    """
+    if data.height < 1:
+        return ValidationResult(
+            rule=rule,
+            message=_(
+                "data_helpers.check_data_exists",
+                sheet=sheet,
+            ),
+            severity=SeverityLevel.ERROR,
+        )
