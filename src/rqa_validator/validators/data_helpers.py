@@ -11,7 +11,7 @@ from .base import SeverityLevel, ValidationResult
 
 
 def get_data_loaded_sheet(
-    data: ExcelLoaderData, sheet_name: str, rule: str
+    data: ExcelLoaderData, sheet_name: str, rule: str, check_data: bool = True
 ) -> tuple[ValidationResult | None, DataSheetMap | None]:
     """Gets a data loaded sheet if it exists.
 
@@ -19,6 +19,7 @@ def get_data_loaded_sheet(
         data (ExcelLoaderData): excel data
         sheet_name (str): name of sheet to load
         rule (str): validation rule
+        check_data (bool): check to see if the dataframe actually contains data
 
     Returns:
         tuple[ValidationResult | None, SheetMap | None]: validation error if any,
@@ -34,6 +35,8 @@ def get_data_loaded_sheet(
             severity=SeverityLevel.ERROR,
             sheet_name=sheet_name,
         )
+    elif check_data:
+        result = check_data_exists(loaded_sheet.data, sheet_name, rule)
 
     return result, loaded_sheet
 
@@ -47,6 +50,7 @@ def get_data_loaded_sheets(
         data (ExcelLoaderData): excel data
         sheet_names (List[str]): list of sheet names to load
         rule (str): validation rule
+        check_data (bool): check to see if the dataframe actually contains data
 
     Returns:
         tuple[List[ValidationResult], dict[str, SheetMap]]:  list of validation errors
@@ -56,15 +60,11 @@ def get_data_loaded_sheets(
     loaded_sheets: dict[str, DataSheetMap] = {}
 
     for sheet in sheet_names:
-        result, loaded_sheet = get_data_loaded_sheet(data, sheet, rule)
+        result, loaded_sheet = get_data_loaded_sheet(data, sheet, rule, check_data)
 
         if result is None:
             assert loaded_sheet is not None
             loaded_sheets[sheet] = loaded_sheet
-            if check_data:
-                result = check_data_exists(loaded_sheet.data, sheet, rule)
-                if result is not None:
-                    results.append(result)
         else:
             results.append(result)
 
@@ -526,7 +526,7 @@ def check_id_column_overlap(
 
 
 def check_data_exists(data: pl.DataFrame, sheet: str, rule: str) -> ValidationResult | None:
-    """Checks that a dataframe has data.
+    """Checks that a dataframe has data. If no data is found an error is returned.
 
     Args:
         data (pl.DataFrame): Dataframe to check

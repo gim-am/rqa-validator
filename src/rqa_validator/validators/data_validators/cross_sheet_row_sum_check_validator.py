@@ -91,7 +91,7 @@ class CrossSheetRowSumCheck(BaseValidator):
             and self.master_deletion_log is not None
         ):
             result, master_filter_loaded_sheet = get_data_loaded_sheet(
-                data, self.master_deletion_log, rule=self.name
+                data, self.master_deletion_log, rule=self.name, check_data=False
             )
             if result is not None:
                 results.append(result)
