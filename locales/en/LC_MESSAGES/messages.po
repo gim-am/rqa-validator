@@ -179,3 +179,35 @@ msgstr "Loading of the excel file '{file}' encountered an error. Check that the 
 #: src/rqa_validator/orchestrator/validation_pipeline.py:184
 msgid "validation_pipeline.passed"
 msgstr "Validator '{name}' passed."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:64
+msgid "base_excel_loader.match_excel_columns_to_schema.multiple_literal_matches"
+msgstr "The schema sheet '{sheet}' column '{column}' had {count} matches to columns. There should be only 1. Check the schema."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:94
+msgid "base_excel_loader.match_excel_columns_to_schema.fuzzy_match"
+msgstr "The schema sheet '{sheet}' column '{column}' was fuzzy matched with an excel column. If this was an accurate match consider renaming this column in the future. See output for details."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:111
+msgid "base_excel_loader.match_excel_columns_to_schema.fuzzy_match_miltiple"
+msgstr "The schema sheet '{sheet}' column '{column}' was fuzzy matched with {count} excel columns so was not matched as this would cause validation errors. See output for details."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:172
+msgid "base_excel_loader.match_excel_sheet_to_schema.fuzzy_match"
+msgstr "Excel sheet '{excel_sheet}' was fuzzy matched with schema sheet {schema_sheet}. If this was an accurate match consider renaming this excel sheet to {schema_sheet} in the future."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:189
+msgid "base_excel_loader.match_excel_sheet_to_schema.fuzzy_match_multiple"
+msgstr "Excel sheet '{excel_sheet}' was fuzzy matched with {count} schema sheets so was not matched. This will lead to validation errors about excel sheets not being found. See output for details."
+
+#: src/rqa_validator/loaders/base_excel_loader.py:225
+msgid "base_excel_loader.check_duplicate_columns"
+msgstr "Excel sheet '{excel_sheet}' has {count} duplicate column names and could not be loaded. Check the output for details."
+
+#: src/rqa_validator/loaders/excel_loader.py:166
+msgid "excel_loader._load_excel_sheet.sheet_not_found"
+msgstr "The schema sheet {sheet} was not found."
+
+#: src/rqa_validator/loaders/excel_loader.py:214
+msgid "excel_loader.load.multiple_matches"
+msgstr "Excel sheet {sheet} was matched with multiple schema sheets. This will lead to validation errors about excel sheets not being found."

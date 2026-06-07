@@ -9,6 +9,7 @@ from ..common.list_matching import (
 from ..config import settings
 from ..loaders.base import DataColumnMap
 from ..models.base import SchemaSheetMap
+from ..utils.il8n import _
 from ..validators.base import SeverityLevel, ValidationResult
 
 
@@ -61,10 +62,12 @@ class BaseExcelLoader:
                     results.append(
                         ValidationResult(
                             rule="Match excel column to schema",
-                            message=f"The schema sheet '{schema_sheet.standard_name}' column"
-                            f" '{column.standard_name}' had {len(literal_matches)}"
-                            " matches to columns. There should be only 1."
-                            "Check the schema.",
+                            message=self._(
+                                "base_excel_loader.match_excel_columns_to_schema.multiple_literal_matches",
+                                sheet=schema_sheet.standard_name,
+                                column=column.standard_name,
+                                count=len(literal_matches),
+                            ),
                             severity=SeverityLevel.ERROR,
                             sheet_name=schema_sheet.standard_name,
                             column_name=column.standard_name,
@@ -87,10 +90,11 @@ class BaseExcelLoader:
                     results.append(
                         ValidationResult(
                             rule="Match excel column to schema",
-                            message=f"The schema sheet '{schema_sheet.standard_name}'"
-                            f" column '{column.standard_name}' was fuzzy matched"
-                            " with an excel column.  If this was an accurate match consider"
-                            " renaming this column in the future. See output for details.",
+                            message=self._(
+                                "base_excel_loader.match_excel_columns_to_schema.fuzzy_match",
+                                sheet=schema_sheet.standard_name,
+                                column=column.standard_name,
+                            ),
                             severity=SeverityLevel.INFO,
                             sheet_name=schema_sheet.standard_name,
                             column_name=column.standard_name,
@@ -101,11 +105,12 @@ class BaseExcelLoader:
                     results.append(
                         ValidationResult(
                             rule="Match excel column to schema",
-                            message=f"The schema sheet '{schema_sheet.standard_name}'"
-                            f" column '{column.standard_name}' was fuzzy matched"
-                            " with multiple excel columns so was not matched as"
-                            " this would cause validation errors."
-                            " See output for details.",
+                            message=self._(
+                                "base_excel_loader.match_excel_columns_to_schema.fuzzy_match_miltiple",
+                                sheet=schema_sheet.standard_name,
+                                column=column.standard_name,
+                                count=len(fuzzy_matched_columns),
+                            ),
                             severity=SeverityLevel.ERROR,
                             sheet_name=schema_sheet.standard_name,
                             column_name=column.standard_name,
@@ -158,9 +163,11 @@ class BaseExcelLoader:
                 results.append(
                     ValidationResult(
                         rule="Match excel sheeet to schema",
-                        message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"
-                        f" schema sheet {sheet_name}. If this was an accurate match consider"
-                        f" renaming this excel sheet to {sheet_name} in the future.",
+                        message=self._(
+                            "base_excel_loader.match_excel_sheet_to_schema.fuzzy_match",
+                            excel_sheet=excel_sheet_name,
+                            schema_sheet=sheet_name,
+                        ),
                         severity=SeverityLevel.INFO,
                         sheet_name=excel_sheet_name,
                         details={excel_sheet_name: fuzzy_matched_values_schema},
@@ -172,10 +179,11 @@ class BaseExcelLoader:
                 results.append(
                     ValidationResult(
                         rule="Match excel sheeet to schema",
-                        message=f"Excel sheet '{excel_sheet_name}' was fuzzy matched with"
-                        " multiple schema sheets so was not matched. This will lead"
-                        " to validation errors about excel sheets not being found."
-                        " See output for details.",
+                        message=self._(
+                            "base_excel_loader.match_excel_sheet_to_schema.fuzzy_match_multiple",
+                            excel_sheet=excel_sheet_name,
+                            count=len(fuzzy_matched_values_schema.keys()),
+                        ),
                         severity=SeverityLevel.INFO,
                         sheet_name=excel_sheet_name,
                         details={excel_sheet_name: fuzzy_matched_values_schema},
@@ -205,10 +213,16 @@ class BaseExcelLoader:
         if duplicate_columns:
             result = ValidationResult(
                 rule="Excel Sheet Loading",
-                message=f"Excel sheet '{sheet_name}' has {len(duplicate_columns)} duplicate column"
-                " names and could not be loaded. Check the output for details.",
+                message=self._(
+                    "base_excel_loader.check_duplicate_columns",
+                    excel_sheet=sheet_name,
+                    count=len(duplicate_columns),
+                ),
                 severity=SeverityLevel.ERROR,
                 sheet_name=sheet_name,
                 details={"duplicate_columns": unique_list(duplicate_columns)},
             )
             return result
+
+    def _(self, key: str, **kwargs):
+        return _(key, **kwargs)

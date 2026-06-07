@@ -163,7 +163,10 @@ class ExcelLoader(BaseExcelLoader):
                     results.append(
                         ValidationResult(
                             rule="Getting Schema Sheet",
-                            message=f"The schema sheet {l_mapped_name} was not found.",
+                            message=self._(
+                                "excel_loader._load_excel_sheet.sheet_not_found",
+                                sheet=l_mapped_name,
+                            ),
                             severity=SeverityLevel.ERROR,
                             sheet_name=l_mapped_name,
                         )
@@ -209,9 +212,9 @@ class ExcelLoader(BaseExcelLoader):
                 results.append(
                     ValidationResult(
                         rule="Match excel sheeet to schema",
-                        message=f"Excel sheet {excel_sheet_name} was fuzzy matched with\
-                            multiple schema sheets. This will lead to validation errors\
-                                about excel sheets not being found.",
+                        message=self._(
+                            "excel_loader.load.multiple_matches", sheet=excel_sheet_name
+                        ),
                         severity=SeverityLevel.INFO,
                         sheet_name=excel_sheet_name,
                     )
