@@ -1,0 +1,57 @@
+name: Build Translation Files
+on: 
+  push:
+    branches: [master]
+
+jobs:
+  check_files_updated:
+    runs-on: ubuntu-latest
+    outputs:
+      rebuild: ${{ steps.check_rebuild_required.outputs.rebuild }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2  
+      
+      - id: check_rebuild_required
+        run: |
+          # Get list of changed .po files excluding .mo files
+          CHANGED_PO_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.po$' || true)
+          
+          if [ -n "$CHANGED_PO_FILES" ]; then
+            echo "rebuild=true" >> $GITHUB_OUTPUT
+          else
+            echo "rebuild=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash 
+
+  rebuild_translation_files:
+    runs-on: ubuntu-latest
+    needs: [check_files_updated]
+    if: needs.check_files_updated.outputs.rebuild == 'true'
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+      
+      - name: Make File Executable
+        run: chmod +x ./locales/update_files.sh
+        
+      - name: Rebuild translation Files
+        run: ./locales/update_files.sh
+      
+      - uses: EndBug/add-and-commit@v10
+        with:
+          default_author: github_actions
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          message: 'rebuild translation files'
+          push: true
+          add: '*.mo' 
