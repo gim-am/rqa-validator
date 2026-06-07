@@ -36,7 +36,4 @@ class DataSheetMap:
         self.column_map.append(column_map)
 
     def set_column_map(self, column_maps: list[DataColumnMap]):
-        self.column_map = column_maps   
-
-
-
+        self.column_map = column_maps
