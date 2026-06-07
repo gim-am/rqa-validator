@@ -1,10 +1,14 @@
 name: Ruff
-on: [ push, pull_request ]
+on: 
+  push:
+    branches: ["master"]
 jobs:
   ruff:
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       issues: write
+      workflows: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
