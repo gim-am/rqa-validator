@@ -9,7 +9,6 @@ from ..loaders.base_excel_loader import BaseExcelLoader
 from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base import (
     DynamicSheetMatching,
-    ProcessValueMap,
     SchemaColumnMap,
     SchemaSheetMap,
 )
@@ -34,6 +33,7 @@ from ..validators.schema_validators import (
     MissingSheetsCheck,
     UnexpectedSheetsCheck,
 )
+from .defaults import CONSENT_COLUMN, create_base_cleaning_log_sheet
 
 
 class DynamicDataset(BaseDataset):
@@ -330,13 +330,19 @@ class DynamicDataset(BaseDataset):
         results: list[ValidationResult] = []
         for sheet, details in self.sheet_matching.items():
             if details.classification in ["log", "clean", "raw"]:
-                new_sheet = self.schema.add_loaded_sheet(
-                    SchemaSheetMap(
-                        standard_name=sheet,
-                        parent_sheet=details.parent_sheet,
-                        parent_linking_column=details.parent_linking_column,
+                if details.log_type == "cleaning":
+                    new_sheet = create_base_cleaning_log_sheet(sheet, None, None)
+                    new_sheet.parent_linking_column = details.parent_linking_column
+                    new_sheet.parent_sheet = details.parent_sheet
+                    self.schema.add_loaded_sheet(new_sheet)
+                else:
+                    new_sheet = self.schema.add_loaded_sheet(
+                        SchemaSheetMap(
+                            standard_name=sheet,
+                            parent_sheet=details.parent_sheet,
+                            parent_linking_column=details.parent_linking_column,
+                        )
                     )
-                )
 
                 # in the rare case that a child sheet only has at most one record for each parent
                 # then the id column found could accidentially also be the foreign key column
@@ -358,16 +364,7 @@ class DynamicDataset(BaseDataset):
                     consent_sheet = sheet
                     self.schema.add_mandatory_column_to_sheet(
                         sheet,
-                        SchemaColumnMap(
-                            standard_name="consent",
-                            alternate_names=[],
-                            process_values=[
-                                ProcessValueMap(
-                                    process_name="consent_check_validation",
-                                    values=["yes", "oui"],
-                                )
-                            ],
-                        ),
+                        CONSENT_COLUMN,
                     )
                 if details.log_type == "cleaning":
                     # parts of this may seem repetitive
@@ -398,32 +395,6 @@ class DynamicDataset(BaseDataset):
                                 sheet, SchemaColumnMap(standard_name=column)
                             )
 
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet, SchemaColumnMap(standard_name="old_value")
-                    )
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet, SchemaColumnMap(standard_name="new_value")
-                    )
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet,
-                        SchemaColumnMap(
-                            standard_name="question",
-                            alternate_names=["question_name", "variable", "question.name"],
-                        ),
-                    )
-                    self.schema.add_mandatory_column_to_sheet(
-                        sheet,
-                        SchemaColumnMap(
-                            standard_name="change_type",
-                            alternate_names=["changed"],
-                            process_values=[
-                                ProcessValueMap(
-                                    process_name="cleaning_log_validation",
-                                    values=["yes", "change_response", "blank_response"],
-                                )
-                            ],
-                        ),
-                    )
                 new_sheet = self.schema.get_schema_loaded_sheet(sheet)
                 assert new_sheet is not None  # added above
                 result, column_map = loader.match_excel_columns_to_schema(

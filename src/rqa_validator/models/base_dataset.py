@@ -2,8 +2,19 @@ import itertools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from ..models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
+from ..models.base import SchemaColumnMap, SchemaSheetMap
 from ..validators.base import BaseValidator
+from .defaults import (
+    CHOICES_SHEET,
+    CONSENT_COLUMN,
+    DELETION_SHEET,
+    ENUMERATOR_PERFORMANCE_SHEET,
+    READ_ME_SHEET,
+    SAMPLING_INFO_SHEET,
+    SURVEY_SHEET,
+    VARIABLE_TRACKER_SHEET,
+    create_base_cleaning_log_sheet,
+)
 
 
 @dataclass
@@ -67,7 +78,7 @@ class BaseDatasetSchema:
                 return sheet
         return None
 
-    def add_loaded_sheet(self, sheet: SchemaSheetMap) -> SchemaSheetMap | None:
+    def add_loaded_sheet(self, sheet: SchemaSheetMap) -> SchemaSheetMap:
         """Adds a sheet to schema_loaded_sheets if the standard_name provided
         does not exist.
 
@@ -83,9 +94,11 @@ class BaseDatasetSchema:
          Returns:
             SheetMapping | None: the new sheet or None
         """
-        if self.get_schema_loaded_sheet(sheet.standard_name) is None:
+
+        loaded_sheet = self.get_schema_loaded_sheet(sheet.standard_name)
+        if loaded_sheet is None:
             self.schema_loaded_sheets.append(sheet)
-            return sheet
+        return sheet
 
     def add_unloaded_sheet(self, sheet: SchemaSheetMap) -> SchemaSheetMap | None:
         """Adds a sheet to schema_unloaded_sheets if the standard_name provided
@@ -143,15 +156,7 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                         alternate_names=["_uuid"],
                         is_unique=True,
                     ),
-                    SchemaColumnMap(
-                        standard_name="consent",
-                        alternate_names=[],
-                        process_values=[
-                            ProcessValueMap(
-                                process_name="consent_check_validation", values=["yes", "oui"]
-                            )
-                        ],
-                    ),
+                    CONSENT_COLUMN,
                 ],
             ),
             SchemaSheetMap(
@@ -171,80 +176,18 @@ class DefaultDatasetSchema(BaseDatasetSchema):
                     #                alternate_names=["person_id"])
                 ],
             ),
-            SchemaSheetMap(
-                standard_name="deletion_log",
-                alternate_names=[],
-                mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="uuid", alternate_names=["_uuid"], is_unique=True
-                    ),
-                ],
-            ),
-            SchemaSheetMap(
-                standard_name="cleaning_log",
-                alternate_names=[],
-                mandatory_columns=[
-                    SchemaColumnMap(standard_name="uuid", alternate_names=["_uuid"]),
-                    SchemaColumnMap(standard_name="old_value"),
-                    SchemaColumnMap(standard_name="new_value"),
-                    SchemaColumnMap(
-                        standard_name="change_type",
-                        alternate_names=["changed"],
-                        process_values=[
-                            ProcessValueMap(
-                                process_name="cleaning_log_validation",
-                                values=["yes", "change_response", "blank_response"],
-                            )
-                        ],
-                    ),
-                    SchemaColumnMap(
-                        standard_name="question", alternate_names=["variable", "question.name"]
-                    ),
-                ],
-            ),
-            SchemaSheetMap(
-                standard_name="survey",
-                alternate_names=["kobo_survey"],
-                mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="type",
-                        process_values=[
-                            ProcessValueMap(
-                                process_name="data_type_numeric_check",
-                                values=["integer", "decimal"],
-                            ),
-                            ProcessValueMap(
-                                process_name="data_type_temporal_check", values=["date"]
-                            ),
-                        ],
-                    ),
-                    SchemaColumnMap(standard_name="name"),
-                ],
-            ),
-            SchemaSheetMap(
-                standard_name="choices",
-                alternate_names=["kobo_choices"],
-                mandatory_columns=[
-                    SchemaColumnMap(standard_name="list_name"),
-                    SchemaColumnMap(standard_name="name"),
-                ],
-            ),
+            DELETION_SHEET,
+            create_base_cleaning_log_sheet("cleaning_log", "uuid", ["_uuid"]),
+            SURVEY_SHEET,
+            CHOICES_SHEET,
         ]
     )
     schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
-            SchemaSheetMap(standard_name="read_me", alternate_names=["read.me", "read me"]),
-            SchemaSheetMap(
-                standard_name="sampling_info",
-                alternate_names=["sampling_info"],
-                required=False,
-            ),
-            SchemaSheetMap(standard_name="variable_tracker", alternate_names=["variable_tracker"]),
-            SchemaSheetMap(
-                standard_name="enumerator_performance_log",
-                alternate_names=["enumerator_performance_log"],
-                required=False,
-            ),
+            READ_ME_SHEET,
+            SAMPLING_INFO_SHEET,
+            VARIABLE_TRACKER_SHEET,
+            ENUMERATOR_PERFORMANCE_SHEET,
         ]
     )
 
@@ -253,56 +196,17 @@ class DefaultDatasetSchema(BaseDatasetSchema):
 class DynamicDatasetSchema(BaseDatasetSchema):
     schema_loaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
-            SchemaSheetMap(
-                standard_name="deletion_log",
-                alternate_names=[],
-                mandatory_columns=[
-                    SchemaColumnMap(standard_name="uuid", alternate_names=["_uuid"], is_unique=True)
-                ],
-            ),
-            SchemaSheetMap(
-                standard_name="survey",
-                alternate_names=["kobo_survey"],
-                mandatory_columns=[
-                    SchemaColumnMap(
-                        standard_name="type",
-                        process_values=[
-                            ProcessValueMap(
-                                process_name="data_type_numeric_check",
-                                values=["integer", "decimal"],
-                            ),
-                            ProcessValueMap(
-                                process_name="data_type_temporal_check", values=["date"]
-                            ),
-                        ],
-                    ),
-                    SchemaColumnMap(standard_name="name"),
-                ],
-            ),
-            SchemaSheetMap(
-                standard_name="choices",
-                alternate_names=["kobo_choices"],
-                mandatory_columns=[
-                    SchemaColumnMap(standard_name="list_name"),
-                    SchemaColumnMap(standard_name="name"),
-                ],
-            ),
+            DELETION_SHEET,
+            SURVEY_SHEET,
+            CHOICES_SHEET,
         ]
     )
     schema_unloaded_sheets: list[SchemaSheetMap] = field(
         default_factory=lambda: [
-            SchemaSheetMap(standard_name="read_me", alternate_names=["read.me", "read me"]),
-            SchemaSheetMap(
-                standard_name="sampling_info",
-                alternate_names=["sampling_info"],
-                required=False,
-            ),
-            SchemaSheetMap(standard_name="variable_tracker", alternate_names=["variable_tracker"]),
-            SchemaSheetMap(
-                standard_name="enumerator_performance_log",
-                alternate_names=["enumerator_performance_log"],
-                required=False,
-            ),
+            READ_ME_SHEET,
+            SAMPLING_INFO_SHEET,
+            VARIABLE_TRACKER_SHEET,
+            ENUMERATOR_PERFORMANCE_SHEET,
         ]
     )
 
