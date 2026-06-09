@@ -20,11 +20,6 @@ class ExcelLoaderData:
     unexpected_sheets: list[str] = field(default_factory=list)
     hidden_sheets: list[str] = field(default_factory=list)
 
-    def add_column_map_to_loaded_sheet(self, sheet: str, column_map: DataColumnMap):
-        loaded_sheet = self.get_loaded_sheet(sheet)
-        if loaded_sheet is not None:
-            loaded_sheet.add_column_map(column_map)
-
     def set_column_map_for_loaded_sheet(self, sheet: str, column_maps: list[DataColumnMap]):
         loaded_sheet = self.get_loaded_sheet(sheet)
         if loaded_sheet is not None:

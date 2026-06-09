@@ -128,24 +128,6 @@ def duplicate_list_items(source: list[Any]) -> list[Any]:
     return [item for item in set(source) if item_counts[item] > 1]
 
 
-def combine_lists(
-    source: list[Any] | None, target: list[Any] | None, return_unique_list: bool = True
-):
-    """Combines two lists returning a unique list"""
-    combined_list: list[Any] = []
-
-    if source is not None:
-        combined_list.extend(source)
-
-    if target is not None:
-        combined_list.extend(target)
-
-    if return_unique_list:
-        return unique_list(combined_list)
-    else:
-        return combined_list
-
-
 def add_to_list(item: str | None, target: list[Any] | None) -> list[Any]:
     """Adds item and list. returns a unique list."""
     combined_list: list[Any] = []
@@ -157,11 +139,6 @@ def add_to_list(item: str | None, target: list[Any] | None) -> list[Any]:
         combined_list.extend(target)
 
     return unique_list(combined_list)
-
-
-def is_in_list(item: str, target: list[Any]) -> bool:
-    """Checks if an item is in a list"""
-    return item in target
 
 
 def match_sheet_columns(

@@ -4,37 +4,6 @@ from ..utils.il8n import _
 from ..validators.base import SeverityLevel, ValidationResult
 
 
-def get_schema_id_column(
-    source: SchemaSheetMap, rule: str
-) -> tuple[ValidationResult | None, list[SchemaColumnMap]]:
-    """Gets unique columns for a schema sheet
-
-    Args:
-        source (SchemaSheetMap): Sheet to search
-        rule (str): validation rule
-
-    Returns:
-        tuple[ValidationResult | None, List[SchemaColumnMap]]: validation results,
-            unique columns if found
-    """
-    result = None
-    matching_columns = source.get_unique_columns()
-    if len(matching_columns) != 1:
-        result = ValidationResult(
-            rule=rule,
-            message=_(
-                "schema_helpers.get_schema_id_column",
-                sheet=source.standard_name,
-                count=len(matching_columns),
-            ),
-            severity=SeverityLevel.ERROR,
-        )
-    if result is None:
-        assert matching_columns is not None
-
-    return result, matching_columns
-
-
 def get_schema_process_value(
     process_value_map_name: str,
     sheet_name: str,

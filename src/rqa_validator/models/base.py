@@ -3,7 +3,7 @@ from typing import Any
 
 import polars as pl
 
-from ..common.list_matching import add_to_list, is_in_list, unique_list
+from ..common.list_matching import add_to_list, unique_list
 
 
 @dataclass
@@ -71,10 +71,6 @@ class SchemaSheetMap:
         """Gets all the columns markes as unique"""
         return [column for column in self.mandatory_columns if column.is_unique]
 
-    def matches(self, sheet_name: str) -> bool:
-        """checks if a sheet name is part of the schema (including alternate names)"""
-        return is_in_list(sheet_name, self.combine_sheet_names())
-
     def combine_column_names(self, return_unique_list: bool = True) -> list[str]:
         """Creates a unique list of mandatory and unique column name options
 
@@ -122,24 +118,3 @@ class SchemaSheetMap:
         if self.get_column(column.standard_name) is None:
             self.mandatory_columns.append(column)
             return column
-
-    def add_alternate_name_to_column(self, column_name: str, name: str):
-        """adds a new alternate name to a mandatory column.
-
-        Args:
-            column_name (str): standard name of existing mandatory column
-            name (str): name to add to alternate names list
-        """
-        for idx, column in enumerate(self.mandatory_columns):
-            if column.standard_name == column_name:
-                self.mandatory_columns[idx].alternate_names = add_to_list(
-                    name, self.mandatory_columns[idx].alternate_names
-                )
-
-    def add_alternate_name_to_sheet(self, name: str):
-        """Adds a new alternate name to the sheet
-
-        Args:
-            name (str): name to add to alternate names list
-        """
-        self.alternate_names = add_to_list(name, self.alternate_names)

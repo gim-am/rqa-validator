@@ -43,10 +43,6 @@ class BaseDatasetSchema:
         """Gets all the standard names for all the loaded sheets."""
         return [item.standard_name for item in self.schema_loaded_sheets]
 
-    def get_unloaded_sheets_standard_names(self) -> list[str]:
-        """Gets all the standard names for all the unloaded sheets."""
-        return [item.standard_name for item in self.schema_unloaded_sheets]
-
     def get_all_sheet_names(self) -> list[str]:
         """Gets all sheet names, including alternate names
 
