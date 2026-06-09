@@ -78,17 +78,7 @@ def lower_list_items(source: list[str]):
 
 def match_list(source: list[Any] | set[Any], target: list[Any] | set[Any]) -> list[Any]:
     """Returns items in source that are in target"""
-    if isinstance(source, list):
-        set_source: set[Any] = set[Any](source)
-    else:
-        set_source = source
-
-    if isinstance(target, list):
-        set_target: set[Any] = set[Any](target)
-    else:
-        set_target = target
-
-    return [item for item in set_source if item in set_target]
+    return [item for item in source if item in target]
 
 
 def unique_list(source: list[Any]) -> list[Any]:
@@ -98,11 +88,7 @@ def unique_list(source: list[Any]) -> list[Any]:
 
 def filter_list(source: list[Any], target: list[Any] | set[Any]) -> list[Any]:
     """Returns items in source that are not in target"""
-    if isinstance(target, list):
-        set_target: set[Any] = set[Any](target)
-    else:
-        set_target = target
-    return [item for item in source if item not in set_target]
+    return [item for item in source if item not in target]
 
 
 def filter_list_with_tolerance(
@@ -142,7 +128,9 @@ def duplicate_list_items(source: list[Any]) -> list[Any]:
     return [item for item in set(source) if item_counts[item] > 1]
 
 
-def combine_lists(source: list[Any] | None, target: list[Any] | None, unique_list: bool = True):
+def combine_lists(
+    source: list[Any] | None, target: list[Any] | None, return_unique_list: bool = True
+):
     """Combines two lists returning a unique list"""
     combined_list: list[Any] = []
 
@@ -152,8 +140,8 @@ def combine_lists(source: list[Any] | None, target: list[Any] | None, unique_lis
     if target is not None:
         combined_list.extend(target)
 
-    if unique_list:
-        return list(set(combined_list))
+    if return_unique_list:
+        return unique_list(combined_list)
     else:
         return combined_list
 
@@ -168,7 +156,7 @@ def add_to_list(item: str | None, target: list[Any] | None) -> list[Any]:
     if target is not None:
         combined_list.extend(target)
 
-    return list(set(combined_list))
+    return unique_list(combined_list)
 
 
 def is_in_list(item: str, target: list[Any]) -> bool:
