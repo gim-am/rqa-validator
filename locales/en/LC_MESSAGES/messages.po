@@ -174,7 +174,7 @@ msgstr "The sheet {sheet} contained no data so the validation rule could not be 
 
 #: src/rqa_validator/orchestrator/validation_pipeline.py:131
 msgid "validation_pipeline.calamine_cell_error"
-msgstr "Loading of the excel file '{file}' encountered an error. Check that the excel sheets do not contain empty columns without headers: {error}"
+msgstr "Loading of the excel file '{file}' encountered an error. Check that the excel sheets do not contain empty columns without headers: {error}."
 
 #: src/rqa_validator/orchestrator/validation_pipeline.py:184
 msgid "validation_pipeline.passed"
