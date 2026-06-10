@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..common.list_matching import duplicate_list_items
+from ..common.list_matching import duplicate_list_items, lower_list_items
 from ..validators.base import SeverityLevel, ValidationResult
 from .base import SchemaColumnMap, SchemaSheetMap
 from .base_dataset_schemas import BaseDatasetSchema
@@ -69,32 +69,32 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         schema (BaseDatasetSchema): schema to process
     """
 
-    def expand_list(str_list: list[Any]):
-        existing_items = set(str_list)
+    # def expand_list(str_list: list[Any]):
+    #     existing_items = set(str_list)
 
-        for item in str_list:
-            if "_" in item:
-                base_name = item.replace("_", " ")
+    #     for item in str_list:
+    #         if "_" in item:
+    #             base_name = item.replace("_", " ")
 
-                if base_name not in existing_items:
-                    str_list.append(base_name)
+    #             if base_name not in existing_items:
+    #                 str_list.append(base_name)
 
-                base_name = item.replace(" ", "")
+    #             base_name = item.replace(" ", "")
 
-                if base_name not in existing_items:
-                    str_list.append(base_name)
+    #             if base_name not in existing_items:
+    #                 str_list.append(base_name)
 
-            if " " in item:
-                base_name = item.replace(" ", "")
+    #         if " " in item:
+    #             base_name = item.replace(" ", "")
 
-                if base_name not in existing_items:
-                    str_list.append(base_name)
+    #             if base_name not in existing_items:
+    #                 str_list.append(base_name)
 
-    def lowercase_list_strs(str_list: list[Any]) -> None:
-        str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
+    # def lowercase_list_strs(str_list: list[Any]) -> None:
+    #     str_list[:] = [item.lower() if isinstance(item, str) else item for item in str_list]
 
     def process_list(str_list: list[Any]):
-        lowercase_list_strs(str_list)
+        lower_list_items(str_list)
         # expand_list(str_list)
 
     def process_sheet_mapping(sheet: SchemaSheetMap) -> None:
@@ -110,8 +110,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
         if column is None:
             return
 
-        if column.standard_name:
-            column.standard_name = column.standard_name.lower()
+        column.standard_name = column.standard_name.lower()
 
         process_list(column.alternate_names)
 

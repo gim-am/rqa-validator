@@ -56,7 +56,6 @@ class SchemaSheetMap:
     parent_sheet: str | None = None
     parent_linking_column: str | None = None
     allow_fuzzy_matching: bool = True
-
     required: bool = True
 
     def get_column(self, column_name: str) -> SchemaColumnMap | None:

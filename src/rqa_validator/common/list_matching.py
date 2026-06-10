@@ -76,17 +76,17 @@ def lower_list_items(source: list[str]):
     return list(map(str.lower, source))
 
 
-def match_list(source: list[Any] | set[Any], target: list[Any] | set[Any]) -> list[Any]:
+def match_list(source: list[str] | set[str], target: list[str] | set[str]) -> list[str]:
     """Returns items in source that are in target"""
     return [item for item in source if item in target]
 
 
-def unique_list(source: list[Any]) -> list[Any]:
+def unique_list(source: list[str]) -> list[str]:
     """returns a list of unique items"""
     return list(set(source))
 
 
-def filter_list(source: list[Any], target: list[Any] | set[Any]) -> list[Any]:
+def filter_list(source: list[str], target: list[str] | set[str]) -> list[str]:
     """Returns items in source that are not in target"""
     return [item for item in source if item not in target]
 
@@ -115,7 +115,7 @@ def filter_list_with_tolerance(
     return [item for item in target if _check_length_tolerance(source, item)]
 
 
-def duplicate_list_items(source: list[Any]) -> list[Any]:
+def duplicate_list_items(source: list[str]) -> list[str]:
     """returns a list of items that appear in a list multiple times.
 
     Args:
@@ -128,9 +128,9 @@ def duplicate_list_items(source: list[Any]) -> list[Any]:
     return [item for item in set(source) if item_counts[item] > 1]
 
 
-def add_to_list(item: str | None, target: list[Any] | None) -> list[Any]:
+def add_to_list(item: str | None, target: list[str] | None) -> list[str]:
     """Adds item and list. returns a unique list."""
-    combined_list: list[Any] = []
+    combined_list: list[str] = []
 
     if item is not None:
         combined_list.append(item)
