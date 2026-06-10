@@ -2,8 +2,8 @@ import polars as pl
 
 from ...common.expression_builder import normalise_list
 from ...common.list_matching import filter_loaded_sheets, match_list
-from ...loaders.excel_loader import ExcelLoaderData
-from ...models.base_dataset import BaseDatasetSchema
+from ...loaders.base_excel_loader import ExcelLoaderData
+from ...models.base_dataset_schemas import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import (
     get_data_loaded_columns,

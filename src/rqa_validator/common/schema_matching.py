@@ -1,5 +1,5 @@
 from ..loaders.base import DataColumnMap, DataSheetMap
-from ..models.base_dataset import BaseDatasetSchema
+from ..models.base_dataset_schemas import BaseDatasetSchema
 
 
 def get_matching_unique_columns(

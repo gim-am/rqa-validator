@@ -1,6 +1,7 @@
+from locales.il8n import _
+
 from ..models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
-from ..models.base_dataset import BaseDatasetSchema
-from ..utils.il8n import _
+from ..models.base_dataset_schemas import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
 
 

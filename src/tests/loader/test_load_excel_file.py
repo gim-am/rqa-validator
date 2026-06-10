@@ -9,7 +9,7 @@ from tests.helpers import error_counter
 
 @pytest.fixture
 def valid_schema():
-    return JMMIDataset.get_schema()
+    return JMMIDataset().schema
 
 
 @pytest.fixture

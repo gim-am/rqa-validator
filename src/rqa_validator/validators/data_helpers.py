@@ -1,11 +1,12 @@
 import polars as pl
 
+from locales.il8n import _
+
 from ..common.list_matching import get_set_overlap, match_sheet_columns, match_sheet_columns_ids
 from ..common.schema_matching import get_matching_unique_columns
 from ..loaders.base import DataColumnMap, DataSheetMap
-from ..loaders.excel_loader import ExcelLoaderData
-from ..models.base_dataset import BaseDatasetSchema
-from ..utils.il8n import _
+from ..loaders.base_excel_loader import ExcelLoaderData
+from ..models.base_dataset_schemas import BaseDatasetSchema
 from ..validators.schema_helpers import get_schema_loaded_sheet
 from .base import SeverityLevel, ValidationResult
 

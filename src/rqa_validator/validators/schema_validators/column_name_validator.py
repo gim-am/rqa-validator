@@ -1,6 +1,6 @@
 import polars as pl
 
-from ...loaders.excel_loader import ExcelLoaderData
+from ...loaders.base_excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ...validators.options import COLUMN_NAME_VALIDATOR_PATTERN
 

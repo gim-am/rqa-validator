@@ -3,8 +3,8 @@ import polars as pl
 from ...common.list_matching import filter_list, match_list_to_list
 from ...config import settings
 from ...loaders.base import DataColumnMap
-from ...loaders.excel_loader import ExcelLoaderData
-from ...models.base_dataset import BaseDatasetSchema
+from ...loaders.base_excel_loader import ExcelLoaderData
+from ...models.base_dataset_schemas import BaseDatasetSchema
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..data_helpers import get_data_sheet_id
 from ..options import PII_PATTERN_EXPRESSIONS, PII_PATTERNS, get_pii_columns

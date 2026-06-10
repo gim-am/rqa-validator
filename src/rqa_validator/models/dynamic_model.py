@@ -6,13 +6,12 @@ import polars as pl
 from ..common.list_matching import filter_list, get_set_overlap, match_list, unique_list
 from ..config import settings
 from ..loaders.base_excel_loader import BaseExcelLoader
-from ..loaders.excel_loader import ExcelLoaderData
 from ..models.base import (
     DynamicSheetMatching,
     SchemaColumnMap,
     SchemaSheetMap,
 )
-from ..models.base_dataset import BaseDataset, DynamicDatasetSchema
+from ..models.base_dataset import BaseDataset
 from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 from ..validators.data_validators import (
     CleaningLogToClean,
@@ -33,6 +32,7 @@ from ..validators.schema_validators import (
     MissingSheetsCheck,
     UnexpectedSheetsCheck,
 )
+from .base_dataset_schemas import DynamicDatasetSchema
 from .defaults import CONSENT_COLUMN, create_base_cleaning_log_sheet
 
 
@@ -63,17 +63,18 @@ class DynamicDataset(BaseDataset):
 
     """
 
-    def __init__(self, data: ExcelLoaderData) -> None:
-        self.data: ExcelLoaderData = data
-        self.schema: DynamicDatasetSchema = DynamicDatasetSchema()
+    def __init__(
+        self,
+    ) -> None:
+        self.schema = self.get_schema()
         self.sheet_matching: dict[str, DynamicSheetMatching] = {}
-        self.validators: list[BaseValidator] = []
 
     def get_schema(self, *args, **kwargs) -> DynamicDatasetSchema:
-        return self.schema
+        # only use for init
+        return DynamicDatasetSchema()
 
     def get_validators(self, *args, **kwargs) -> list[BaseValidator]:
-        return self.validators
+        return super().get_validators()
 
     def process_data(self) -> list[ValidationResult]:
         """Runs all the steps."""
@@ -405,6 +406,8 @@ class DynamicDataset(BaseDataset):
 
                 if column_map:
                     self.data.set_column_map_for_loaded_sheet(sheet, column_map)
+
+            self.lower_schema(self.schema)
         return results, consent_sheet
 
     def match_data(self) -> list[ValidationResult]:

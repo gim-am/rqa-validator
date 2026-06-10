@@ -1,7 +1,7 @@
 import polars as pl
 
 from ...common.list_matching import duplicate_list_items
-from ...loaders.excel_loader import ExcelLoaderData
+from ...loaders.base_excel_loader import ExcelLoaderData
 from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 

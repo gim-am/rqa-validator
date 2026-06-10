@@ -1,3 +1,7 @@
+from dataclasses import dataclass, field
+
+from locales.il8n import _
+
 from ..common.list_matching import (
     FuzzMatch,
     duplicate_list_items,
@@ -7,9 +11,8 @@ from ..common.list_matching import (
     unique_list,
 )
 from ..config import settings
-from ..loaders.base import DataColumnMap
+from ..loaders.base import DataColumnMap, DataSheetMap
 from ..models.base import SchemaSheetMap
-from ..utils.il8n import _
 from ..validators.base import SeverityLevel, ValidationResult
 
 
@@ -37,10 +40,9 @@ class BaseExcelLoader:
         results: list[ValidationResult] = []
         matches: list[DataColumnMap] = []
 
+        excel_columns_filtered = filter_list(excel_columns, settings.IGNORE_COLUMNS_FOR_VALIDATION)
+
         for column in schema_sheet.mandatory_columns:
-            excel_columns_filtered = filter_list(
-                excel_columns, settings.IGNORE_COLUMNS_FOR_VALIDATION
-            )
             literal_matches, fuzzy_matched_values = match_list_to_list(
                 column.combine(), excel_columns_filtered, fuzzy_match=settings.FUZZY_MATCH_SHEETS
             )
@@ -226,3 +228,82 @@ class BaseExcelLoader:
 
     def _(self, key: str, **kwargs):
         return _(key, **kwargs)
+
+
+@dataclass
+class ExcelLoaderData:
+    loaded_sheets: list[DataSheetMap] = field(default_factory=list)
+    unloaded_sheets: list[DataSheetMap] = field(default_factory=list)
+    unexpected_sheets: list[str] = field(default_factory=list)
+    hidden_sheets: list[str] = field(default_factory=list)
+
+    def set_column_map_for_loaded_sheet(self, sheet: str, column_maps: list[DataColumnMap]):
+        loaded_sheet = self.get_loaded_sheet(sheet)
+        if loaded_sheet is not None:
+            loaded_sheet.set_column_map(column_maps)
+
+    def get_loaded_sheet_mapped_names(self) -> list[str]:
+        """Gets all the standard names for the loaded excel sheets
+
+        Returns:
+            List[str]: List of sheet names.
+        """
+        return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
+
+    def get_loaded_sheet_excel_names(self) -> list[str]:
+        """Gets all the excel names for the loaded excel sheets
+        that were mapped to the origianl schema.
+
+        This is related to dynamic model creation process.
+
+        Returns:
+            List[str]: List of sheet names.
+        """
+        return [sheet.data_sheet_name for sheet in self.loaded_sheets if not sheet.auto_loaded]
+
+    def get_unloaded_sheet_mapped_names(self) -> list[str]:
+        """Gets all the standard names for the loaded excel sheets
+
+        Returns:
+            List[str]: List of sheet names.
+        """
+        return [sheet.schema_sheet_name for sheet in self.unloaded_sheets]
+
+    def get_loaded_sheet(self, sheet_name: str) -> DataSheetMap | None:
+        """Gets the details and data for a loaded sheet if it exists.
+
+        Args:
+            sheet_name (str): Excel sheets to be searched for
+
+        Returns:
+            SheetMap | None: Loaded sheet details if found
+        """
+        for sheet in self.loaded_sheets:
+            if sheet.schema_sheet_name == sheet_name:
+                return sheet
+        return None
+
+    def remove_loaded_sheet(self, sheet_name: str):
+        for idx, sheet in enumerate(self.loaded_sheets):
+            if sheet.schema_sheet_name == sheet_name:
+                self.loaded_sheets.pop(idx)
+
+    def get_sheet_matches(self, sheet_name: str) -> list[DataSheetMap]:
+        """Gets all the sheets matched with a given schema_name.
+
+        Args:
+            sheet_name (str): Excel sheets to be searched for
+
+        Returns:
+            List[SheetMap] | None: Loaded sheet details if found
+        """
+        sheets: list[DataSheetMap] = []
+        for sheet in self.loaded_sheets:
+            if sheet.schema_sheet_name == sheet_name:
+                sheets.append(sheet)
+
+        for sheet in self.unloaded_sheets:
+            if sheet.schema_sheet_name == sheet_name:
+                sheets.append(sheet)
+
+        return sheets

@@ -1,13 +1,13 @@
 import polars as pl
 import pytest
 
-from rqa_validator.loaders.excel_loader import (
+from rqa_validator.loaders.base import (
     DataColumnMap,
     DataSheetMap,
-    ExcelLoaderData,
 )
+from rqa_validator.loaders.base_excel_loader import ExcelLoaderData
 from rqa_validator.models.base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
-from rqa_validator.models.base_dataset import BaseDatasetSchema
+from rqa_validator.models.base_dataset_schemas import BaseDatasetSchema
 from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.column_data_type_validator import (
     DataTypeCheck,

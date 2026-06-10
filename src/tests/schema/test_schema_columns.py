@@ -1,7 +1,7 @@
 import pytest
 
 from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
-from rqa_validator.models.base_dataset import BaseDatasetSchema
+from rqa_validator.models.base_dataset_schemas import BaseDatasetSchema
 from rqa_validator.models.preprocess import validate_schema
 from tests.helpers import do_basic_checks
 

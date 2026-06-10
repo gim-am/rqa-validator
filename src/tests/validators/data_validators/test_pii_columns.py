@@ -2,9 +2,10 @@ import polars as pl
 import pytest
 
 from rqa_validator.loaders.base import DataColumnMap
-from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
+from rqa_validator.loaders.base_excel_loader import ExcelLoaderData
+from rqa_validator.loaders.excel_loader import DataSheetMap
 from rqa_validator.models.base import SchemaColumnMap, SchemaSheetMap
-from rqa_validator.models.base_dataset import BaseDatasetSchema
+from rqa_validator.models.base_dataset_schemas import BaseDatasetSchema
 from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.data_validators.pii_validator import PiiDataCheck
 from tests.helpers import do_basic_checks, error_counter

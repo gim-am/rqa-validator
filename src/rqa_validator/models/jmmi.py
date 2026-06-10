@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from ..models.base_dataset import BaseDataset, BaseDatasetSchema, DefaultDatasetSchema
+from ..models.base_dataset import BaseDataset
 from ..validators.base import BaseValidator
 from ..validators.data_validators import (
     CleaningLogToClean,
@@ -22,6 +22,7 @@ from ..validators.schema_validators import (
     UnexpectedSheetsCheck,
 )
 from .base import SchemaColumnMap, SchemaSheetMap
+from .default_dataset_schema import DefaultDatasetSchema
 
 
 @dataclass()
@@ -43,30 +44,36 @@ class JMMIDatasetSchema(DefaultDatasetSchema):
 
 # schema and validation rules for jmmi dataset.
 class JMMIDataset(BaseDataset):
-    @staticmethod
-    def get_schema(*args, **kwargs) -> JMMIDatasetSchema:
+    def __init__(self) -> None:
+        self.schema = self.get_schema()
+        self.validators = self.get_validators(self.schema)
+
+    def get_schema(self, *args, **kwargs):
         schema = JMMIDatasetSchema()
+        self.lower_schema(schema)
         return schema
 
-    @staticmethod
-    def get_validators(schema: BaseDatasetSchema, *args, **kwargs) -> list[BaseValidator]:
+    def get_validators(self, *args, **kwargs) -> list[BaseValidator]:
         return [
-            MissingSheetsCheck(schema=schema),
+            MissingSheetsCheck(schema=self.schema),
             UnexpectedSheetsCheck(),
             DuplicateSheetMatches(),
-            MandatoryColumns(schema=schema),
-            UniqueColumn(schema=schema),
-            PiiDataCheck(schema=schema),
-            CrossSheetRowSumCheck(schema=schema),
-            CrossSheetIdCheck(schema=schema),
+            MandatoryColumns(schema=self.schema),
+            UniqueColumn(schema=self.schema),
+            PiiDataCheck(schema=self.schema),
+            CrossSheetRowSumCheck(schema=self.schema),
+            CrossSheetIdCheck(schema=self.schema),
             CrossSheetIdCheck(
-                schema=schema, master_sheet="clean_data", child_sheets=["cleaning_log"]
+                schema=self.schema, master_sheet="clean_data", child_sheets=["cleaning_log"]
             ),
-            CleaningLogToClean(schema=schema),
-            RawToCleanToLog(schema=schema),
-            NaNDataCheck(schema=schema),
-            ConsentCheck(schema=schema),
+            CleaningLogToClean(schema=self.schema),
+            RawToCleanToLog(schema=self.schema),
+            NaNDataCheck(schema=self.schema),
+            ConsentCheck(schema=self.schema),
             ColumnNameCheck(),
-            DataTypeCheck(schema=schema),
-            SurveyChoicesCheck(schema=schema),
+            DataTypeCheck(schema=self.schema),
+            SurveyChoicesCheck(schema=self.schema),
         ]
+
+    def process_data(self):
+        return super().process_data()

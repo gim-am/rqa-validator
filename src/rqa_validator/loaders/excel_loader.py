@@ -1,95 +1,15 @@
-from dataclasses import dataclass, field
 from pathlib import Path
 
 import fastexcel
 import polars as pl
 
-from ..models.base_dataset import BaseDatasetSchema
+from ..loaders.base_excel_loader import ExcelLoaderData
+from ..models.base_dataset_schemas import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
 from .base import (
-    DataColumnMap,
     DataSheetMap,
 )
 from .base_excel_loader import BaseExcelLoader
-
-
-@dataclass
-class ExcelLoaderData:
-    loaded_sheets: list[DataSheetMap] = field(default_factory=list)
-    unloaded_sheets: list[DataSheetMap] = field(default_factory=list)
-    unexpected_sheets: list[str] = field(default_factory=list)
-    hidden_sheets: list[str] = field(default_factory=list)
-
-    def set_column_map_for_loaded_sheet(self, sheet: str, column_maps: list[DataColumnMap]):
-        loaded_sheet = self.get_loaded_sheet(sheet)
-        if loaded_sheet is not None:
-            loaded_sheet.set_column_map(column_maps)
-
-    def get_loaded_sheet_mapped_names(self) -> list[str]:
-        """Gets all the standard names for the loaded excel sheets
-
-        Returns:
-            List[str]: List of sheet names.
-        """
-        return [sheet.schema_sheet_name for sheet in self.loaded_sheets]
-
-    def get_loaded_sheet_excel_names(self) -> list[str]:
-        """Gets all the excel names for the loaded excel sheets
-        that were mapped to the origianl schema.
-
-        This is related to dynamic model creation process.
-
-        Returns:
-            List[str]: List of sheet names.
-        """
-        return [sheet.data_sheet_name for sheet in self.loaded_sheets if not sheet.auto_loaded]
-
-    def get_unloaded_sheet_mapped_names(self) -> list[str]:
-        """Gets all the standard names for the loaded excel sheets
-
-        Returns:
-            List[str]: List of sheet names.
-        """
-        return [sheet.schema_sheet_name for sheet in self.unloaded_sheets]
-
-    def get_loaded_sheet(self, sheet_name: str) -> DataSheetMap | None:
-        """Gets the details and data for a loaded sheet if it exists.
-
-        Args:
-            sheet_name (str): Excel sheets to be searched for
-
-        Returns:
-            SheetMap | None: Loaded sheet details if found
-        """
-        for sheet in self.loaded_sheets:
-            if sheet.schema_sheet_name == sheet_name:
-                return sheet
-        return None
-
-    def remove_loaded_sheet(self, sheet_name: str):
-        for idx, sheet in enumerate(self.loaded_sheets):
-            if sheet.schema_sheet_name == sheet_name:
-                self.loaded_sheets.pop(idx)
-
-    def get_sheet_matches(self, sheet_name: str) -> list[DataSheetMap]:
-        """Gets all the sheets matched with a given schema_name.
-
-        Args:
-            sheet_name (str): Excel sheets to be searched for
-
-        Returns:
-            List[SheetMap] | None: Loaded sheet details if found
-        """
-        sheets: list[DataSheetMap] = []
-        for sheet in self.loaded_sheets:
-            if sheet.schema_sheet_name == sheet_name:
-                sheets.append(sheet)
-
-        for sheet in self.unloaded_sheets:
-            if sheet.schema_sheet_name == sheet_name:
-                sheets.append(sheet)
-
-        return sheets
 
 
 class ExcelLoader(BaseExcelLoader):

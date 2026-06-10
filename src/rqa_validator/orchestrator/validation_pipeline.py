@@ -4,14 +4,16 @@ from typing import Any
 
 from fastexcel import CalamineCellError
 
+from locales.il8n import _, i18n
+
 from ..config import settings
 from ..loaders.base import DataSheetMap
-from ..loaders.excel_loader import ExcelLoader, ExcelLoaderData
-from ..models.base_dataset import BaseDatasetSchema, DynamicDatasetSchema
+from ..loaders.base_excel_loader import ExcelLoaderData
+from ..loaders.excel_loader import ExcelLoader
+from ..models.base_dataset_schemas import BaseDatasetSchema
 from ..models.dynamic_model import DynamicDataset
 from ..models.jmmi import JMMIDataset
-from ..models.preprocess import lowercase_schema_mappings, validate_schema
-from ..utils.il8n import _, i18n
+from ..models.preprocess import validate_schema
 from ..validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 FULLY_SUPPORTED_DATASETS: list[str] = ["jmmi"]
@@ -27,21 +29,15 @@ class ValidationPipeline:
         Raises:
             ValueError: if dataset type not found.
         """
-        validators: list[BaseValidator] = []
-        if dataset_type == "jmmi":
-            schema = JMMIDataset.get_schema()
-            validators = JMMIDataset.get_validators(schema=schema)
-        else:
-            # uses dynamic schema generation
-            schema = DynamicDatasetSchema()
+        # validators: list[BaseValidator] = []
+        dataset = JMMIDataset() if dataset_type == "jmmi" else DynamicDataset()
         # else:
         #     raise ValueError(f"Unknown dataset type: {dataset_type}")
 
         # make sure all the sheet and column names in the shema are lower
         # to make comparison easier later
-        lowercase_schema_mappings(schema)
 
-        return schema, validators
+        return dataset
 
     def run_all(self, filepath: Path, dataset_type: str, locale: str = "en") -> dict[str, Any]:
         """_summary_
@@ -75,9 +71,9 @@ class ValidationPipeline:
 
         # pre-validate the schema. checks for duplicate sheet/column
         # names etc
-        schema, validators = self._setup_schema(dataset_type)
+        dataset = self._setup_schema(dataset_type)
         try:
-            validation_errors = validate_schema(schema)
+            validation_errors = validate_schema(dataset.schema)
 
             if validation_errors:
                 all_results.extend(validation_errors)
@@ -88,7 +84,7 @@ class ValidationPipeline:
                     rule="SchemaValidation",
                     message=f"Schema validation encountered an error: {str(e)}",
                     severity=SeverityLevel.ADMIN_ERROR,
-                    details=vars(schema),
+                    details=vars(dataset.schema),
                 )
             )
             settings.logger.log_exception(e)
@@ -96,8 +92,8 @@ class ValidationPipeline:
 
         # load the excel data
         try:
-            loader = ExcelLoader(schema)
-            data, excel_results = loader.load(
+            loader = ExcelLoader(dataset.schema)
+            dataset.data, excel_results = loader.load(
                 filepath,
                 load_all_sheets=dataset_type not in FULLY_SUPPORTED_DATASETS,
             )
@@ -110,7 +106,7 @@ class ValidationPipeline:
                     rule="ExcelFileLoading",
                     message="Data mapping after data load.",
                     severity=SeverityLevel.ADMIN_INFO,
-                    details=self._excel_loader_to_dict(data),
+                    details=self._excel_loader_to_dict(dataset.data),
                 )
             )
         except CalamineCellError as ce:
@@ -138,28 +134,23 @@ class ValidationPipeline:
             return all_results
 
         if dataset_type not in FULLY_SUPPORTED_DATASETS:
-            dataset = DynamicDataset(data)
             results = dataset.process_data()
             if results:
                 all_results.extend(results)
-
-            validators = dataset.get_validators()
-            schema = dataset.get_schema()
-            data = dataset.data
 
         all_results.append(
             ValidationResult(
                 rule="Schema Details",
                 message=f"Schema for dataset '{dataset_type}' and file '{filepath}'",
                 severity=SeverityLevel.ADMIN_INFO,
-                details=vars(schema),
+                details=vars(dataset.schema),
             )
         )
 
         # run each of the validators for the dataset.
-        for validator in validators:
+        for validator in dataset.validators:
             try:
-                results = validator.validate(data)
+                results = validator.validate(dataset.data)
                 if results:
                     all_results.extend(results)
 

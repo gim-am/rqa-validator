@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from ..utils.il8n import _
+from locales.il8n import _
 
 
 class SeverityLevel(Enum):

@@ -1,9 +1,9 @@
 from typing import Any
 
 from ..common.list_matching import duplicate_list_items
-from ..models.base_dataset import BaseDatasetSchema
 from ..validators.base import SeverityLevel, ValidationResult
 from .base import SchemaColumnMap, SchemaSheetMap
+from .base_dataset_schemas import BaseDatasetSchema
 
 
 def validate_schema(schema: BaseDatasetSchema) -> list[ValidationResult]:
@@ -95,7 +95,7 @@ def lowercase_schema_mappings(schema: BaseDatasetSchema) -> None:
 
     def process_list(str_list: list[Any]):
         lowercase_list_strs(str_list)
-        expand_list(str_list)
+        # expand_list(str_list)
 
     def process_sheet_mapping(sheet: SchemaSheetMap) -> None:
         if sheet.standard_name:

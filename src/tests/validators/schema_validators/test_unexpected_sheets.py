@@ -1,7 +1,8 @@
 import polars as pl
 import pytest
 
-from rqa_validator.loaders.excel_loader import DataSheetMap, ExcelLoaderData
+from rqa_validator.loaders.base_excel_loader import ExcelLoaderData
+from rqa_validator.loaders.excel_loader import DataSheetMap
 from rqa_validator.validators.base import BaseValidator
 from rqa_validator.validators.schema_validators.unexpected_sheets_validator import (
     UnexpectedSheetsCheck,

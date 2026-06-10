@@ -11,9 +11,10 @@ _current_locale: contextvars.ContextVar[str] = contextvars.ContextVar(
 class I18nService:
     def __init__(self, domain="messages", localedir=None, fallback_locale="en"):
         self.domain = domain
-        current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        relative_path = os.path.join(current_file_dir, "..", "..", "..", "locales")
-        self.localedir = os.path.abspath(relative_path)
+        # current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        # relative_path = os.path.join(current_file_dir, "..", "locales")
+        # self.localedir = os.path.abspath(relative_path)
+        self.localedir = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
         self._cache = {}
         self.fallback_locale = fallback_locale
 
@@ -43,8 +44,12 @@ class I18nService:
 
     def _get_translator(self, locale: str):
         if locale not in self._cache:
-            # Fallback
-            self._cache[locale] = self._cache.get("en", gettext.NullTranslations())
+            if len(self._cache) == 0:
+                # this should only happen if set_locale was not initially set, ie in pytest modules
+                self.set_locale(locale)
+            else:
+                # Fallback
+                self._cache[locale] = self._cache.get("en", gettext.NullTranslations())
         return self._cache[locale]
 
     def _(self, key: str, **kwargs) -> str:
