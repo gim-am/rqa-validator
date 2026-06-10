@@ -10,8 +10,6 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    FUZZY_MATCH_SHEETS: bool = True
-    FUZZY_MATCH_COLUMNS: bool = True
     MIN_FUZZY_MATCH_SCORE: int = 90
     FUZZY_MATCH_STRING_LENGTH_RATIO: float = 0.7
 
@@ -52,7 +50,7 @@ class Settings(BaseSettings):
         "888",
     ]
     # limits the output of each of the validation results. set below 0 to ignore.
-    LIMIT_DETAILS_THRESHOLD: int = -1
+    LIMIT_DETAILS_THRESHOLD: int = 50
 
     logger: JIVELogger = JIVELogger()
 

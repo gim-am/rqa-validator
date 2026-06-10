@@ -36,6 +36,7 @@ class SchemaColumnMap:
     alternate_names: list[str] = field(default_factory=list)
     is_unique: bool = False
     process_values: list[ProcessValueMap] = field(default_factory=list)
+    allow_fuzzy_matching: bool = True
 
     def combine(self) -> list[str]:
         """returns a unique list of column names and alternate names"""
@@ -54,6 +55,7 @@ class SchemaSheetMap:
     mandatory_columns: list[SchemaColumnMap] = field(default_factory=list)
     parent_sheet: str | None = None
     parent_linking_column: str | None = None
+    allow_fuzzy_matching: bool = True
 
     required: bool = True
 

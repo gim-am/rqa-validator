@@ -50,7 +50,7 @@ class PiiDataCheck(BaseValidator):
             )
             # scan column names
             literal_matches, fuzzy_matched_values = match_list_to_list(
-                filtered_df.columns, pii_columns, settings.FUZZY_MATCH_COLUMNS
+                filtered_df.columns, pii_columns, True
             )
 
             if literal_matches:

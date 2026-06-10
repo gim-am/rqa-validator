@@ -44,7 +44,7 @@ class BaseExcelLoader:
 
         for column in schema_sheet.mandatory_columns:
             literal_matches, fuzzy_matched_values = match_list_to_list(
-                column.combine(), excel_columns_filtered, fuzzy_match=settings.FUZZY_MATCH_SHEETS
+                column.combine(), excel_columns_filtered, fuzzy_match=column.allow_fuzzy_matching
             )
 
             if literal_matches:
@@ -148,7 +148,7 @@ class BaseExcelLoader:
             literal_matches, fuzzy_matched_values = match_list_to_list(
                 sheet_config.combine_sheet_names(),
                 [excel_sheet_name],
-                fuzzy_match=settings.FUZZY_MATCH_SHEETS,
+                fuzzy_match=sheet_config.allow_fuzzy_matching,
             )
 
             if literal_matches:

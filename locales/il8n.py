@@ -11,9 +11,6 @@ _current_locale: contextvars.ContextVar[str] = contextvars.ContextVar(
 class I18nService:
     def __init__(self, domain="messages", localedir=None, fallback_locale="en"):
         self.domain = domain
-        # current_file_dir = os.path.dirname(os.path.abspath(__file__))
-        # relative_path = os.path.join(current_file_dir, "..", "locales")
-        # self.localedir = os.path.abspath(relative_path)
         self.localedir = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
         self._cache = {}
         self.fallback_locale = fallback_locale
