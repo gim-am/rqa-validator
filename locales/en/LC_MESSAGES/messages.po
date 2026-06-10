@@ -158,7 +158,7 @@ msgstr "Expected 1 linkable ID column for sheets '{source_sheet}' and '{target_s
 
 #: src/rqa_validator/validators/data_helpers.py:419
 msgid "data_helpers.get_id_linking_columns.no_columns"
-msgstr "Unable to find possible linkable ID columns for sheet '{source_sheet}' and sheet '{target_sheet}'"
+msgstr "Unable to find possible linkable ID columns for sheet '{source_sheet}' and sheet '{target_sheet}'."
 
 #: src/rqa_validator/validators/data_helpers.py:456
 msgid "data_helpers.get_id_linking_columns.linked_columns"
