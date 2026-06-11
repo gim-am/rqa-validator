@@ -71,7 +71,7 @@ class PiiDataCheck(BaseValidator):
                     [
                         {
                             "sheet": sheet.data_sheet_name,
-                            "column": item.standard_name,
+                            "column": item.schema_name,
                             "match_type": "fuzzy",
                             "match_values": str(item.matches),
                         }

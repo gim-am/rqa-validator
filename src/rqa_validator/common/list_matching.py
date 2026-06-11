@@ -10,7 +10,7 @@ from ..loaders.base import DataColumnMap, DataSheetMap
 
 @dataclass
 class FuzzMatch:
-    standard_name: str
+    schema_name: str
     matches: dict[Any, Any] = field(default_factory=dict)
 
 
@@ -64,7 +64,7 @@ def match_list_to_list(
                 )
 
                 if match_result:
-                    details = FuzzMatch(standard_name=search_item)
+                    details = FuzzMatch(schema_name=search_item)
                     for match_item in match_result:
                         details.matches[match_item[0]] = match_item[1]
 

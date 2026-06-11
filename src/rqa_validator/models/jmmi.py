@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..models.base_dataset import BaseDataset
 from ..validators.base import BaseValidator
@@ -21,25 +21,47 @@ from ..validators.schema_validators import (
     MissingSheetsCheck,
     UnexpectedSheetsCheck,
 )
-from .base import SchemaColumnMap, SchemaSheetMap
-from .default_dataset_schema import DefaultDatasetSchema
+from .base import SchemaSheetMap
+from .base_dataset_schemas import BaseDatasetSchema
+from .defaults import (
+    CHOICES_SHEET,
+    CLEAN_DATA_SHEET,
+    DELETION_SHEET,
+    ENUMERATOR_PERFORMANCE_SHEET,
+    RAW_DATA_SHEET,
+    READ_ME_SHEET,
+    SAMPLING_INFO_SHEET,
+    SURVEY_SHEET,
+    VARIABLE_TRACKER_SHEET,
+    create_base_cleaning_log_sheet,
+)
 
 
 @dataclass()
-class JMMIDatasetSchema(DefaultDatasetSchema):
+class JMMIDatasetSchema(BaseDatasetSchema):
     dataset_type = "JMMI"
 
-    def __post_init__(self):
-        self.add_unloaded_sheet(
-            SchemaSheetMap(standard_name="meb_analysis", alternate_names=["meb"])
-        )
-        self.add_unloaded_sheet(
-            SchemaSheetMap(standard_name="mfs_analysis", alternate_names=["mfs"])
-        )
-        self.add_mandatory_column_to_sheet(
-            "clean_data",
-            SchemaColumnMap(standard_name="stratum", alternate_names=["stratum"]),
-        )
+    schema_loaded_sheets: list[SchemaSheetMap] = field(
+        default_factory=lambda: [
+            RAW_DATA_SHEET,
+            CLEAN_DATA_SHEET,
+            create_base_cleaning_log_sheet("cleaning_log", "uuid", ["_uuid"]),
+            SURVEY_SHEET,
+            CHOICES_SHEET,
+            DELETION_SHEET,
+        ]
+    )
+
+    schema_unloaded_sheets: list[SchemaSheetMap] = field(
+        default_factory=lambda: [
+            READ_ME_SHEET,
+            SAMPLING_INFO_SHEET,
+            VARIABLE_TRACKER_SHEET,
+            ENUMERATOR_PERFORMANCE_SHEET,
+            SchemaSheetMap(standard_name="meb_analysis", alternate_names=["meb"]),
+            SchemaSheetMap(standard_name="mfs_analysis", alternate_names=["mfs"]),
+        ]
+    )
 
 
 # schema and validation rules for jmmi dataset.

@@ -1,6 +1,6 @@
 from .base import ProcessValueMap, SchemaColumnMap, SchemaSheetMap
 
-CHOICES_SHEET = SchemaSheetMap(
+CHOICES_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="choices",
     alternate_names=["kobo_choices"],
     mandatory_columns=[
@@ -9,7 +9,7 @@ CHOICES_SHEET = SchemaSheetMap(
     ],
 )
 
-SURVEY_SHEET = SchemaSheetMap(
+SURVEY_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="survey",
     alternate_names=["kobo_survey"],
     mandatory_columns=[
@@ -27,7 +27,7 @@ SURVEY_SHEET = SchemaSheetMap(
         SchemaColumnMap(standard_name="calculation"),
     ],
 )
-DELETION_SHEET = SchemaSheetMap(
+DELETION_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="deletion_log",
     alternate_names=[],
     mandatory_columns=[
@@ -35,29 +35,65 @@ DELETION_SHEET = SchemaSheetMap(
     ],
 )
 
-READ_ME_SHEET = SchemaSheetMap(standard_name="read_me", alternate_names=["read.me", "read me"])
+READ_ME_SHEET: SchemaSheetMap = SchemaSheetMap(
+    standard_name="read_me", alternate_names=["read.me", "read me"]
+)
 
-SAMPLING_INFO_SHEET = SchemaSheetMap(
+SAMPLING_INFO_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="sampling_info",
     alternate_names=["sampling_info"],
     required=False,
 )
 
-VARIABLE_TRACKER_SHEET = SchemaSheetMap(
+VARIABLE_TRACKER_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="variable_tracker", alternate_names=["variable_tracker"]
 )
 
-ENUMERATOR_PERFORMANCE_SHEET = SchemaSheetMap(
+ENUMERATOR_PERFORMANCE_SHEET: SchemaSheetMap = SchemaSheetMap(
     standard_name="enumerator_performance_log",
     alternate_names=["enumerator_performance_log"],
     required=False,
+)
+
+CLEAN_DATA_SHEET: SchemaSheetMap = SchemaSheetMap(
+    standard_name="clean_data",
+    alternate_names=["clean_data"],
+    mandatory_columns=[
+        SchemaColumnMap(
+            standard_name="uuid",
+            alternate_names=["_uuid"],
+            is_unique=True,
+        ),
+    ],
+)
+CONSENT_COLUMN: SchemaColumnMap = SchemaColumnMap(
+    standard_name="consent",
+    alternate_names=["consentement"],
+    process_values=[
+        ProcessValueMap(
+            process_name="consent_check_validation",
+            values=["yes", "oui"],
+        )
+    ],
+)
+RAW_DATA_SHEET: SchemaSheetMap = SchemaSheetMap(
+    standard_name="raw_data",
+    alternate_names=["raw_data"],
+    mandatory_columns=[
+        SchemaColumnMap(
+            standard_name="uuid",
+            alternate_names=["_uuid"],
+            is_unique=True,
+        ),
+        CONSENT_COLUMN,
+    ],
 )
 
 
 def create_base_cleaning_log_sheet(
     name: str, id_column: str | None, id_column_alt: list[str] | None
 ) -> SchemaSheetMap:
-    sheet = SchemaSheetMap(
+    sheet: SchemaSheetMap = SchemaSheetMap(
         standard_name=name,
         alternate_names=[],
         mandatory_columns=[
@@ -87,15 +123,3 @@ def create_base_cleaning_log_sheet(
             )
         )
     return sheet
-
-
-CONSENT_COLUMN = SchemaColumnMap(
-    standard_name="consent",
-    alternate_names=["consentement"],
-    process_values=[
-        ProcessValueMap(
-            process_name="consent_check_validation",
-            values=["yes", "oui"],
-        )
-    ],
-)
