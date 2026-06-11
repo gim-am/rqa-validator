@@ -19,7 +19,7 @@ class DynamicSheetMatching:
     linked_cleaning_log: str | None = None
     linked_raw_sheet: str | None = None
     linked_clean_sheet: str | None = None
-    log_id_column: str | None = None
+    log_id_column: list[str] = field(default_factory=list)
 
 
 @dataclass

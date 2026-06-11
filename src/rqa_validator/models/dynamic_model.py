@@ -373,13 +373,15 @@ class DynamicDataset(BaseDataset):
                     #  dont have their own cleaning log then its possible there will
                     #  be multiple id columns in cleaning data. this aims to make
                     #  sure that all likely id columns are in the schema
-                    if details.log_id_column is not None:
-                        self.schema.add_mandatory_column_to_sheet(
-                            sheet, SchemaColumnMap(standard_name=details.log_id_column)
-                        )
-
                     matches = match_list(settings.COMMON_ID_COLUMN_NAMES, details.data.columns)
-                    matches = filter_list(matches, [details.log_id_column])
+                    if details.log_id_column:
+                        (
+                            self.schema.add_mandatory_column_to_sheet(
+                                sheet, SchemaColumnMap(standard_name=column)
+                            )
+                            for column in details.log_id_column
+                        )
+                        matches = filter_list(matches, details.log_id_column)
                     if len(matches) > 0:
                         for match in matches:
                             self.schema.add_mandatory_column_to_sheet(
@@ -390,7 +392,7 @@ class DynamicDataset(BaseDataset):
                         if (
                             "id" in column
                             and column not in matches
-                            and column != details.log_id_column
+                            and column not in details.log_id_column
                         ):
                             self.schema.add_mandatory_column_to_sheet(
                                 sheet, SchemaColumnMap(standard_name=column)
@@ -536,7 +538,8 @@ class DynamicDataset(BaseDataset):
             # if there was a good enough score then assume its a parent
             if best_score > min_matching_score and best_parent is not None:
                 self.sheet_matching[best_parent].linked_cleaning_log = log_sheet
-                self.sheet_matching[log_sheet].log_id_column = best_linking_log_column
+                if best_linking_log_column is not None:
+                    self.sheet_matching[log_sheet].log_id_column.append(best_linking_log_column)
 
         self._match_child_parent(raw_sheets)
         self._match_child_parent(clean_sheets)
