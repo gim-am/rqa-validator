@@ -90,9 +90,6 @@ class CleaningLogToClean(BaseValidator):
         """
         results: list[ValidationResult] = []
 
-        # multiple_changes_filename = "cleaning_log_validation_multiple_changes"
-        # validation_results_filename = "cleaning_log_validation_results"
-
         # PRE-VALIDATION - check sheets, columns etc all exist
 
         result, data_loaded_sheets = get_data_loaded_sheets(
@@ -187,7 +184,7 @@ class CleaningLogToClean(BaseValidator):
 
         # Compares the cleaning log to clean_data
 
-        # racods where the same question was updated more than once for the same id
+        # records where the same question was updated more than once for the same id
         multiple_change_mask = modified_rows_df.select(
             clean_log_id_columns.data_column_name,
             data_loaded_columns[self.cleaning_log_question_column].data_column_name,
@@ -273,6 +270,7 @@ class CleaningLogToClean(BaseValidator):
             .to_list()
         )
 
+        # questions in cleaning log not iin clean data
         missing_quesitons = filter_list(
             questions, data_loaded_sheets[self.clean_data_sheet].data.columns
         )

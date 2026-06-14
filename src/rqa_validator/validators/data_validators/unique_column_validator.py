@@ -17,8 +17,6 @@ class UniqueColumn(BaseValidator):
         """Checks to see if any expected unique columns contain any
         non unique values across relevant sheets.
 
-        Saves duplicates to a csv
-
         Args:
             data (ExcelLoaderData): data to be validated
 
@@ -26,12 +24,12 @@ class UniqueColumn(BaseValidator):
             List[ValidationResult]: List of validation errors.
         """
         results: list[ValidationResult] = []
-        # output_filename = "duplicate_uuids"
 
         duplicated_ids_df: pl.DataFrame = pl.DataFrame(
             [
-                pl.Series("uuid", [], dtype=pl.String),
+                pl.Series("value", [], dtype=pl.String),
                 pl.Series("sheet", [], dtype=pl.String),
+                pl.Series("column", [], dtype=pl.String),
             ]
         )
 
@@ -53,14 +51,15 @@ class UniqueColumn(BaseValidator):
                                 ).is_duplicated()
                             )
                             .select(mapped_column.data_column_name)
-                            .rename({mapped_column.data_column_name: "uuid"})
+                            .rename({mapped_column.data_column_name: "value"})
                         )
                         unique_duplicated_row_count = unique_duplicated_rows_df.n_unique()
                         if unique_duplicated_row_count > 0:
                             # store for output
                             unique_duplicated_rows_df = (
                                 unique_duplicated_rows_df.unique().with_columns(
-                                    pl.lit(loaded_sheet_info.data_sheet_name).alias("sheet")
+                                    pl.lit(loaded_sheet_info.data_sheet_name).alias("sheet"),
+                                    pl.lit(mapped_column.data_column_name).alias("column"),
                                 )
                             )
                             duplicated_ids_df = pl.concat(

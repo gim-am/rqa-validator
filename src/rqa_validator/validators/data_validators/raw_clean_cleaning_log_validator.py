@@ -90,9 +90,6 @@ class RawToCleanToLog(BaseValidator):
         """
         results: list[ValidationResult] = []
 
-        # multiple_changes_filename = 'cleaning_log_validation_multiple_changes'
-        # validation_results_filename = 'cleaning_log_validation_results'
-
         # PRE-VALIDATION - check sheets, columns etc all exist
 
         sheet_names = [self.clean_data_sheet, self.raw_data_sheet]

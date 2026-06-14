@@ -6,6 +6,8 @@ from ...validators.base import BaseValidator, SeverityLevel, ValidationResult
 
 
 class DuplicateSheetMatches(BaseValidator):
+    """Checks to see if a schema sheet was matched to multiple excel sheets."""
+
     @property
     def name(self) -> str:
         return "DuplicateSheetMatches"

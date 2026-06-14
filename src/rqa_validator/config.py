@@ -50,7 +50,7 @@ class Settings(BaseSettings):
         "888",
     ]
     # limits the output of each of the validation results. set below 0 to ignore.
-    LIMIT_DETAILS_THRESHOLD: int = 50
+    LIMIT_DETAILS_THRESHOLD: int = -1
 
     logger: JIVELogger = JIVELogger()
 
