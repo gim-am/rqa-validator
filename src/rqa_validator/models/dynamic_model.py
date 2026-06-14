@@ -367,36 +367,13 @@ class DynamicDataset(BaseDataset):
                         sheet,
                         CONSENT_COLUMN,
                     )
-                if details.log_type == "cleaning":
-                    # parts of this may seem repetitive
-                    # if there are multiple clean data sheets (from loops) and they
-                    #  dont have their own cleaning log then its possible there will
-                    #  be multiple id columns in cleaning data. this aims to make
-                    #  sure that all likely id columns are in the schema
-                    matches = match_list(settings.COMMON_ID_COLUMN_NAMES, details.data.columns)
-                    if details.log_id_column:
-                        (
-                            self.schema.add_mandatory_column_to_sheet(
-                                sheet, SchemaColumnMap(standard_name=column)
-                            )
-                            for column in details.log_id_column
+                if details.log_type == "cleaning" and details.log_id_column:
+                    (
+                        self.schema.add_mandatory_column_to_sheet(
+                            sheet, SchemaColumnMap(standard_name=column)
                         )
-                        matches = filter_list(matches, details.log_id_column)
-                    if len(matches) > 0:
-                        for match in matches:
-                            self.schema.add_mandatory_column_to_sheet(
-                                sheet, SchemaColumnMap(standard_name=match)
-                            )
-
-                    for column in details.data.columns:
-                        if (
-                            "id" in column
-                            and column not in matches
-                            and column not in details.log_id_column
-                        ):
-                            self.schema.add_mandatory_column_to_sheet(
-                                sheet, SchemaColumnMap(standard_name=column)
-                            )
+                        for column in details.log_id_column
+                    )
 
                 new_sheet = self.schema.get_schema_loaded_sheet(sheet)
                 assert new_sheet is not None  # added above
