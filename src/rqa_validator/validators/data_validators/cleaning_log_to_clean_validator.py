@@ -24,7 +24,6 @@ class CleaningLogToClean(BaseValidator):
     - items in cleaning log that have multiple updates for the same question
     - questions in cleaning log that are not present in clean_data
     - items where there is a difference between cleaning_log and clean_data values
-
     """
 
     def __init__(
